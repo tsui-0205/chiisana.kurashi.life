@@ -1,7 +1,10 @@
 {
-  "name": "my-site",
+  "name": "watashi-to-otto-no-chiisana-kurashi",
   "version": "0.1.0",
   "private": true,
+  "description": "私と夫の小さな暮らし - 夫婦の日常を綴るふんわりホームページ",
+  "keywords": ["夫婦", "日常", "暮らし", "ライフスタイル", "石川県", "ブログ"],
+  "author": "河岸夫妻",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
@@ -19,5 +22,13 @@
     "eslint": "^9",
     "eslint-config-next": "15.4.6",
     "@eslint/eslintrc": "^3"
+  },
+  "homepage": "https://watashi-to-otto.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kawagishi/watashi-to-otto.git"
+  },
+  "bugs": {
+    "url": "https://github.com/kawagishi/watashi-to-otto/issues"
   }
 }
