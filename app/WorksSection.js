@@ -1,6 +1,47 @@
 'use client';
 
+import { useState, useEffect, useRef } from 'react';
+
 export default function WorksSection() {
+    const [visibleItems, setVisibleItems] = useState(new Set());
+    const observerRef = useRef(null);
+
+    useEffect(() => {
+        observerRef.current = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        setVisibleItems(prev => new Set([...prev, entry.target.dataset.index]));
+                    }
+                });
+            },
+            {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            }
+        );
+
+        return () => {
+            if (observerRef.current) {
+                observerRef.current.disconnect();
+            }
+        };
+    }, []);
+
+    useEffect(() => {
+        const elements = document.querySelectorAll('[data-animate="true"]');
+        elements.forEach((el) => {
+            if (observerRef.current) {
+                observerRef.current.observe(el);
+            }
+        });
+
+        return () => {
+            if (observerRef.current) {
+                observerRef.current.disconnect();
+            }
+        };
+    }, []);
     // 最近の日記データ
     const recentPosts = [
         {
@@ -38,23 +79,68 @@ export default function WorksSection() {
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Yomogi&display=swap');
         .font-body { font-family: 'Noto Sans JP', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; }
         .font-hand { font-family: 'Yomogi', 'Noto Sans JP', sans-serif; letter-spacing: .02em; }
+        
+        .fade-in-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        
+        .fade-in-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .fade-in-left {
+            opacity: 0;
+            transform: translateX(-30px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        
+        .fade-in-left.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .fade-in-right {
+            opacity: 0;
+            transform: translateX(30px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        
+        .fade-in-right.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
       `}</style>
 
             {/* Soft color blobs */}
             <div className="pointer-events-none absolute right-32 top-24 h-72 w-72 rounded-full bg-blue-200/20 blur-3xl" />
             <div className="pointer-events-none absolute right-52 top-52 h-64 w-64 rounded-full bg-amber-100/40 blur-3xl" />
 
-            <div className="mx-auto max-w-6xl px-6 py-24 font-body">
-                {/* Section heading with rule */}
-                <div className="mb-16 flex items-center gap-6">
-                    <span className="h-px w-24 bg-zinc-300" />
-                    <h2 className="text-3xl tracking-[0.08em] text-zinc-700 font-hand">最近の日記</h2>
+            {/* Section Header - Independent positioning */}
+            <div className="px-6 py-24 pb-8 font-body">
+                <div
+                    className={`flex items-center gap-6 fade-in-up ${visibleItems.has('header') ? 'visible' : ''}`}
+                    data-animate="true"
+                    data-index="header"
+                >
+                    <div className="h-0.5 w-32 bg-black rounded-full"></div>
+                    <h2 className="text-2xl md:text-3xl font-bold text-zinc-700 font-body tracking-normal">最近の日記</h2>
                 </div>
+            </div>
 
+            <div className="mx-auto max-w-6xl px-6 py-8 pb-24 font-body">
                 {/* Blog posts grid */}
                 <div className="space-y-16">
                     {recentPosts.map((post, index) => (
-                        <div key={post.id} className={`grid items-center gap-16 ${index % 2 === 0 ? 'md:grid-cols-2' : 'md:grid-cols-2'}`}>
+                        <div
+                            key={post.id}
+                            className={`grid items-center gap-16 md:grid-cols-2 fade-in-up ${visibleItems.has(`post-${index}`) ? 'visible' : ''}`}
+                            data-animate="true"
+                            data-index={`post-${index}`}
+                            style={{ transitionDelay: `${index * 0.1}s` }}
+                        >
                             {/* Image */}
                             <div className={`relative mx-auto w-full max-w-lg ${index % 2 === 1 ? 'md:order-2' : ''}`}>
                                 <div className="relative overflow-hidden rounded-2xl bg-white p-2 shadow-[0_10px_50px_rgba(0,0,0,0.08)]">
@@ -92,7 +178,11 @@ export default function WorksSection() {
                 </div>
 
                 {/* View all button */}
-                <div className="mt-16 text-center">
+                <div
+                    className={`mt-16 text-center fade-in-up ${visibleItems.has('button') ? 'visible' : ''}`}
+                    data-animate="true"
+                    data-index="button"
+                >
                     <a
                         href="/blog"
                         className="inline-block border-2 border-zinc-300 px-8 py-3 rounded-full text-zinc-700 font-medium hover:bg-zinc-50 transition-colors tracking-wide"

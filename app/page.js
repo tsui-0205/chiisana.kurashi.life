@@ -5,6 +5,8 @@ import InstagramFeed from "./InstagramFeed";
 import CoupleIntroSlider from "./CoupleIntroSlider";
 import AboutUsSection from "./AboutUsSection";
 import WorksSection from "./WorksSection";
+import ContactFooter from "./ContactFooter";
+import SectionHeader from "./SectionHeader";
 import Link from "next/link";
 
 export default function Home() {
@@ -199,21 +201,8 @@ export default function Home() {
           <InstagramFeed />
         </div>
 
-        {/* フッター */}
-        <footer className="bg-zinc-900 text-white py-12 px-4 font-body">
-          <div className="max-w-4xl mx-auto text-center">
-            <h4 className="text-xl font-bold mb-4">私と夫の小さな暮らし</h4>
-            <p className="text-zinc-400 mb-6">
-              石川県で暮らす夫婦の日常を綴るブログ
-            </p>
-
-            <div className="border-t border-zinc-700 pt-6">
-              <p className="text-zinc-500 text-sm">
-                ©私と夫の小さな暮らし
-              </p>
-            </div>
-          </div>
-        </footer>
+        {/* Contact Footer */}
+        <ContactFooter />
       </div>
     </div>
   );

@@ -1,9 +1,79 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import SectionHeader from './SectionHeader';
 
 export default function AboutUsSection() {
     const [currentSlide, setCurrentSlide] = useState(0);
+    const [visibleItems, setVisibleItems] = useState(new Set());
+    const observerRef = useRef(null);
+
+    // デバッグ用
+    useEffect(() => {
+        console.log('Visible items:', Array.from(visibleItems));
+    }, [visibleItems]);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        const index = entry.target.getAttribute('data-index');
+                        if (index) {
+                            setVisibleItems(prev => new Set([...prev, index]));
+                        }
+                    }
+                });
+            },
+            {
+                threshold: 0.2,
+                rootMargin: '-10% 0px -10% 0px'
+            }
+        );
+
+        // コンポーネントマウント後に要素を監視
+        const timer = setTimeout(() => {
+            const elements = document.querySelectorAll('[data-animate="true"]');
+            elements.forEach((el) => {
+                observer.observe(el);
+            });
+        }, 100);
+
+        return () => {
+            clearTimeout(timer);
+            observer.disconnect();
+        };
+    }, []);
+
+    useEffect(() => {
+        // スライドが変更されたときに新しい要素を監視
+        const timer = setTimeout(() => {
+            const elements = document.querySelectorAll('[data-animate="true"]:not([data-observed])');
+            const observer = new IntersectionObserver(
+                (entries) => {
+                    entries.forEach((entry) => {
+                        if (entry.isIntersecting) {
+                            const index = entry.target.getAttribute('data-index');
+                            if (index) {
+                                setVisibleItems(prev => new Set([...prev, index]));
+                            }
+                        }
+                    });
+                },
+                {
+                    threshold: 0.2,
+                    rootMargin: '-10% 0px -10% 0px'
+                }
+            );
+            
+            elements.forEach((el) => {
+                observer.observe(el);
+                el.setAttribute('data-observed', 'true');
+            });
+        }, 100);
+
+        return () => clearTimeout(timer);
+    }, [currentSlide]);
 
     const profiles = [
         {
@@ -45,21 +115,65 @@ export default function AboutUsSection() {
                 .font-body { font-family: 'Noto Sans JP', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; }
                 .font-hand { font-family: 'Yomogi', 'Noto Sans JP', sans-serif; letter-spacing: .02em; }
                 .text-shadow-soft { text-shadow: 0 6px 30px rgba(0,0,0,.06); }
+                
+                .fade-in-up {
+                    opacity: 0;
+                    transform: translateY(50px);
+                    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+                }
+                
+                .fade-in-up.visible {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+                
+                .fade-in-left {
+                    opacity: 0;
+                    transform: translateX(-50px);
+                    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+                }
+                
+                .fade-in-left.visible {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+                
+                .fade-in-right {
+                    opacity: 0;
+                    transform: translateX(50px);
+                    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+                }
+                
+                .fade-in-right.visible {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
             `}</style>
 
             {/* Soft color blobs */}
             <div className="pointer-events-none absolute -right-16 bottom-8 h-72 w-72 rounded-full bg-blue-300/30 blur-3xl" />
             <div className="pointer-events-none absolute right-14 bottom-20 h-64 w-64 rounded-full bg-amber-200/40 blur-3xl" />
 
-            <div className="mx-auto max-w-6xl px-6 py-24 font-body">
-                {/* Section heading with rule */}
-                <div className="mb-16 flex items-center gap-6">
-                    <span className="h-px w-24 bg-zinc-300" />
-                    <h2 className="text-3xl tracking-[0.08em] text-zinc-700 font-hand">私たちについて</h2>
+            {/* Section Header - Independent positioning */}
+            <div className="px-6 py-24 pb-8 font-body">
+                <div 
+                    className={`flex items-center gap-6 fade-in-up ${visibleItems.has('header') ? 'visible' : ''}`}
+                    data-animate="true"
+                    data-index="header"
+                >
+                    <div className="h-0.5 w-32 bg-black rounded-full"></div>
+                    <h2 className="text-2xl md:text-3xl font-bold text-zinc-700 font-body tracking-normal">私たちについて</h2>
                 </div>
+            </div>
 
+            <div className="mx-auto max-w-6xl px-6 py-8 pb-24 font-body">
                 {/* Slider Container */}
-                <div className="relative overflow-hidden">
+                <div 
+                    className={`relative overflow-hidden fade-in-up ${visibleItems.has('slider') ? 'visible' : ''}`}
+                    data-animate="true"
+                    data-index="slider"
+                    style={{ transitionDelay: '0.2s' }}
+                >
                     {/* Slides */}
                     <div
                         className="flex transition-transform duration-500 ease-in-out"
@@ -105,8 +219,11 @@ export default function AboutUsSection() {
                     {/* Navigation Arrows */}
                     <button
                         onClick={prevSlide}
-                        className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-16 w-12 h-12 bg-white hover:bg-zinc-50 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 z-10 border border-zinc-200"
+                        className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-16 w-12 h-12 bg-white hover:bg-zinc-50 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 z-10 border border-zinc-200 fade-in-left ${visibleItems.has('nav') ? 'visible' : ''}`}
                         aria-label="前のスライド"
+                        data-animate="true"
+                        data-index="nav"
+                        style={{ transitionDelay: '0.4s' }}
                     >
                         <svg className="w-5 h-5 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.6" d="M15 19l-7-7 7-7"></path>
@@ -115,8 +232,9 @@ export default function AboutUsSection() {
 
                     <button
                         onClick={nextSlide}
-                        className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-16 w-12 h-12 bg-white hover:bg-zinc-50 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 z-10 border border-zinc-200"
+                        className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-16 w-12 h-12 bg-white hover:bg-zinc-50 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 z-10 border border-zinc-200 fade-in-right ${visibleItems.has('nav') ? 'visible' : ''}`}
                         aria-label="次のスライド"
+                        style={{ transitionDelay: '0.4s' }}
                     >
                         <svg className="w-5 h-5 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.6" d="M9 5l7 7-7 7"></path>
@@ -124,7 +242,12 @@ export default function AboutUsSection() {
                     </button>
 
                     {/* Slide Indicators */}
-                    <div className="mt-12 flex justify-center gap-2">
+                    <div 
+                        className={`mt-12 flex justify-center gap-2 fade-in-up ${visibleItems.has('indicators') ? 'visible' : ''}`}
+                        data-animate="true"
+                        data-index="indicators"
+                        style={{ transitionDelay: '0.6s' }}
+                    >
                         {profiles.map((_, index) => (
                             <button
                                 key={index}
