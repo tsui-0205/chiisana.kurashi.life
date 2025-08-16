@@ -18,7 +18,7 @@ export const metadata = {
   authors: [{ name: "河岸夫妻" }],
   icons: {
     icon: "/profiles/17552437879081.jpg",
-    shortcut: "/profiles/17552437879081.jpg", 
+    shortcut: "/profiles/17552437879081.jpg",
     apple: "/profiles/17552437879081.jpg",
   },
   openGraph: {

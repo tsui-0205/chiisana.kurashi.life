@@ -1,0 +1,157 @@
+'use client';
+
+import { useState } from 'react';
+
+export default function AboutUsSection() {
+    const [currentSlide, setCurrentSlide] = useState(0);
+
+    const profiles = [
+        {
+            id: 'couple',
+            name: '河岸夫妻',
+            role: '石川で暮らす夫婦',
+            image: '/profiles/17552437879081.jpg',
+            description: '石川県の豊かな自然に囲まれて、夫婦ふたりでゆったりと暮らしています。季節ごとに変わる風景、近所への散歩、ちょっとした発見...そんな何気ない日常の中にある小さな幸せを大切にして、この場所で記録していきたいと思います。'
+        },
+        {
+            id: 'wife',
+            name: 'みさき',
+            role: '音楽と食べることが大好き',
+            image: '/profiles/wife.jpg',
+            description: '毎日の生活の中で、音楽を聴きながらお菓子を作る時間が一番の楽しみです。特にピアノを弾いて過ごす午後のひととき、手作りのお菓子と一緒にコーヒーを飲む時間を大切にしています。'
+        },
+        {
+            id: 'husband',
+            name: 'つばさ',
+            role: 'フットサルと読書が日課',
+            image: '/profiles/husband.jpg',
+            description: '週末はフットサルで体を動かし、平日の夜は読書の時間を楽しんでいます。最近は写真撮影にも興味を持ち、日常の風景や妻との思い出を記録することが新しい趣味になっています。'
+        }
+    ];
+
+    const nextSlide = () => {
+        setCurrentSlide((prev) => (prev + 1) % profiles.length);
+    };
+
+    const prevSlide = () => {
+        setCurrentSlide((prev) => (prev - 1 + profiles.length) % profiles.length);
+    };
+
+    return (
+        <section id="about" className="relative overflow-hidden bg-white text-zinc-800">
+            {/* Google Fonts */}
+            <style>{`
+                @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Yomogi&display=swap');
+                .font-body { font-family: 'Noto Sans JP', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; }
+                .font-hand { font-family: 'Yomogi', 'Noto Sans JP', sans-serif; letter-spacing: .02em; }
+                .text-shadow-soft { text-shadow: 0 6px 30px rgba(0,0,0,.06); }
+            `}</style>
+
+            {/* Soft color blobs */}
+            <div className="pointer-events-none absolute -right-16 bottom-8 h-72 w-72 rounded-full bg-blue-300/30 blur-3xl" />
+            <div className="pointer-events-none absolute right-14 bottom-20 h-64 w-64 rounded-full bg-amber-200/40 blur-3xl" />
+
+            <div className="mx-auto max-w-6xl px-6 py-24 font-body">
+                {/* Section heading with rule */}
+                <div className="mb-16 flex items-center gap-6">
+                    <span className="h-px w-24 bg-zinc-300" />
+                    <h2 className="text-3xl tracking-[0.08em] text-zinc-700 font-hand">私たちについて</h2>
+                </div>
+
+                {/* Slider Container */}
+                <div className="relative overflow-hidden">
+                    {/* Slides */}
+                    <div
+                        className="flex transition-transform duration-500 ease-in-out"
+                        style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+                    >
+                        {profiles.map((profile, index) => (
+                            <div key={profile.id} className="w-full flex-shrink-0 px-4">
+                                <div className="grid items-center gap-16 md:grid-cols-2 min-h-[500px]">
+                                    {/* Left: text */}
+                                    <div className="space-y-6">
+                                        <h3 className="mb-8 text-2xl font-medium tracking-widest text-zinc-600 font-hand">
+                                            {profile.name}
+                                        </h3>
+                                        <p className="text-zinc-500 mb-4 font-medium tracking-wide">
+                                            {profile.role}
+                                        </p>
+                                        <p className="leading-8 text-zinc-500">
+                                            {profile.description}
+                                        </p>
+                                    </div>
+
+                                    {/* Right: photo card */}
+                                    <div className="relative mx-auto w-full max-w-md">
+                                        <div className="relative overflow-hidden rounded-2xl bg-white p-2 shadow-[0_10px_50px_rgba(0,0,0,0.08)]">
+                                            <img
+                                                src={profile.image}
+                                                alt={profile.name}
+                                                className="aspect-[4/5] w-full rounded-xl object-cover text-shadow-soft"
+                                                loading="lazy"
+                                                onError={(e) => {
+                                                    e.currentTarget.style.display = "none";
+                                                }}
+                                            />
+                                            {/* inner soft shadow */}
+                                            <div className="pointer-events-none absolute inset-0 rounded-xl shadow-[inset_0_0_80px_rgba(0,0,0,0.06)]" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Navigation Arrows */}
+                    <button
+                        onClick={prevSlide}
+                        className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-16 w-12 h-12 bg-white hover:bg-zinc-50 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 z-10 border border-zinc-200"
+                        aria-label="前のスライド"
+                    >
+                        <svg className="w-5 h-5 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.6" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                    </button>
+
+                    <button
+                        onClick={nextSlide}
+                        className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-16 w-12 h-12 bg-white hover:bg-zinc-50 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 z-10 border border-zinc-200"
+                        aria-label="次のスライド"
+                    >
+                        <svg className="w-5 h-5 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.6" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </button>
+
+                    {/* Slide Indicators */}
+                    <div className="mt-12 flex justify-center gap-2">
+                        {profiles.map((_, index) => (
+                            <button
+                                key={index}
+                                onClick={() => setCurrentSlide(index)}
+                                className={`h-2 rounded-full transition-all duration-200 ${currentSlide === index
+                                        ? 'bg-zinc-600 w-8'
+                                        : 'bg-zinc-300 hover:bg-zinc-400 w-2'
+                                    }`}
+                                aria-label={`スライド ${index + 1} へ移動`}
+                            />
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+            {/* Scroll to top button */}
+            <div className="fixed bottom-6 right-6">
+                <a
+                    href="#top"
+                    className="group grid h-12 w-12 place-items-center rounded-full border border-zinc-200 bg-white shadow-sm transition hover:shadow-md"
+                    aria-label="ページ上部へ"
+                >
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M6 14l6-6 6 6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                </a>
+            </div>
+        </section>
+    );
+}

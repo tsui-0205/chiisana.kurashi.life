@@ -3,6 +3,7 @@
 import { useState } from "react";
 import InstagramFeed from "./InstagramFeed";
 import CoupleIntroSlider from "./CoupleIntroSlider";
+import AboutUsSection from "./AboutUsSection";
 import Link from "next/link";
 
 export default function Home() {
@@ -76,7 +77,6 @@ export default function Home() {
         </div>
 
         {/* Right-side soft color blobs */}
-        <div className="pointer-events-none absolute right-8 top-44 size-6 rounded-full bg-zinc-400/50 z-10" />
         <div className="pointer-events-none absolute right-16 top-64 w-56 h-56 rounded-full bg-orange-100 soft-spot z-10" />
         <div className="pointer-events-none absolute right-6 top-[420px] w-72 h-72 rounded-full bg-sky-100 soft-spot z-10" />
 
@@ -114,15 +114,6 @@ export default function Home() {
                   >
                     ブログ
                   </Link>
-                </li>
-                <li>
-                  <a
-                    href="#photos"
-                    className="block text-zinc-700 hover:text-zinc-900 transition-colors cursor-pointer py-2 px-3 rounded-lg hover:bg-zinc-100"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    写真
-                  </a>
                 </li>
                 <li>
                   <a
@@ -177,11 +168,6 @@ export default function Home() {
                 </Link>
               </li>
               <li>
-                <a href="#photos" className="text-zinc-600 hover:text-zinc-900 transition-colors">
-                  写真
-                </a>
-              </li>
-              <li>
                 <a
                   href="https://www.instagram.com/chiisana.kurashi.life?igsh=MXVpeDk4YjRwbzZrag=="
                   target="_blank"
@@ -202,14 +188,7 @@ export default function Home() {
         </div>
 
         {/* 私たちについて */}
-        <section id="about" className="py-20 px-4 bg-zinc-50">
-          <div className="max-w-4xl mx-auto font-body">
-            <h3 className="text-3xl font-bold text-center text-zinc-800 mb-12">私たちについて</h3>
-            <div className="bg-white rounded-3xl shadow-lg p-8 md:p-12">
-              <CoupleIntroSlider />
-            </div>
-          </div>
-        </section>
+        <AboutUsSection />
 
         {/* 最近の日記 */}
         <section id="blog" className="py-20 px-4 bg-white font-body">
@@ -266,32 +245,6 @@ export default function Home() {
               >
                 すべての日記を見る
               </Link>
-            </div>
-          </div>
-        </section>
-
-        {/* 写真ギャラリー */}
-        <section id="photos" className="py-20 px-4 bg-zinc-50 font-body">
-          <div className="max-w-4xl mx-auto">
-            <h3 className="text-3xl font-bold text-center text-zinc-800 mb-12">写真</h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {[
-                { title: "朝の庭", color: "from-green-200 to-emerald-200" },
-                { title: "手作りパン", color: "from-orange-200 to-yellow-200" },
-                { title: "夕焼け", color: "from-pink-200 to-rose-200" },
-                { title: "散歩道", color: "from-blue-200 to-indigo-200" },
-                { title: "お茶の時間", color: "from-purple-200 to-pink-200" },
-                { title: "季節の花", color: "from-red-200 to-pink-200" },
-              ].map((photo, index) => (
-                <div key={index} className={`aspect-square bg-gradient-to-br ${photo.color} rounded-2xl flex items-center justify-center shadow-sm hover:shadow-md transition-shadow cursor-pointer`}>
-                  <div className="text-center">
-                    <svg className="w-8 h-8 text-white mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                    </svg>
-                    <p className="text-white text-sm font-medium">{photo.title}</p>
-                  </div>
-                </div>
-              ))}
             </div>
           </div>
         </section>
