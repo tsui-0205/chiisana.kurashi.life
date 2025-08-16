@@ -4,6 +4,7 @@ import { useState } from "react";
 import InstagramFeed from "./InstagramFeed";
 import CoupleIntroSlider from "./CoupleIntroSlider";
 import AboutUsSection from "./AboutUsSection";
+import WorksSection from "./WorksSection";
 import Link from "next/link";
 
 export default function Home() {
@@ -191,63 +192,7 @@ export default function Home() {
         <AboutUsSection />
 
         {/* 最近の日記 */}
-        <section id="blog" className="py-20 px-4 bg-white font-body">
-          <div className="max-w-4xl mx-auto">
-            <h3 className="text-3xl font-bold text-center text-zinc-800 mb-12">最近の日記</h3>
-            <div className="grid gap-6">
-              {[
-                {
-                  slug: "summer-evening-kakigori",
-                  date: "2024年8月10日",
-                  title: "夏の夕暮れと手作りかき氷",
-                  excerpt: "今日はとても暑い一日でした。夕方に夫と一緒に庭に出て、手作りのかき氷を作りました。シンプルなブルーハワイシロップをかけただけですが、とても美味しく感じられて...",
-                  color: "from-blue-100 to-cyan-100"
-                },
-                {
-                  slug: "shrine-walk",
-                  date: "2024年8月8日",
-                  title: "近所の小さな神社へお散歩",
-                  excerpt: "朝の涼しいうちに、近所にある小さな神社まで散歩に出かけました。石段を上ると、街が一望できる素敵な場所があって、夫と二人でしばらく景色を眺めていました...",
-                  color: "from-green-100 to-emerald-100"
-                },
-                {
-                  slug: "first-nukadoko",
-                  date: "2024年8月5日",
-                  title: "初めてのぬか床作り",
-                  excerpt: "以前から挑戦してみたかったぬか床作りに挑戦しました。最初はうまくいくか心配でしたが、夫が丁寧に調べてくれて、二人で協力して作ることができました...",
-                  color: "from-orange-100 to-yellow-100"
-                }
-              ].map((post, index) => (
-                <article key={index} className={`bg-gradient-to-r ${post.color} p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow`}>
-                  <div className="flex flex-col md:flex-row gap-4">
-                    <div className="md:w-24 text-sm text-zinc-500 font-medium">
-                      {post.date}
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="text-lg font-semibold text-zinc-800 mb-2">
-                        {post.title}
-                      </h4>
-                      <p className="text-zinc-600 leading-relaxed">
-                        {post.excerpt}
-                      </p>
-                      <Link href={`/blog/${post.slug}`} className="inline-block mt-3 text-zinc-700 hover:text-zinc-900 font-medium text-sm">
-                        続きを読む →
-                      </Link>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-            <div className="text-center mt-8">
-              <Link
-                href="/blog"
-                className="border-2 border-zinc-400 text-zinc-700 px-6 py-2 rounded-full font-medium hover:bg-zinc-50 transition-colors"
-              >
-                すべての日記を見る
-              </Link>
-            </div>
-          </div>
-        </section>
+        <WorksSection />
 
         {/* インスタグラムフィード */}
         <div className="bg-white">
