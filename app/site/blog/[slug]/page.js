@@ -1,5 +1,9 @@
+"use client";
+
+import React, { useState } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import ContactFooter from "../../ContactFooter";
 
 // 仮のブログデータ（実際のプロジェクトでは外部ファイルやCMSから取得）
 const blogPosts = {
@@ -62,8 +66,10 @@ const blogPosts = {
     }
 };
 
+
 export default function BlogPost({ params }) {
-    const post = blogPosts[params.slug];
+    const { slug } = React.use(params);
+    const post = blogPosts[slug];
 
     if (!post) {
         notFound();
@@ -74,58 +80,72 @@ export default function BlogPost({ params }) {
         .slice(0, 2);
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-pink-50 via-orange-50 to-yellow-50">
+        <div className="bg-white text-zinc-800 relative min-h-screen font-body">
+            {/* Google Fonts */}
+            <style>{`
+                @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Yomogi&display=swap');
+                .font-body { font-family: 'Noto Sans JP', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; }
+                .font-hand { font-family: 'Yomogi', 'Noto Sans JP', sans-serif; letter-spacing: .02em; }
+            `}</style>
             {/* ヘッダー */}
-            <header className="bg-white/80 backdrop-blur-sm shadow-sm sticky top-0 z-10">
-                <nav className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center py-4">
-                        <Link href="/" className="text-2xl font-bold text-rose-800 hover:text-rose-900 transition-colors">
-                            私と夫の小さな暮らし
+            <header className="relative bg-white border-b border-zinc-200">
+                <div className="max-w-6xl mx-auto px-6 py-6">
+                    <div className="flex justify-between items-center">
+                        <Link href="/" className="text-2xl font-bold text-zinc-800 hover:text-zinc-900 transition-colors font-hand">
+                            わたしと夫の小さな暮らし
                         </Link>
-                        <div className="hidden md:flex space-x-6">
-                            <Link href="/" className="text-rose-700 hover:text-rose-900 transition-colors font-medium">
+                        <nav className="hidden lg:flex space-x-8">
+                            <Link href="/" className="text-zinc-600 hover:text-zinc-900 transition-colors font-medium">
                                 ホーム
                             </Link>
-                            <Link href="/blog" className="text-rose-700 hover:text-rose-900 transition-colors font-medium">
+                            <Link href="/#about" className="text-zinc-600 hover:text-zinc-900 transition-colors font-medium">
+                                わたしたちのこと
+                            </Link>
+                            <Link href="/blog" className="text-zinc-900 font-medium border-b-2 border-zinc-900">
                                 ブログ
                             </Link>
-                            <a href="/#about" className="text-rose-700 hover:text-rose-900 transition-colors font-medium">
-                                私たちについて
+                            <a
+                                href="https://www.instagram.com/chiisana.kurashi.life?igsh=MXVpeDk4YjRwbzZrag=="
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-zinc-600 hover:text-zinc-900 transition-colors font-medium"
+                            >
+                                Instagram
                             </a>
-                        </div>
+                        </nav>
                     </div>
-                </nav>
+                </div>
             </header>
 
             {/* パンくずリスト */}
             <nav className="py-4 px-4">
                 <div className="max-w-4xl mx-auto">
-                    <div className="flex items-center space-x-2 text-sm text-gray-600">
-                        <Link href="/" className="hover:text-rose-600">ホーム</Link>
+                    <div className="flex items-center space-x-2 text-sm text-zinc-600">
+                        <Link href="/" className="hover:text-zinc-900">ホーム</Link>
                         <span>/</span>
-                        <Link href="/blog" className="hover:text-rose-600">ブログ</Link>
+                        <Link href="/blog" className="hover:text-zinc-900">ブログ</Link>
                         <span>/</span>
-                        <span className="text-gray-800">{post.title}</span>
+                        <span className="text-zinc-800">{post.title}</span>
                     </div>
                 </div>
             </nav>
 
             {/* 記事メイン */}
-            <article className="py-8 px-4">
-                <div className="max-w-4xl mx-auto">
+            <main className="max-w-6xl mx-auto px-6 py-16 font-body">
+                <div className="max-w-3xl mx-auto">
                     <header className="mb-8">
-                        <div className="flex items-center gap-3 mb-4">
-                            <span className="text-sm text-gray-500">{post.date}</span>
-                            <span className="px-3 py-1 bg-rose-100 text-rose-600 rounded-full text-sm font-medium">
+                        <div className="flex items-center gap-4 mb-3">
+                            <time className="text-sm text-zinc-500">{post.date}</time>
+                            <span className="px-3 py-1 bg-zinc-100 text-zinc-600 text-xs rounded-full">
                                 {post.category}
                             </span>
                         </div>
-                        <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-6">
+                        <h1 className="text-3xl md:text-4xl font-bold text-zinc-800 mb-4 font-hand tracking-widest">
                             {post.title}
                         </h1>
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex flex-wrap gap-2 mb-4">
                             {post.tags.map((tag) => (
-                                <span key={tag} className="px-3 py-1 bg-gray-100 text-gray-600 rounded-md text-sm">
+                                <span key={tag} className="px-3 py-1 bg-zinc-100 text-zinc-600 rounded-md text-sm">
                                     #{tag}
                                 </span>
                             ))}
@@ -133,21 +153,29 @@ export default function BlogPost({ params }) {
                     </header>
 
                     {/* アイキャッチ画像 */}
-                    <div className="mb-8">
-                        <div className="aspect-video bg-gradient-to-br from-pink-100 to-orange-100 rounded-3xl flex items-center justify-center shadow-lg">
-                            <div className="text-center p-8">
-                                <svg className="w-16 h-16 text-rose-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                </svg>
-                                <p className="text-rose-600 font-medium">{post.category}</p>
+                    {post.image && (
+                        <div className="mb-8 max-w-3xl mx-auto w-full">
+                            <div className="relative w-full aspect-[4/3] rounded-[2rem] p-[3px] bg-gradient-to-br from-pink-200 via-zinc-100 to-sky-200 shadow-xl overflow-hidden group">
+                                <div className="w-full h-full rounded-[1.8rem] bg-white/80 backdrop-blur-[2px] flex items-center justify-center overflow-hidden">
+                                    <img
+                                        src={post.image}
+                                        alt={post.title}
+                                        className="w-full h-full object-cover rounded-[1.5rem] transition-transform duration-300 group-hover:scale-105"
+                                        onError={(e) => {
+                                            e.currentTarget.onerror = null;
+                                            e.currentTarget.src = '/kilakilazaka.jpg';
+                                        }}
+                                    />
+                                </div>
+                                <div className="absolute inset-0 rounded-[2rem] ring-1 ring-zinc-200 group-hover:ring-pink-300 pointer-events-none transition-all duration-300"></div>
                             </div>
                         </div>
-                    </div>
+                    )}
 
                     {/* 記事本文 */}
-                    <div className="bg-white rounded-3xl shadow-lg p-8 md:p-12 mb-8">
+                    <div className="bg-white rounded-2xl shadow-md p-6 md:p-10 mb-8">
                         <div
-                            className="prose prose-lg max-w-none prose-gray prose-headings:text-gray-800 prose-p:text-gray-700 prose-p:leading-relaxed"
+                            className="prose prose-lg max-w-none prose-zinc prose-headings:text-zinc-800 prose-p:text-zinc-700 prose-p:leading-relaxed"
                             dangerouslySetInnerHTML={{ __html: post.content }}
                         />
                     </div>
@@ -155,21 +183,21 @@ export default function BlogPost({ params }) {
                     {/* 関連記事 */}
                     {relatedPosts.length > 0 && (
                         <section className="mt-12">
-                            <h3 className="text-2xl font-bold text-gray-800 mb-6">関連記事</h3>
+                            <h3 className="text-2xl font-bold text-zinc-800 mb-6">関連記事</h3>
                             <div className="grid gap-6 md:grid-cols-2">
                                 {relatedPosts.map((relatedPost) => (
                                     <Link key={relatedPost.id} href={`/blog/${relatedPost.id}`}>
-                                        <div className="bg-white rounded-2xl shadow-md p-6 hover:shadow-lg transition-shadow group">
+                                        <div className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-lg transition-shadow group">
                                             <div className="flex items-center gap-2 mb-3">
-                                                <span className="text-sm text-gray-500">{relatedPost.date}</span>
-                                                <span className="px-2 py-1 bg-rose-100 text-rose-600 rounded-full text-xs font-medium">
+                                                <span className="text-sm text-zinc-500">{relatedPost.date}</span>
+                                                <span className="px-2 py-1 bg-zinc-100 text-zinc-600 rounded-full text-xs font-medium">
                                                     {relatedPost.category}
                                                 </span>
                                             </div>
-                                            <h4 className="text-lg font-semibold text-gray-800 mb-2 group-hover:text-rose-600 transition-colors">
+                                            <h4 className="text-lg font-semibold text-zinc-800 mb-2 group-hover:text-zinc-900 transition-colors">
                                                 {relatedPost.title}
                                             </h4>
-                                            <div className="text-rose-600 font-medium text-sm">
+                                            <div className="text-zinc-600 font-medium text-sm group-hover:text-zinc-900 transition-colors">
                                                 読む →
                                             </div>
                                         </div>
@@ -180,31 +208,19 @@ export default function BlogPost({ params }) {
                     )}
 
                     {/* ナビゲーション */}
-                    <div className="mt-8 pt-8 border-t border-gray-200">
+                    <div className="mt-8 pt-8 border-t border-zinc-200">
                         <Link
                             href="/blog"
-                            className="inline-flex items-center text-rose-600 hover:text-rose-800 font-medium transition-colors"
+                            className="inline-flex items-center text-zinc-600 hover:text-zinc-900 font-medium transition-colors"
                         >
                             ← ブログ一覧に戻る
                         </Link>
                     </div>
                 </div>
-            </article>
+            </main>
 
-            {/* フッター */}
-            <footer className="bg-rose-900 text-white py-12 px-4 mt-16">
-                <div className="max-w-4xl mx-auto text-center">
-                    <h4 className="text-xl font-bold mb-4">私と夫の小さな暮らし</h4>
-                    <p className="text-rose-200 mb-6">
-                        石川県で暮らす夫婦の日常を綴るブログ
-                    </p>
-                    <div className="border-t border-rose-700 pt-6">
-                        <p className="text-rose-300 text-sm">
-                            © 2025 私と夫の小さな暮らし
-                        </p>
-                    </div>
-                </div>
-            </footer>
+            {/* Contact Footer */}
+            <ContactFooter />
         </div>
     );
 }

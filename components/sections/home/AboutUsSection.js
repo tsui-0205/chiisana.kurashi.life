@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import SectionHeader from './SectionHeader';
+import SectionHeader from '../../ui/SectionHeader';
 
 export default function AboutUsSection() {
     const [currentSlide, setCurrentSlide] = useState(0);
@@ -65,7 +65,7 @@ export default function AboutUsSection() {
                     rootMargin: '-10% 0px -10% 0px'
                 }
             );
-            
+
             elements.forEach((el) => {
                 observer.observe(el);
                 el.setAttribute('data-observed', 'true');
@@ -78,23 +78,22 @@ export default function AboutUsSection() {
     const profiles = [
         {
             id: 'couple',
-            name: '河岸夫妻',
             role: '石川で暮らす夫婦',
-            image: '/profiles/17552437879081.jpg',
+            image: '/images/profiles/17552437879081.jpg',
             description: '石川県の豊かな自然に囲まれて、夫婦ふたりでゆったりと暮らしています。季節ごとに変わる風景、近所への散歩、ちょっとした発見...そんな何気ない日常の中にある小さな幸せを大切にして、この場所で記録していきたいと思います。'
         },
         {
             id: 'wife',
-            name: 'みさき',
+            name: 'わたし',
             role: '音楽と食べることが大好き',
-            image: '/profiles/wife.jpg',
+            image: '/images/profiles/wife.jpg',
             description: '毎日の生活の中で、音楽を聴きながらお菓子を作る時間が一番の楽しみです。特にピアノを弾いて過ごす午後のひととき、手作りのお菓子と一緒にコーヒーを飲む時間を大切にしています。'
         },
         {
             id: 'husband',
-            name: 'つばさ',
+            name: '夫',
             role: 'フットサルと読書が日課',
-            image: '/profiles/husband.jpg',
+            image: '/images/profiles/husband.jpg',
             description: '週末はフットサルで体を動かし、平日の夜は読書の時間を楽しんでいます。最近は写真撮影にも興味を持ち、日常の風景や妻との思い出を記録することが新しい趣味になっています。'
         }
     ];
@@ -156,19 +155,19 @@ export default function AboutUsSection() {
 
             {/* Section Header - Independent positioning */}
             <div className="px-6 py-24 pb-8 font-body">
-                <div 
+                <div
                     className={`flex items-center gap-6 fade-in-up ${visibleItems.has('header') ? 'visible' : ''}`}
                     data-animate="true"
                     data-index="header"
                 >
                     <div className="h-0.5 w-32 bg-black rounded-full"></div>
-                    <h2 className="text-2xl md:text-3xl font-bold text-zinc-700 font-body tracking-normal">私たちについて</h2>
+                    <h2 className="text-2xl md:text-3xl font-bold text-zinc-700 font-body tracking-widest">わたしたちのこと</h2>
                 </div>
             </div>
 
             <div className="mx-auto max-w-6xl px-6 py-8 pb-24 font-body">
                 {/* Slider Container */}
-                <div 
+                <div
                     className={`relative overflow-hidden fade-in-up ${visibleItems.has('slider') ? 'visible' : ''}`}
                     data-animate="true"
                     data-index="slider"
@@ -197,18 +196,18 @@ export default function AboutUsSection() {
 
                                     {/* Right: photo card */}
                                     <div className="relative mx-auto w-full max-w-md">
-                                        <div className="relative overflow-hidden rounded-2xl bg-white p-2 shadow-[0_10px_50px_rgba(0,0,0,0.08)]">
+                                        <div className="relative overflow-hidden rounded-full bg-white p-2 shadow-[0_10px_50px_rgba(0,0,0,0.08)]">
                                             <img
                                                 src={profile.image}
                                                 alt={profile.name}
-                                                className="aspect-[4/5] w-full rounded-xl object-cover text-shadow-soft"
+                                                className="aspect-square w-full rounded-full object-cover text-shadow-soft"
                                                 loading="lazy"
                                                 onError={(e) => {
                                                     e.currentTarget.style.display = "none";
                                                 }}
                                             />
                                             {/* inner soft shadow */}
-                                            <div className="pointer-events-none absolute inset-0 rounded-xl shadow-[inset_0_0_80px_rgba(0,0,0,0.06)]" />
+                                            <div className="pointer-events-none absolute inset-0 rounded-full shadow-[inset_0_0_80px_rgba(0,0,0,0.06)]" />
                                         </div>
                                     </div>
                                 </div>
@@ -242,7 +241,7 @@ export default function AboutUsSection() {
                     </button>
 
                     {/* Slide Indicators */}
-                    <div 
+                    <div
                         className={`mt-12 flex justify-center gap-2 fade-in-up ${visibleItems.has('indicators') ? 'visible' : ''}`}
                         data-animate="true"
                         data-index="indicators"
@@ -253,8 +252,8 @@ export default function AboutUsSection() {
                                 key={index}
                                 onClick={() => setCurrentSlide(index)}
                                 className={`h-2 rounded-full transition-all duration-200 ${currentSlide === index
-                                        ? 'bg-zinc-600 w-8'
-                                        : 'bg-zinc-300 hover:bg-zinc-400 w-2'
+                                    ? 'bg-zinc-600 w-8'
+                                    : 'bg-zinc-300 hover:bg-zinc-400 w-2'
                                     }`}
                                 aria-label={`スライド ${index + 1} へ移動`}
                             />

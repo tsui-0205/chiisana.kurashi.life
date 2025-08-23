@@ -42,7 +42,7 @@ export default function WorksSection() {
             }
         };
     }, []);
-    // 最近の日記データ
+    // 日々のことデータ
     const recentPosts = [
         {
             id: 1,
@@ -126,7 +126,7 @@ export default function WorksSection() {
                     data-index="header"
                 >
                     <div className="h-0.5 w-32 bg-black rounded-full"></div>
-                    <h2 className="text-2xl md:text-3xl font-bold text-zinc-700 font-body tracking-normal">最近の日記</h2>
+                    <h2 className="text-2xl md:text-3xl font-bold text-zinc-700 font-body tracking-widest">日々のこと</h2>
                 </div>
             </div>
 
@@ -187,7 +187,7 @@ export default function WorksSection() {
                         href="/blog"
                         className="inline-block border-2 border-zinc-300 px-8 py-3 rounded-full text-zinc-700 font-medium hover:bg-zinc-50 transition-colors tracking-wide"
                     >
-                        すべての日記を見る
+                        すべてみる
                     </a>
                 </div>
             </div>

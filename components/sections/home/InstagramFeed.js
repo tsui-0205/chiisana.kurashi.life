@@ -1,23 +1,23 @@
 "use client";
 import { useState, useEffect } from "react";
-import SectionHeader from "./SectionHeader";
+import SectionHeader from "../../ui/SectionHeader";
 
 // インスタグラム投稿のデータ（実際の投稿を手動で更新してください）
 const instagramPosts = [
     {
         id: "1",
         postUrl: "https://www.instagram.com/p/DM_23O9SGfO/?utm_source=ig_web_copy_link&igsh=ZGkzdGhybzQwanZl",
-        imageUrl: "/instagram/a.jpg"
+        imageUrl: "/images/instagram/a.jpg"
     },
     {
         id: "2",
         postUrl: "https://www.instagram.com/p/DMkyHLmychN/?utm_source=ig_web_copy_link&igsh=MWV6eDd4MmFiY2p3NA==",
-        imageUrl: "/instagram/1755241937405.jpg"
+        imageUrl: "/images/instagram/1755241937405.jpg"
     },
     {
         id: "3",
         postUrl: "https://www.instagram.com/p/DMAQhUoS135/?utm_source=ig_web_copy_link&igsh=MTlsb2E2ZmpiejNiMA==",
-        imageUrl: "/instagram/1755241937446.jpg"
+        imageUrl: "/images/instagram/1755241937446.jpg"
     }
 ];
 

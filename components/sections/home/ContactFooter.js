@@ -57,7 +57,7 @@ export default function ContactFooter() {
                 {/* 下部のコピーライト */}
                 <div className="mx-auto max-w-6xl px-6 pb-10">
                     <div className="text-center text-xs text-zinc-400">
-                        © 私と夫の小さな暮らし
+                        © わたしと夫の小さな暮らし
                     </div>
                 </div>
             </div>

@@ -1,5 +1,5 @@
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import "../styles/globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -12,7 +12,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "私と夫の小さな暮らし - 石川県で過ごす夫婦の日常",
+  title: "わたしと夫の小さな暮らし - 石川県で過ごす夫婦の日常",
   description: "石川県で暮らす夫婦の日常を綴るブログ。季節の移り変わり、料理、散歩、小さな幸せを写真と文章で記録しています。",
   keywords: "夫婦,日常,暮らし,石川県,ブログ,日記,ライフスタイル,北陸",
   authors: [{ name: "河岸夫妻" }],
@@ -22,15 +22,15 @@ export const metadata = {
     apple: "/profiles/17552437879081.jpg",
   },
   openGraph: {
-    title: "私と夫の小さな暮らし - 石川県で過ごす夫婦の日常",
+    title: "わたしと夫の小さな暮らし - 石川県で過ごす夫婦の日常",
     description: "石川県で暮らす夫婦の日常を綴るブログ。季節の移り変わり、料理、散歩、小さな幸せを写真と文章で記録しています。",
     type: "website",
     locale: "ja_JP",
-    siteName: "私と夫の小さな暮らし"
+    siteName: "わたしと夫の小さな暮らし"
   },
   twitter: {
     card: "summary",
-    title: "私と夫の小さな暮らし - 石川県で過ごす夫婦の日常",
+    title: "わたしと夫の小さな暮らし - 石川県で過ごす夫婦の日常",
     description: "石川県で暮らす夫婦の日常を綴るブログ。季節の移り変わり、料理、散歩、小さな幸せを写真と文章で記録しています。"
   },
   robots: {
