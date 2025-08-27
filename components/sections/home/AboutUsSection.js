@@ -2,16 +2,13 @@
 
 import { useState, useEffect, useRef } from 'react';
 import SectionHeader from '../../ui/SectionHeader';
+import ToTopButton from '../../ui/ToTopButton';
 
-export default function AboutUsSection() {
+export default function AboutUsSection({ showToTop = false, hideWhenHeroVisible = false }) {
+    // ...existing code...
     const [currentSlide, setCurrentSlide] = useState(0);
     const [visibleItems, setVisibleItems] = useState(new Set());
     const observerRef = useRef(null);
-
-    // デバッグ用
-    useEffect(() => {
-        console.log('Visible items:', Array.from(visibleItems));
-    }, [visibleItems]);
 
     useEffect(() => {
         const observer = new IntersectionObserver(
@@ -78,21 +75,21 @@ export default function AboutUsSection() {
     const profiles = [
         {
             id: 'couple',
-            role: '石川で暮らす夫婦',
+            name: '石川で暮らす夫婦',
             image: '/images/profiles/17552437879081.jpg',
             description: '石川県の豊かな自然に囲まれて、夫婦ふたりでゆったりと暮らしています。季節ごとに変わる風景、近所への散歩、ちょっとした発見...そんな何気ない日常の中にある小さな幸せを大切にして、この場所で記録していきたいと思います。'
         },
         {
             id: 'wife',
             name: 'わたし',
-            role: '音楽と食べることが大好き',
+            // role: '音楽と食べることが大好き',
             image: '/images/profiles/wife.jpg',
             description: '毎日の生活の中で、音楽を聴きながらお菓子を作る時間が一番の楽しみです。特にピアノを弾いて過ごす午後のひととき、手作りのお菓子と一緒にコーヒーを飲む時間を大切にしています。'
         },
         {
             id: 'husband',
             name: '夫',
-            role: 'フットサルと読書が日課',
+            // role: 'フットサルと読書が日課',
             image: '/images/profiles/husband.jpg',
             description: '週末はフットサルで体を動かし、平日の夜は読書の時間を楽しんでいます。最近は写真撮影にも興味を持ち、日常の風景や妻との思い出を記録することが新しい趣味になっています。'
         }
@@ -115,6 +112,19 @@ export default function AboutUsSection() {
                 .font-hand { font-family: 'Yomogi', 'Noto Sans JP', sans-serif; letter-spacing: .02em; }
                 .text-shadow-soft { text-shadow: 0 6px 30px rgba(0,0,0,.06); }
                 
+                /* 名前デザイン */
+                .portfolio-title,
+                .name-text h3 {
+                    font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+                    font-size: 24px; 
+                    font-weight: 500; 
+                    letter-spacing: 0.18em; 
+                    padding: 10px 0 24px;
+                    transition: all 0.4s;
+                    margin: 0 0 32px 0; /* mb-8 相当 */
+                    color: rgba(63,63,70,1); 
+                }
+
                 .fade-in-up {
                     opacity: 0;
                     transform: translateY(50px);
@@ -154,14 +164,14 @@ export default function AboutUsSection() {
             <div className="pointer-events-none absolute right-14 bottom-20 h-64 w-64 rounded-full bg-amber-200/40 blur-3xl" />
 
             {/* Section Header - Independent positioning */}
-            <div className="px-6 py-24 pb-8 font-body">
+            <div className="font-body mx-auto" style={{ margin: '80px auto 24px', maxWidth: '1200px', position: 'relative' }}>
                 <div
-                    className={`flex items-center gap-6 fade-in-up ${visibleItems.has('header') ? 'visible' : ''}`}
+                    className={`flex items-center gap-3 fade-in-up ${visibleItems.has('header') ? 'visible' : ''}`}
                     data-animate="true"
                     data-index="header"
                 >
-                    <div className="h-0.5 w-32 bg-black rounded-full"></div>
-                    <h2 className="text-2xl md:text-3xl font-bold text-zinc-700 font-body tracking-widest">わたしたちのこと</h2>
+                    <div className="h-0.5 w-24 bg-black rounded-full"></div>
+                    <h2 className="text-[22px] sm:text-[28px] md:text-[38px] font-bold text-zinc-700 tracking-[0.18em] md:pl-[80px] whitespace-nowrap">わたしたちのこと</h2>
                 </div>
             </div>
 
@@ -183,12 +193,11 @@ export default function AboutUsSection() {
                                 <div className="grid items-center gap-16 md:grid-cols-2 min-h-[500px]">
                                     {/* Left: text */}
                                     <div className="space-y-6">
-                                        <h3 className="mb-8 text-2xl font-medium tracking-widest text-zinc-600 font-hand">
-                                            {profile.name}
-                                        </h3>
-                                        <p className="text-zinc-500 mb-4 font-medium tracking-wide">
-                                            {profile.role}
-                                        </p>
+                                        <div className="name-text">
+                                            <h3 className="portfolio-title font-hand">
+                                                {profile.name}
+                                            </h3>
+                                        </div>
                                         <p className="leading-8 text-zinc-500">
                                             {profile.description}
                                         </p>
@@ -262,18 +271,8 @@ export default function AboutUsSection() {
                 </div>
             </div>
 
-            {/* Scroll to top button */}
-            <div className="fixed bottom-6 right-6">
-                <a
-                    href="#top"
-                    className="group grid h-12 w-12 place-items-center rounded-full border border-zinc-200 bg-white shadow-sm transition hover:shadow-md"
-                    aria-label="ページ上部へ"
-                >
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M6 14l6-6 6 6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                </a>
-            </div>
+            {/* ページトップへ（共通部品） */}
+            <ToTopButton />
         </section>
     );
 }

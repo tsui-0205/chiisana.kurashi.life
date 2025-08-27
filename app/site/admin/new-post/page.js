@@ -39,7 +39,6 @@ export default function NewPost() {
   const handleSubmit = (e) => {
     e.preventDefault();
     // ここで記事を保存する処理を実装
-    console.log("新しい記事:", formData);
     alert("記事が保存されました！（このデモでは実際には保存されません）");
   };
 

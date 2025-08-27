@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import ContactFooter from "../../ContactFooter";
+import ContactFooter from "../../../../components/sections/home/ContactFooter";
 
 // 仮のブログデータ（実際のプロジェクトでは外部ファイルやCMSから取得）
 const blogPosts = {
@@ -22,7 +22,7 @@ const blogPosts = {
       
       <p>明日はもう少し涼しくなりそうです。でもまた暑くなったら、今度は違う味のシロップを試してみたいと思います。</p>
     `,
-        image: "/blog/kakigori.jpg",
+    image: "/images/blog/kakigori.jpg",
         category: "日常",
         tags: ["夏", "手作り", "おやつ", "夫婦時間"]
     },
@@ -41,7 +41,7 @@ const blogPosts = {
       
       <p>帰り道では、コンビニで冷たいお茶を買って、また別の道を通って帰りました。同じ街でも、歩く道が違うだけで新しい発見があるものですね。</p>
     `,
-        image: "/blog/shrine.jpg",
+    image: "/images/blog/shrine.jpg",
         category: "散歩",
         tags: ["朝", "神社", "景色", "散歩", "発見"]
     },
@@ -60,7 +60,7 @@ const blogPosts = {
       
       <p>これから毎日かき混ぜて、ぬか床を育てていくのが楽しみです。季節ごとに違う野菜を漬けて、私たちだけの味を作っていきたいと思います。</p>
     `,
-        image: "/blog/nukadoko.jpg",
+    image: "/images/blog/nukadoko.jpg",
         category: "料理",
         tags: ["手作り", "発酵", "料理", "挑戦", "野菜"]
     }
@@ -163,7 +163,7 @@ export default function BlogPost({ params }) {
                                         className="w-full h-full object-cover rounded-[1.5rem] transition-transform duration-300 group-hover:scale-105"
                                         onError={(e) => {
                                             e.currentTarget.onerror = null;
-                                            e.currentTarget.src = '/kilakilazaka.jpg';
+                                            e.currentTarget.src = '/images/blog/kilakilazaka.jpg';
                                         }}
                                     />
                                 </div>

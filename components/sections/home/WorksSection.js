@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import ToTopButton from '../../ui/ToTopButton';
 
-export default function WorksSection() {
+export default function WorksSection({ showToTop = false, hideWhenHeroVisible = false }) {
     const [visibleItems, setVisibleItems] = useState(new Set());
     const observerRef = useRef(null);
 
@@ -79,6 +80,17 @@ export default function WorksSection() {
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Yomogi&display=swap');
         .font-body { font-family: 'Noto Sans JP', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; }
         .font-hand { font-family: 'Yomogi', 'Noto Sans JP', sans-serif; letter-spacing: .02em; }
+        /* portfolio-title: AboutUsSection と統一するタイトルスタイル */
+        .portfolio-title {
+            font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+            font-size: 24px; 
+            font-weight: 500; 
+            letter-spacing: 0.18em; 
+            padding: 10px 0 24px;
+            transition: all 0.4s;
+            margin: 0 0 32px 0; 
+            color: rgba(63,63,70,1); 
+        }
         
         .fade-in-up {
             opacity: 0;
@@ -91,13 +103,14 @@ export default function WorksSection() {
             transform: translateY(0);
         }
         
-        .fade-in-left {
-            opacity: 0;
-            transform: translateX(-30px);
-            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-        }
-        
-        .fade-in-left.visible {
+            .excerpt-text {
+                color: red;
+                font-size: 15px;
+                line-height: 1.8;
+                letter-spacing: 0.3em;
+                font-family: YakuHanJP_Narrow, "Zen Kaku Gothic New", sans-serif;
+                margin: 0 0 24px 0;
+            }
             opacity: 1;
             transform: translateX(0);
         }
@@ -119,14 +132,14 @@ export default function WorksSection() {
             <div className="pointer-events-none absolute right-52 top-52 h-64 w-64 rounded-full bg-amber-100/40 blur-3xl" />
 
             {/* Section Header - Independent positioning */}
-            <div className="px-6 py-24 pb-8 font-body">
+            <div className="font-body mx-auto" style={{ margin: '80px auto 24px', maxWidth: '1200px', position: 'relative' }}>
                 <div
-                    className={`flex items-center gap-6 fade-in-up ${visibleItems.has('header') ? 'visible' : ''}`}
+                    className={`flex items-center gap-3 fade-in-up ${visibleItems.has('header') ? 'visible' : ''}`}
                     data-animate="true"
                     data-index="header"
                 >
-                    <div className="h-0.5 w-32 bg-black rounded-full"></div>
-                    <h2 className="text-2xl md:text-3xl font-bold text-zinc-700 font-body tracking-widest">日々のこと</h2>
+                    <div className="h-0.5 w-24 bg-black rounded-full"></div>
+                    <h2 className="text-[22px] sm:text-[28px] md:text-[38px] font-bold text-zinc-700 tracking-[0.18em] md:pl-[80px] whitespace-nowrap">日々のこと</h2>
                 </div>
             </div>
 
@@ -162,12 +175,12 @@ export default function WorksSection() {
                             <div className={index % 2 === 1 ? 'md:order-1' : ''}>
                                 <p className="mb-2 text-sm tracking-widest text-sky-600 font-medium">#{post.category}</p>
                                 <p className="mb-2 text-sm text-zinc-400">{post.date}</p>
-                                <h3 className="mb-4 text-2xl font-medium tracking-wide text-zinc-700 font-hand">{post.title}</h3>
+                                <h3 className="portfolio-title text-[24px] font-medium tracking-[0.18em] pb-6 text-zinc-600">{post.title}</h3>
                                 <p className="mb-6 leading-8 text-zinc-500">
                                     {post.excerpt}
                                 </p>
                                 <a
-                                    href={`/blog/${post.slug}`}
+                                    href={`/site/blog/${post.slug}`}
                                     className="inline-block border-b border-zinc-300 pb-1 text-sm tracking-widest text-zinc-600 transition hover:border-zinc-500 hover:text-zinc-700"
                                 >
                                     続きを読む →
@@ -184,26 +197,32 @@ export default function WorksSection() {
                     data-index="button"
                 >
                     <a
-                        href="/blog"
-                        className="inline-block border-2 border-zinc-300 px-8 py-3 rounded-full text-zinc-700 font-medium hover:bg-zinc-50 transition-colors tracking-wide"
+                        href="/site/blog"
+                        className="group inline-flex items-center gap-4 sm:gap-12 focus:outline-none"
+                        aria-label="すべてみる"
                     >
-                        すべてみる
+                        {/* 円ボタン */}
+                        <span className="grid place-items-center w-20 h-20 rounded-full border-2 border-zinc-500 bg-zinc-50/80 text-zinc-700 shadow-lg transition-all
+                   group-hover:border-zinc-700 group-hover:bg-zinc-200/60 group-focus-visible:ring-2 group-focus-visible:ring-zinc-400/60">
+                            <svg
+                                width="32" height="32" viewBox="0 0 24 24" fill="none"
+                                className="transition-transform duration-200 group-hover:translate-x-1"
+                            >
+                                <path d="M6 12h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                                <path d="M18 9l4 3-4 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                        </span>
+
+                        {/* テキスト */}
+                        <span className="text-zinc-700 text-lg tracking-wide font-semibold py-2
+                   group-hover:underline underline-offset-4 decoration-zinc-500">
+                            すべてみる
+                        </span>
                     </a>
                 </div>
             </div>
-
-            {/* Scroll to top button */}
-            <div className="fixed bottom-6 right-6">
-                <a
-                    href="#top"
-                    className="group grid h-12 w-12 place-items-center rounded-full border border-zinc-200 bg-white shadow-sm transition hover:shadow-md"
-                    aria-label="ページ上部へ"
-                >
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M6 14l6-6 6 6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                </a>
-            </div>
+            {/* ページトップへ（共通部品） */}
+            <ToTopButton />
         </section>
     );
 }

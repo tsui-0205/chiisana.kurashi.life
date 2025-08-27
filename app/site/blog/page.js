@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import ContactFooter from "../ContactFooter";
+import ContactFooter from "../../../components/sections/home/ContactFooter";
 import Link from "next/link";
 
 // 仮のブログデータ
