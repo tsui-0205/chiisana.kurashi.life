@@ -37,26 +37,45 @@ function ToScrollButton({
     );
 
     return (
-        <a
-            href={href}
-            className={`relative block w-20 h-20 md:w-32 md:h-32 bg-transparent z-50 transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 rounded-full ${className}`}
-            title={title}
-            aria-label={ariaLabel}
-            onClick={handleClick}
-            {...rest}
-        >
-            <span className="relative block w-full h-full">
-                <img
-                    src="/images/toScroll.png"
-                    alt="下へスクロール"
-                    draggable="false"
-                    className="absolute inset-0 m-auto max-w-full max-h-full object-contain translate-y-1 md:translate-y-2 scale-x-110 animate-bob motion-reduce:animate-none"
-                />
+        <>
+            <style jsx>{`
+                @keyframes float-down {
+                    0% { transform: translateY(-20px); opacity: 0.8; }
+                    50% { opacity: 1; }
+                    100% { transform: translateY(40px); opacity: 0; }
+                }
+                .animate-float-down {
+                    animation: float-down 2s ease-out infinite;
+                }
+                @keyframes bounce-down {
+                    0%, 100% { transform: translateY(0); }
+                    50% { transform: translateY(4px); }
+                }
+                .animate-bounce-down {
+                    animation: bounce-down 2s ease-in-out infinite;
+                }
+            `}</style>
+            <a
+                href={href}
+                className={`relative block w-20 h-20 md:w-32 md:h-32 bg-transparent z-50 transition-all duration-300 hover:opacity-90 hover:translate-y-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 rounded-full group ${className}`}
+                title={title}
+                aria-label={ariaLabel}
+                onClick={handleClick}
+                {...rest}
+            >
+                <span className="relative block w-full h-full">
+                    <img
+                        src="/images/toScroll.png"
+                        alt="下へスクロール"
+                        draggable="false"
+                        className="absolute inset-0 m-auto max-w-full max-h-full object-contain animate-bounce-down motion-reduce:animate-none transition-transform duration-300 group-hover:scale-110"
+                    />
 
-                {/* 単一の汗要素に統合（位置・大きさは調整可） */}
-                <span className="absolute right-3 top-4 md:right-8 md:top-7 w-3.5 h-3.5 md:w-4 md:h-4 rounded-full bg-amber-300/75 blur-[0.5px] animate-sweat motion-reduce:animate-none" aria-hidden />
-            </span>
-        </a>
+                    {/* 単一の浮遊ドット（上から下に移動） */}
+                    <span className="absolute right-3 top-4 md:right-8 md:top-7 w-3.5 h-3.5 md:w-4 md:h-4 rounded-full bg-amber-300/40 blur-[0.4px] animate-float-down motion-reduce:animate-none" aria-hidden />
+                </span>
+            </a>
+        </>
     );
 }
 
