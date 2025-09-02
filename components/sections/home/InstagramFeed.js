@@ -234,23 +234,21 @@ export default function InstagramFeed({ showToTop = false, hideWhenHeroVisible =
                             window.open('https://www.instagram.com/chiisana.kurashi.life?igsh=MXVpeDk4YjRwbzZrag==', '_blank', 'noopener,noreferrer');
                         }}
                     >
-                        {/* 円ボタン */}
-                        <span className="grid place-items-center w-20 h-20 rounded-full border-2 border-zinc-500 bg-zinc-50/80 text-zinc-700 shadow-lg transition-all
-                   group-hover:border-zinc-700 group-hover:bg-zinc-200/60 group-focus-visible:ring-2 group-focus-visible:ring-zinc-400/60">
+                        {/* 円ボタン（デザインを合わせた） */}
+                        <span className="grid place-items-center w-20 h-20 rounded-full border border-[#84B5C5] bg-zinc-100/60 text-[#84B5C5] shadow-sm transition-all
+       group-hover:border-zinc-600 group-hover:bg-zinc-200/80 group-focus-visible:ring-1 group-focus-visible:ring-[#84B5C5]/50">
                             <svg
-                                width="32" height="32" viewBox="0 0 24 24" fill="none"
+                                width="28" height="28" viewBox="0 0 24 24" fill="none"
                                 className="transition-transform duration-200 group-hover:translate-x-1"
                             >
-                                {/* Start a bit more left and extend the horizontal shaft to make the arrow longer */}
-                                <path d="M6 12h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                                {/* Move the arrow head further right to match the longer shaft */}
-                                <path d="M18 9l4 3-4 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                <path d="M6 12h12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                                <path d="M18 9l4 3-4 3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
                         </span>
 
-                        {/* テキスト */}
-                        <span className="text-zinc-700 text-lg tracking-wide font-semibold py-2
-                   group-hover:underline underline-offset-4 decoration-zinc-500">
+                        {/* テキスト（色・フォントを合わせる） */}
+                        <span className="text-[#84B5C5] text-base tracking-wide font-medium py-2
+       group-hover:underline underline-offset-4 decoration-[#84B5C5] transition-colors">
                             インスタグラムへ
                         </span>
                     </a>

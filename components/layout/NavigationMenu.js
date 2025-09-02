@@ -18,7 +18,7 @@ export default function NavigationMenu({ isOpen, onClose }) {
     const menuItems = [
         { href: "/", label: "ホーム", type: "internal" },
         { href: "#about", label: "わたしたちのこと", type: "anchor" },
-        { href: "/blog", label: "日々のこと", type: "internal" },
+    { href: "#blog", label: "日々のこと", type: "anchor" },
         {
             href: "https://www.instagram.com/chiisana.kurashi.life?igsh=MXVpeDk4YjRwbzZrag==",
             label: "Instagram",
@@ -55,12 +55,12 @@ export default function NavigationMenu({ isOpen, onClose }) {
                             />
                         )}
                         <Wrapper
-                                    {...wrapperProps}
-                                    className={`${baseClass} data-[active=true]:text-zinc-900`}
-                                    onClick={onClose}
-                                    data-active={active}
-                                    style={{ cursor: 'pointer' }}
-                                >
+                            {...wrapperProps}
+                            className={`${baseClass} data-[active=true]:text-zinc-900`}
+                            onClick={onClose}
+                            data-active={active}
+                            style={{ cursor: 'pointer' }}
+                        >
                             {item.label}
                         </Wrapper>
                     </li>

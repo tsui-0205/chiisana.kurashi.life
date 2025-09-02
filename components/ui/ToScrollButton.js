@@ -54,7 +54,7 @@ function ToScrollButton({
                 />
 
                 {/* 単一の汗要素に統合（位置・大きさは調整可） */}
-                <span className="absolute right-3 top-4 md:right-8 md:top-7 w-3.5 h-3.5 md:w-4 md:h-4 rounded-full bg-sky-300/75 blur-[0.5px] animate-sweat motion-reduce:animate-none" aria-hidden />
+                <span className="absolute right-3 top-4 md:right-8 md:top-7 w-3.5 h-3.5 md:w-4 md:h-4 rounded-full bg-amber-300/75 blur-[0.5px] animate-sweat motion-reduce:animate-none" aria-hidden />
             </span>
         </a>
     );

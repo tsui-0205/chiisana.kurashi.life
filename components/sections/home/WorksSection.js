@@ -6,6 +6,7 @@ import ToTopButton from '../../ui/ToTopButton';
 export default function WorksSection({ showToTop = false, hideWhenHeroVisible = false }) {
     const [visibleItems, setVisibleItems] = useState(new Set());
     const observerRef = useRef(null);
+    const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
         observerRef.current = new IntersectionObserver(
@@ -28,6 +29,8 @@ export default function WorksSection({ showToTop = false, hideWhenHeroVisible = 
             }
         };
     }, []);
+
+    useEffect(() => { setMounted(true); }, []);
 
     useEffect(() => {
         const elements = document.querySelectorAll('[data-animate="true"]');
@@ -74,16 +77,18 @@ export default function WorksSection({ showToTop = false, hideWhenHeroVisible = 
         }
     ];
 
+    if (!mounted) return <section className="relative overflow-hidden bg-white text-zinc-800" style={{ minHeight: 480 }} />;
+
     return (
-        <section className="relative overflow-hidden bg-white text-zinc-800">
+        <section id="blog" className="relative overflow-hidden bg-white text-zinc-800">
             <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Yomogi&display=swap');
         .font-body { font-family: 'Noto Sans JP', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; }
         .font-hand { font-family: 'Yomogi', 'Noto Sans JP', sans-serif; letter-spacing: .02em; }
-        /* portfolio-title: AboutUsSection と統一するタイトルスタイル */
+      
         .portfolio-title {
-            font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
-            font-size: 24px; 
+            font-family: "YakuHanJP_Narrow", "Zen Kaku Gothic New", sans-serif ;
+            font-size: 26px; 
             font-weight: 500; 
             letter-spacing: 0.18em; 
             padding: 10px 0 24px;
@@ -91,7 +96,7 @@ export default function WorksSection({ showToTop = false, hideWhenHeroVisible = 
             margin: 0 0 32px 0; 
             color: rgba(63,63,70,1); 
         }
-        
+    
         .fade-in-up {
             opacity: 0;
             transform: translateY(30px);
@@ -161,9 +166,12 @@ export default function WorksSection({ showToTop = false, hideWhenHeroVisible = 
                                         src={post.image}
                                         alt={post.title}
                                         className="aspect-[4/3] w-full rounded-xl object-cover"
-                                        loading="lazy"
+                                        loading="eager"
                                         onError={(e) => {
-                                            e.currentTarget.style.display = "none";
+                                            try {
+                                                e.currentTarget.onerror = null;
+                                                e.currentTarget.src = '/images/blog/kilakilazaka.jpg';
+                                            } catch (err) { }
                                         }}
                                     />
                                     {/* inner soft shadow */}
@@ -175,16 +183,26 @@ export default function WorksSection({ showToTop = false, hideWhenHeroVisible = 
                             <div className={index % 2 === 1 ? 'md:order-1' : ''}>
                                 <p className="mb-2 text-sm tracking-widest text-sky-600 font-medium">#{post.category}</p>
                                 <p className="mb-2 text-sm text-zinc-400">{post.date}</p>
-                                <h3 className="portfolio-title text-[24px] font-medium tracking-[0.18em] pb-6 text-zinc-600">{post.title}</h3>
-                                <p className="mb-6 leading-8 text-zinc-500">
-                                    {post.excerpt}
-                                </p>
-                                <a
-                                    href={`/site/blog/${post.slug}`}
-                                    className="inline-block border-b border-zinc-300 pb-1 text-sm tracking-widest text-zinc-600 transition hover:border-zinc-500 hover:text-zinc-700"
-                                >
-                                    続きを読む →
-                                </a>
+                                <h3 className="font-yaku text-[26px] font-medium tracking-[0.18em] text-[rgba(63,63,70,1)] pt-[10px] pb-[24px] mb-[32px]">
+                                    {post.title}
+                                </h3>
+                                <>
+                                    <p
+                                        className="text-[14px] font-light leading-[2] tracking-[0.12em] text-[#6B6B6B] max-w-[462px] mb-[64px] text-justify"
+                                        style={{
+                                            fontFamily: `'YakuHanJP_Narrow', 'Zen Kaku Gothic New', sans-serif`,
+                                            letterSpacing: '0.13em'
+                                        }}
+                                    >
+                                        {post.excerpt}
+                                    </p>
+                                    <a
+                                        href={`/site/blog/${post.slug}`}
+                                        className="inline-block border-b border-zinc-300 pb-1 text-sm tracking-widest text-zinc-600 transition hover:border-zinc-500 hover:text-zinc-700"
+                                    >
+                                        続きを読む →
+                                    </a>
+                                </>
                             </div>
                         </div>
                     ))}
@@ -199,24 +217,24 @@ export default function WorksSection({ showToTop = false, hideWhenHeroVisible = 
                     <a
                         href="/site/blog"
                         className="group inline-flex items-center gap-4 sm:gap-12 focus:outline-none"
-                        aria-label="すべてみる"
+                        aria-label="詳しくみる"
                     >
                         {/* 円ボタン */}
-                        <span className="grid place-items-center w-20 h-20 rounded-full border-2 border-zinc-500 bg-zinc-50/80 text-zinc-700 shadow-lg transition-all
-                   group-hover:border-zinc-700 group-hover:bg-zinc-200/60 group-focus-visible:ring-2 group-focus-visible:ring-zinc-400/60">
+                        <span className="grid place-items-center w-20 h-20 rounded-full border border-[#84B5C5] bg-zinc-100/60 text-[#84B5C5] shadow-sm transition-all
+       group-hover:border-zinc-600 group-hover:bg-zinc-200/80 group-focus-visible:ring-1 group-focus-visible:ring-[#84B5C5]/50">
                             <svg
-                                width="32" height="32" viewBox="0 0 24 24" fill="none"
+                                width="28" height="28" viewBox="0 0 24 24" fill="none"
                                 className="transition-transform duration-200 group-hover:translate-x-1"
                             >
-                                <path d="M6 12h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                                <path d="M18 9l4 3-4 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                <path d="M6 12h12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                                <path d="M18 9l4 3-4 3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
                         </span>
 
                         {/* テキスト */}
-                        <span className="text-zinc-700 text-lg tracking-wide font-semibold py-2
-                   group-hover:underline underline-offset-4 decoration-zinc-500">
-                            すべてみる
+                        <span className="text-[#84B5C5] text-base tracking-wide font-medium py-2
+       group-hover:underline underline-offset-4 decoration-[#84B5C5] transition-colors">
+                            詳しくみる
                         </span>
                     </a>
                 </div>

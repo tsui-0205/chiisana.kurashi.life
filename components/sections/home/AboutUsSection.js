@@ -7,6 +7,7 @@ import ToTopButton from '../../ui/ToTopButton';
 export default function AboutUsSection({ showToTop = false, hideWhenHeroVisible = false }) {
     // ...existing code...
     const [currentSlide, setCurrentSlide] = useState(0);
+    const [mounted, setMounted] = useState(false);
     const [visibleItems, setVisibleItems] = useState(new Set());
     const observerRef = useRef(null);
 
@@ -28,7 +29,6 @@ export default function AboutUsSection({ showToTop = false, hideWhenHeroVisible 
             }
         );
 
-        // コンポーネントマウント後に要素を監視
         const timer = setTimeout(() => {
             const elements = document.querySelectorAll('[data-animate="true"]');
             elements.forEach((el) => {
@@ -43,7 +43,6 @@ export default function AboutUsSection({ showToTop = false, hideWhenHeroVisible 
     }, []);
 
     useEffect(() => {
-        // スライドが変更されたときに新しい要素を監視
         const timer = setTimeout(() => {
             const elements = document.querySelectorAll('[data-animate="true"]:not([data-observed])');
             const observer = new IntersectionObserver(
@@ -82,14 +81,12 @@ export default function AboutUsSection({ showToTop = false, hideWhenHeroVisible 
         {
             id: 'wife',
             name: 'わたし',
-            // role: '音楽と食べることが大好き',
             image: '/images/profiles/wife.jpg',
             description: '毎日の生活の中で、音楽を聴きながらお菓子を作る時間が一番の楽しみです。特にピアノを弾いて過ごす午後のひととき、手作りのお菓子と一緒にコーヒーを飲む時間を大切にしています。'
         },
         {
             id: 'husband',
             name: '夫',
-            // role: 'フットサルと読書が日課',
             image: '/images/profiles/husband.jpg',
             description: '週末はフットサルで体を動かし、平日の夜は読書の時間を楽しんでいます。最近は写真撮影にも興味を持ち、日常の風景や妻との思い出を記録することが新しい趣味になっています。'
         }
@@ -103,27 +100,19 @@ export default function AboutUsSection({ showToTop = false, hideWhenHeroVisible 
         setCurrentSlide((prev) => (prev - 1 + profiles.length) % profiles.length);
     };
 
+    useEffect(() => { setMounted(true); }, []);
+
+    if (!mounted) {
+        return <section id="about" className="relative overflow-hidden bg-white text-zinc-800" style={{ minHeight: 520 }} />;
+    }
+
     return (
         <section id="about" className="relative overflow-hidden bg-white text-zinc-800">
-            {/* Google Fonts */}
             <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Yomogi&display=swap');
                 .font-body { font-family: 'Noto Sans JP', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; }
                 .font-hand { font-family: 'Yomogi', 'Noto Sans JP', sans-serif; letter-spacing: .02em; }
                 .text-shadow-soft { text-shadow: 0 6px 30px rgba(0,0,0,.06); }
-                
-                /* 名前デザイン */
-                .portfolio-title,
-                .name-text h3 {
-                    font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
-                    font-size: 24px; 
-                    font-weight: 500; 
-                    letter-spacing: 0.18em; 
-                    padding: 10px 0 24px;
-                    transition: all 0.4s;
-                    margin: 0 0 32px 0; /* mb-8 相当 */
-                    color: rgba(63,63,70,1); 
-                }
 
                 .fade-in-up {
                     opacity: 0;
@@ -194,11 +183,17 @@ export default function AboutUsSection({ showToTop = false, hideWhenHeroVisible 
                                     {/* Left: text */}
                                     <div className="space-y-6">
                                         <div className="name-text">
-                                            <h3 className="portfolio-title font-hand">
+                                            <h3 className='text-[26px] font-medium tracking-[0.18em] text-[rgba(63,63,70,1)] pt-[10px] pb-[24px] mb-[32px] font-yaku'>
                                                 {profile.name}
                                             </h3>
                                         </div>
-                                        <p className="leading-8 text-zinc-500">
+                                        <p
+                                            className="text-[14px] font-light leading-[2] tracking-[0.12em] text-[#6B6B6B] max-w-[462px] mb-[64px] text-justify"
+                                            style={{
+                                                fontFamily: `'YakuHanJP_Narrow', 'Zen Kaku Gothic New', sans-serif`,
+                                                letterSpacing: '0.13em'
+                                            }}
+                                        >
                                             {profile.description}
                                         </p>
                                     </div>

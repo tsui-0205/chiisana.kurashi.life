@@ -1,0 +1,73 @@
+// ブログ投稿データ
+export const posts = [
+    {
+        id: "home-desk-light",
+        title: "暮らしを変えたデスクライト",
+        date: "2021-02-14",
+        cover: "/images/sample/lamp.jpg",
+        href: "/posts/home-desk-light",
+    },
+    {
+        id: "coffee-maker-note",
+        title: "毎朝がちょっと楽しみになるコーヒーメーカー",
+        date: "2021-03-02",
+        cover: "/images/sample/coffee.jpg",
+        href: "/posts/coffee-maker-note",
+    },
+    {
+        id: "fujifilm-xt4",
+        title: "FUJIFILM X-T4と暮らす",
+        date: "2021-05-19",
+        cover: "/images/sample/fuji.jpg",
+        href: "/posts/fujifilm-xt4",
+    },
+    {
+        id: "balmuda-toaster",
+        title: "バルミューダ トースターの良いところ・気になるところ",
+        date: "2021-06-01",
+        cover: "/images/sample/toaster.jpg",
+        href: "/posts/balmuda-toaster",
+    },
+    {
+        id: "minimal-backpack",
+        title: "ミニマルなバックパックの選び方",
+        date: "2021-06-22",
+        cover: "/images/sample/bag.jpg",
+        href: "/posts/minimal-backpack",
+    },
+    {
+        id: "room-divider",
+        title: "部屋の印象が変わるロールスクリーン",
+        date: "2021-07-11",
+        cover: "/images/sample/blind.jpg",
+        href: "/posts/room-divider",
+    },
+    {
+        id: "clean-bin",
+        title: "生活感の出にくいダストボックス",
+        date: "2021-08-03",
+        cover: "/images/sample/trash.jpg",
+        href: "/posts/clean-bin",
+    },
+    {
+        id: "everyday-phone",
+        title: "毎日持ち歩くスマホの話",
+        date: "2021-09-10",
+        cover: "/images/sample/iphone.jpg",
+        href: "/posts/everyday-phone",
+    },
+    {
+        id: "jacket-choice",
+        title: "軽くて暖かいアウターの選び方",
+        date: "2021-10-05",
+        cover: "/images/sample/jacket.jpg",
+        href: "/posts/jacket-choice",
+    },
+    {
+        id: "kilakilazaka-walk",
+        title: "近所を自転車で巡る週末",
+        date: "2021-11-21",
+        cover: "/images/blog/kilakilazaka.jpg",
+        href: "/posts/kilakilazaka-walk",
+    },
+];

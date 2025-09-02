@@ -11,6 +11,7 @@ import React, { useEffect, useState } from "react";
  */
 export default function ToTopButton({ className = "", onClick, href = "#top", title = "ページ上部へ", ...rest }) {
     const [rootHasHero, setRootHasHero] = useState(false);
+    const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
         let obs;
@@ -37,6 +38,9 @@ export default function ToTopButton({ className = "", onClick, href = "#top", ti
         return () => { try { obs && obs.disconnect(); } catch (e) { } };
     }, []);
 
+    // Avoid rendering until after client mount to prevent SSR/CSR markup mismatch
+    useEffect(() => { setMounted(true); }, []);
+    if (!mounted) return null;
     if (rootHasHero) return null;
 
     return (
