@@ -16,7 +16,7 @@ export default function AdminDashboard() {
         try {
             const response = await fetch('/api/auth/me');
             const data = await response.json();
-            
+
             if (data.authenticated) {
                 setIsAuthenticated(true);
             } else {
@@ -61,20 +61,29 @@ export default function AdminDashboard() {
             {/* ヘッダー */}
             <header className="bg-white shadow-sm border-b border-gray-200">
                 <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center py-4">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-4 gap-4">
                         <div className="flex items-center">
-                            <h1 className="text-2xl font-bold text-gray-800">
+                            <h1 className="text-xl sm:text-2xl font-bold text-gray-800">
                                 ブログ管理画面
                             </h1>
                         </div>
-                        <div className="flex space-x-4">
+                        <div className="flex gap-3">
                             <button
                                 onClick={handleLogout}
-                                className="text-gray-600 hover:text-gray-800 font-medium"
+                                className="group inline-flex items-center px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg shadow-sm hover:bg-gray-50 hover:text-gray-700 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-200"
                             >
+                                <svg className="w-4 h-4 mr-2 text-gray-500 group-hover:text-gray-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                </svg>
                                 ログアウト
                             </button>
-                            <Link href="/" className="text-rose-600 hover:text-rose-800 font-medium">
+                            <Link
+                                href="/"
+                                className="group inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-rose-600 border border-rose-600 rounded-lg shadow-sm hover:bg-rose-700 hover:border-rose-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 transition-all duration-200"
+                            >
+                                <svg className="w-4 h-4 mr-2 text-rose-100 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                </svg>
                                 サイトを見る
                             </Link>
                         </div>
@@ -147,16 +156,16 @@ export default function AdminDashboard() {
                                 { title: "近所の小さな神社へお散歩", date: "2024年8月8日", status: "公開済み" },
                                 { title: "初めてのぬか床作り", date: "2024年8月5日", status: "公開済み" }
                             ].map((post, index) => (
-                                <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                                    <div>
-                                        <h4 className="font-medium text-gray-800">{post.title}</h4>
-                                        <p className="text-sm text-gray-600">{post.date}</p>
+                                <div key={index} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 bg-gray-50 rounded-lg gap-3 sm:gap-4">
+                                    <div className="flex-1">
+                                        <h4 className="font-medium text-gray-800 text-sm sm:text-base">{post.title}</h4>
+                                        <p className="text-xs sm:text-sm text-gray-600 mt-1">{post.date}</p>
                                     </div>
-                                    <div className="flex items-center space-x-2">
-                                        <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
+                                    <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-2">
+                                        <span className="px-2 py-1 sm:px-3 sm:py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
                                             {post.status}
                                         </span>
-                                        <button className="text-rose-600 hover:text-rose-800 text-sm font-medium">
+                                        <button className="text-rose-600 hover:text-rose-800 text-xs sm:text-sm font-medium">
                                             編集
                                         </button>
                                     </div>

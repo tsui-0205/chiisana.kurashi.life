@@ -6,8 +6,6 @@ import { Card, CardContent, CardImage } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { posts } from "@/data/posts";
 import ContactFooter from "@/components/sections/home/ContactFooter";
-import AuthenticatedFloatingWriteButton from "@/components/ui/AuthenticatedFloatingWriteButton";
-import AuthenticatedWriteButton from "@/components/ui/AuthenticatedWriteButton";
 
 const heroTitle = posts[0]?.title ?? "おすすめ記事";
 const heroImages = [
@@ -67,12 +65,31 @@ function PostCard({ post }) {
             alt={post.title}
           />
           <CardContent>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-[10px] px-2 py-1 bg-rose-100 text-rose-600 rounded-full font-medium">
+                {post.category || "日常"}
+              </span>
+              <p className="text-[10px] text-neutral-500 tracking-[0.08em]">
+                {formatDateYMD(post.date)}
+              </p>
+            </div>
             <h3 className="text-[13px] font-bold tracking-wide text-sky-700 line-clamp-2">
               {post.title}
             </h3>
-            <p className="mt-2 text-[11px] text-neutral-500 tracking-[0.08em]">
-              {formatDateYMD(post.date)}
-            </p>
+            {post.excerpt && (
+              <p className="mt-2 text-[10px] text-neutral-600 line-clamp-2 leading-relaxed">
+                {post.excerpt}
+              </p>
+            )}
+            {post.tags && (
+              <div className="flex flex-wrap gap-1 mt-2">
+                {post.tags.split(',').slice(0, 3).map((tag, index) => (
+                  <span key={index} className="text-[9px] px-1.5 py-0.5 bg-gray-100 text-gray-500 rounded">
+                    #{tag.trim()}
+                  </span>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </Link>
@@ -154,9 +171,16 @@ export default function BlogPage() {
   }, [isMenuOpen]);
 
   const [q, setQ] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("すべて");
 
   // show only latest 9 by default, toggle to show all via `old` button
   const [showAll, setShowAll] = useState(false);
+
+  // カテゴリの一覧を取得
+  const categories = useMemo(() => {
+    const cats = new Set(posts.map(post => post.category).filter(Boolean));
+    return ["すべて", ...Array.from(cats)];
+  }, []);
 
   const sortedPosts = useMemo(() => {
     return [...posts].sort((a, b) => {
@@ -168,10 +192,14 @@ export default function BlogPage() {
 
   const filtered = useMemo(() => {
     const base = sortedPosts.filter((p) => {
-      return q ? p.title.toLowerCase().includes(q.toLowerCase()) : true;
+      // 検索クエリのフィルタリング
+      const matchesSearch = q ? p.title.toLowerCase().includes(q.toLowerCase()) : true;
+      // カテゴリのフィルタリング
+      const matchesCategory = selectedCategory === "すべて" || p.category === selectedCategory;
+      return matchesSearch && matchesCategory;
     });
     return showAll ? base : base.slice(0, 9);
-  }, [q, showAll, sortedPosts]);
+  }, [q, selectedCategory, showAll, sortedPosts]);
 
   return (
     <div className="min-h-screen bg-zinc-50 text-gray-800">
@@ -289,18 +317,11 @@ export default function BlogPage() {
 
       {/* New Articles */}
       <section id="articles" className="py-16 px-4 md:px-6 max-w-6xl mx-auto mb-4 md:mb-6 lg:mb-8">
-        <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4">
-          <div className="text-center md:text-left">
-            <h2 className="text-4xl md:text-5xl font-semibold tracking-[0.18em] text-zinc-900">
-              ARTICLES
-            </h2>
-            <p className="text-zinc-500 mt-2 font-light">記事一覧</p>
-          </div>
-          
-          {/* 投稿ボタン（認証時のみ表示） */}
-          <div className="mt-6 md:mt-0 flex justify-center md:justify-end">
-            <AuthenticatedWriteButton />
-          </div>
+        <div className="text-center mb-4">
+          <h2 className="text-4xl md:text-5xl font-semibold tracking-[0.18em] text-zinc-900">
+            ARTICLES
+          </h2>
+          <p className="text-zinc-500 mt-2 font-light">記事一覧</p>
         </div>
 
         {/* Filter / Search */}
@@ -316,6 +337,25 @@ export default function BlogPage() {
               placeholder="キーワードで探す"
               className="pl-9 rounded-2xl"
             />
+          </div>
+        </div>
+
+        {/* Category Filter */}
+        <div className="mb-8">
+          <div className="flex flex-wrap gap-3 justify-center">
+            {categories.map((category) => (
+              <button
+                key={category}
+                onClick={() => setSelectedCategory(category)}
+                className={`px-6 py-2.5 text-sm font-light tracking-wider transition-all duration-300 border ${selectedCategory === category
+                    ? 'bg-zinc-900 text-white border-zinc-900 shadow-lg'
+                    : 'bg-white/90 text-zinc-700 border-zinc-200 hover:bg-zinc-50 hover:border-zinc-300 hover:text-zinc-900'
+                  }`}
+                style={{ letterSpacing: '0.1em' }}
+              >
+                {category}
+              </button>
+            ))}
           </div>
         </div>
         <div className="relative pb-6 md:pb-6 lg:pb-20">
@@ -356,9 +396,6 @@ export default function BlogPage() {
         </div>
       </section>
       <ContactFooter />
-      
-      {/* フローティング投稿ボタン（認証時のみ表示） */}
-      <AuthenticatedFloatingWriteButton />
     </div>
   );
 }
