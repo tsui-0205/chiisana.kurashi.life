@@ -6,6 +6,7 @@ import AboutUsSection from "../components/sections/home/AboutUsSection";
 import WorksSection from "../components/sections/home/WorksSection";
 import ContactFooter from "../components/sections/home/ContactFooter";
 import HeroSection from "../components/sections/home/HeroSection";
+import AuthenticatedFloatingWriteButton from "../components/ui/AuthenticatedFloatingWriteButton";
 
 export default function Home() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -51,6 +52,9 @@ export default function Home() {
                 {/* Contact Footer */}
                 <ContactFooter />
             </div>
+            
+            {/* フローティング投稿ボタン（認証時のみ表示） */}
+            <AuthenticatedFloatingWriteButton />
         </div>
     );
 }

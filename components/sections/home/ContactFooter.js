@@ -1,7 +1,16 @@
 'use client';
+import { useState } from 'react';
 import ToTopButton from '../../ui/ToTopButton';
 
 export default function ContactFooter() {
+    const [isHovered, setIsHovered] = useState(false);
+    const [isClicked, setIsClicked] = useState(false);
+
+    const handleClick = () => {
+        setIsClicked(true);
+        setTimeout(() => setIsClicked(false), 500); // 0.5秒後に元に戻す
+    };
+
     return (
         <section className="relative bg-white border-t border-neutral-200">
             <style>{`
@@ -18,6 +27,25 @@ export default function ContactFooter() {
                         </span>
                     </div>
 
+                    {/* メールイラスト */}
+                    {/* <div className="mb-8 flex justify-center">
+                        <div
+                            className="relative w-24 h-24 sm:w-32 sm:h-32 transition-transform duration-300 hover:scale-105"
+                            onMouseEnter={() => setIsHovered(true)}
+                            onMouseLeave={() => setIsHovered(false)}
+                            onClick={handleClick}
+                        >
+                            <img
+                                src={(isHovered || isClicked) ? "/images/mail/open-mail.jpg" : "/images/mail/close-mail.jpg"}
+                                alt={(isHovered || isClicked) ? "開いたメール" : "閉じたメール"}
+                                className="w-full h-full object-cover rounded-lg shadow-sm transition-all duration-300 cursor-pointer"
+                                style={{
+                                    filter: (isHovered || isClicked) ? 'brightness(1.1)' : 'brightness(1)',
+                                }}
+                            />
+                        </div>
+                    </div> */}
+
                     <p className="mb-8 text-neutral-600 leading-7 text-sm max-w-md mx-auto">
                         下記のメールアドレスまでお気軽にご連絡ください
                     </p>
@@ -26,12 +54,21 @@ export default function ContactFooter() {
                         href="mailto:chiisana.kurashi.life@gmail.com"
                         className="inline-flex items-center gap-3 rounded-lg border border-neutral-300 bg-neutral-50 px-6 py-3 shadow-sm transition-all hover:bg-neutral-100 hover:border-neutral-400 hover:shadow-md group cursor-pointer"
                         aria-label="メールアドレスに連絡"
+                        onMouseEnter={() => setIsHovered(true)}
+                        onMouseLeave={() => setIsHovered(false)}
+                        onClick={handleClick}
                     >
-                        {/* メールアイコン */}
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-neutral-600 group-hover:text-neutral-800 transition-colors">
-                            <path d="M3 6.75A2.25 2.25 0 0 1 5.25 4.5h13.5A2.25 2.25 0 0 1 21 6.75v10.5A2.25 2.25 0 0 1 18.75 19.5H5.25A2.25 2.25 0 0 1 3 17.25V6.75Z" stroke="currentColor" strokeWidth="1.5" />
-                            <path d="M3.75 7.5 12 13.5l8.25-6" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-                        </svg>
+                        {/* 小さなメールイラスト */}
+                        <div className="w-6 h-6 flex-shrink-0">
+                            <img
+                                src={(isHovered || isClicked) ? "/images/mail/open-mail.jpg" : "/images/mail/close-mail.jpg"}
+                                alt={(isHovered || isClicked) ? "開いたメール" : "閉じたメール"}
+                                className="w-full h-full object-cover rounded transition-all duration-300"
+                                style={{
+                                    filter: (isHovered || isClicked) ? 'brightness(1.1)' : 'brightness(1)',
+                                }}
+                            />
+                        </div>
                         <span className="text-sm font-medium text-neutral-700 group-hover:text-neutral-900 select-all transition-colors">
                             chiisana.kurashi.life@gmail.com
                         </span>

@@ -1,17 +1,13 @@
 "use client";
 import React from "react";
+import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
 import ContactFooter from "@/components/sections/home/ContactFooter";
+import { posts } from "@/data/posts";
 
 // ===== Simple Post (odekake-camera 個別記事 風) =====
 // 画面中央に「タイトル→日付→大きな画像（白フチ＆影）」のみを配置。
 // 余白たっぷり・モノトーン・可読性重視。必要最小限のスタイルに絞っています。
-
-// SimplePost 型定義:
-// {
-//   title: string;
-//   date: string; // ISO 8601 もしくは YYYY.MM.DD を想定
-//   hero: { src: string; alt?: string };
-// }
 
 const fmtDateDot = (d) => {
     // 受け取りが ISO の場合は YYYY.MM.DD に整形
@@ -24,99 +20,166 @@ const fmtDateDot = (d) => {
     return `${y}.${m}.${day}`;
 };
 
-const sample = {
-    title: "祝！自分だけの城？",
-    date: "2025-08-28",
-    hero: {
-        src: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=2000",
-        alt: "家の廊下で作業する人の後ろ姿",
-    },
-    content: "この記事では、私たちの新しい住まいについて紹介します。静かな住宅街に位置するこの家は、自然光がたっぷりと入る明るい空間が特徴です。リビングルームは開放的で、家族が集まってリラックスできる場所となっています。\n\nキッチンは機能的でありながらも美しいデザインが施されており、料理をするのが楽しくなります。また、庭には季節の花々が植えられ、四季を通じて異なる表情を見せてくれます。\n\nこの家での新しい生活は、私たちにとって新たなスタートを意味しています。ここで過ごす時間が、かけがえのない思い出となることを願っています。"
-};
+export default function BlogPostSimple() {
+    const params = useParams();
+    const router = useRouter();
+    const slug = params?.slug;
+    
+    // URLのslugから該当する投稿を検索
+    const post = posts.find(p => p.id === slug);
+    
+    const handleBackClick = () => {
+        console.log('戻るボタンがクリックされました');
+        router.push('/site/blog');
+    };    // 投稿が見つからない場合のデフォルト
+    if (!post) {
+        return (
+            <main className="min-h-screen bg-neutral-100 text-neutral-900 flex items-center justify-center">
+                <div className="text-center">
+                    <h1 className="text-2xl font-semibold mb-8">記事が見つかりません</h1>
+                    <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+                        <Link href="/site/blog" className="group flex items-center gap-3 transition-all duration-200">
+                            {/* 円ボタン */}
+                            <span className="grid place-items-center w-12 h-12 rounded-full border border-zinc-700 bg-zinc-100/60 text-zinc-700 shadow-sm transition-all
+                              group-hover:border-zinc-900 group-hover:bg-zinc-200/80 group-focus-visible:ring-1 group-focus-visible:ring-zinc-700/50">
+                              <svg
+                                width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                className="transition-transform duration-200 group-hover:-translate-x-1"
+                              >
+                                <path d="M18 12H6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                                <path d="M6 15l-4-3 4-3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                              </svg>
+                            </span>
 
-export default function BlogPostSimple({ post = sample }) {
-    return (
-        <main className="min-h-screen bg-neutral-100 text-neutral-900">
-            {/* Header with Logo and Navigation */}
-            <header className="bg-white border-b border-neutral-200">
-                <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                    <div className="flex items-center justify-between">
-                        {/* Logo/Site Name */}
-                        <div className="flex items-center space-x-2">
-                            <div className="w-8 h-8 bg-neutral-900 rounded-full flex items-center justify-center">
-                                <span className="text-white text-sm font-bold">OC</span>
-                            </div>
-                            <span className="text-lg font-semibold tracking-wide">おでかけカメラ</span>
-                        </div>
+                            {/* テキスト */}
+                            <span className="text-zinc-700 text-base tracking-wider font-bold py-2
+                              group-hover:underline underline-offset-4 decoration-zinc-700 transition-colors" style={{ letterSpacing: '0.12em' }}>
+                              ブログ一覧
+                            </span>
+                        </Link>
+                        
+                        <Link href="/" className="group flex items-center gap-3 transition-all duration-200">
+                            {/* 円ボタン */}
+                            <span className="grid place-items-center w-12 h-12 rounded-full border border-zinc-700 bg-zinc-100/60 text-zinc-700 shadow-sm transition-all
+                              group-hover:border-zinc-900 group-hover:bg-zinc-200/80 group-focus-visible:ring-1 group-focus-visible:ring-zinc-700/50">
+                              <svg
+                                width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                className="transition-transform duration-200 group-hover:scale-110"
+                              >
+                                <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                                <path d="M9 22V12h6v10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                              </svg>
+                            </span>
 
-                        {/* Navigation */}
-                        <nav className="hidden sm:flex items-center space-x-6 text-sm">
-                            <a href="/" className="text-neutral-600 hover:text-neutral-900 transition">Home</a>
-                            <a href="/site/blog" className="text-neutral-900 font-medium">Blog</a>
-                            <a href="#" className="text-neutral-600 hover:text-neutral-900 transition">About</a>
-                            <a href="#" className="text-neutral-600 hover:text-neutral-900 transition">Contact</a>
-                        </nav>
+                            {/* テキスト */}
+                            <span className="text-zinc-700 text-base tracking-wider font-bold py-2
+                              group-hover:underline underline-offset-4 decoration-zinc-700 transition-colors" style={{ letterSpacing: '0.12em' }}>
+                              ホーム
+                            </span>
+                        </Link>
                     </div>
                 </div>
-            </header>
+            </main>
+        );
+    }
 
-            {/* Breadcrumbs */}
-            <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-                <nav className="text-sm text-neutral-500 mb-4">
-                    <a href="/" className="hover:text-neutral-700 transition">Home</a>
-                    <span className="mx-2">/</span>
-                    <a href="/site/blog" className="hover:text-neutral-700 transition">Blog</a>
-                    <span className="mx-2">/</span>
-                    <span className="text-neutral-900">{post.title}</span>
-                </nav>
-            </div>
-
-            {/* Title Section */}
-            <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="text-center">
-                    <h1 className="text-2xl sm:text-3xl font-semibold tracking-wide">
+    return (
+        <main className="min-h-screen bg-neutral-100 text-neutral-900">
+            {/* 記事コンテンツ: ページ上部中央に配置 */}
+            <div className="px-6 py-16">
+                <article className="max-w-4xl mx-auto">
+                    {/* タイトル */}
+                    <h1 className="text-3xl md:text-4xl font-semibold mb-3 text-center leading-relaxed tracking-wide">
                         {post.title}
                     </h1>
-                    <p className="mt-3 text-sm tracking-widest font-semibold text-neutral-700">
+
+                    {/* 日付 */}
+                    <p className="text-base text-neutral-600 text-center mb-8">
                         {fmtDateDot(post.date)}
                     </p>
 
-                    {/* Category/Tags */}
-                    <div className="mt-4 flex justify-center">
-                        <div className="inline-flex items-center px-3 py-1 rounded-full bg-neutral-200 text-xs font-medium text-neutral-700">
-                            <span className="w-2 h-2 bg-neutral-400 rounded-full mr-2"></span>
-                            ライフスタイル
+                    {/* 大きな画像（白フチ＆影） */}
+                    <div className="mb-10 flex justify-center">
+                        <div className="bg-white p-3 shadow-lg max-w-full">
+                            <img
+                                src={post.hero?.src || "/images/blog/default.jpg"}
+                                alt={post.hero?.alt || post.title}
+                                className="w-full h-auto max-w-3xl mx-auto block"
+                                style={{
+                                    aspectRatio: "3/2",
+                                    objectFit: "cover",
+                                }}
+                            />
                         </div>
                     </div>
-                </div>
+
+                    {/* 記事本文 */}
+                    {post.content && (
+                        <div className="prose prose-lg max-w-none text-neutral-800 leading-relaxed">
+                            {post.content.split('\n').map((paragraph, index) => (
+                                <p key={index} className="mb-4">
+                                    {paragraph}
+                                </p>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* ナビゲーションボタン */}
+                    <div className="mt-12 text-center">
+                        <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+                            <Link
+                                href="/site/blog"
+                                onClick={() => console.log('戻るリンクがクリックされました')}
+                                className="group flex items-center gap-3 transition-all duration-200"
+                            >
+                                {/* 円ボタン */}
+                                <span className="grid place-items-center w-12 h-12 rounded-full border border-zinc-700 bg-zinc-100/60 text-zinc-700 shadow-sm transition-all
+                                  group-hover:border-zinc-900 group-hover:bg-zinc-200/80 group-focus-visible:ring-1 group-focus-visible:ring-zinc-700/50">
+                                  <svg
+                                    width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                    className="transition-transform duration-200 group-hover:-translate-x-1"
+                                  >
+                                    <path d="M18 12H6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                                    <path d="M6 15l-4-3 4-3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                                  </svg>
+                                </span>
+
+                                {/* テキスト */}
+                                <span className="text-zinc-700 text-base tracking-wider font-bold py-2
+                                  group-hover:underline underline-offset-4 decoration-zinc-700 transition-colors" style={{ letterSpacing: '0.12em' }}>
+                                  ブログ一覧
+                                </span>
+                            </Link>
+                            
+                            <Link
+                                href="/"
+                                className="group flex items-center gap-3 transition-all duration-200"
+                            >
+                                {/* 円ボタン */}
+                                <span className="grid place-items-center w-12 h-12 rounded-full border border-zinc-700 bg-zinc-100/60 text-zinc-700 shadow-sm transition-all
+                                  group-hover:border-zinc-900 group-hover:bg-zinc-200/80 group-focus-visible:ring-1 group-focus-visible:ring-zinc-700/50">
+                                  <svg
+                                    width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                    className="transition-transform duration-200 group-hover:scale-110"
+                                  >
+                                    <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                                    <path d="M9 22V12h6v10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                                  </svg>
+                                </span>
+
+                                {/* テキスト */}
+                                <span className="text-zinc-700 text-base tracking-wider font-bold py-2
+                                  group-hover:underline underline-offset-4 decoration-zinc-700 transition-colors" style={{ letterSpacing: '0.12em' }}>
+                                  ホーム
+                                </span>
+                            </Link>
+                        </div>
+                    </div>
+                </article>
             </div>
 
-            {/* Hero (white frame) - wider size */}
-            <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 sm:mt-8">
-                <div className="mx-auto max-w-4xl rounded-md border-4 border-white shadow-[0_2px_0_0_rgba(0,0,0,0.06),0_10px_30px_-10px_rgba(0,0,0,0.25)] bg-white/50">
-                    <img
-                        src={post.hero.src}
-                        alt={post.hero.alt ?? post.title}
-                        className="block w-full h-auto object-cover"
-                    />
-                </div>
-            </div>
-
-            {/* Content - narrower than image */}
-            <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
-                <div className="prose prose-neutral max-w-2xl mx-auto">
-                    {post.content && post.content.split('\n\n').map((paragraph, index) => (
-                        <p key={index} className="mb-4 leading-8 text-neutral-700">
-                            {paragraph}
-                        </p>
-                    ))}
-                </div>
-            </div>
-
-            {/* Contact Footer */}
-            <div className="mt-16">
-                <ContactFooter />
-            </div>
+            {/* ContactFooter */}
+            <ContactFooter />
         </main>
     );
 }

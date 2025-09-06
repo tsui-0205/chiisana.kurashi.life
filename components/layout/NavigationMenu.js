@@ -24,6 +24,7 @@ export default function NavigationMenu({ isOpen, onClose }) {
             label: "Instagram",
             type: "external",
         },
+        { href: "/site/admin", label: "管理", type: "internal", admin: true },
     ];
 
     const isActive = (item) => {
@@ -38,6 +39,13 @@ export default function NavigationMenu({ isOpen, onClose }) {
                 const baseClass = mobile
                     ? 'block text-zinc-900 hover:text-zinc-700 transition-colors cursor-pointer py-3 px-2 text-center'
                     : 'block text-zinc-700 hover:text-zinc-900 transition-colors cursor-pointer py-2 pl-5 pr-3 rounded-lg hover:bg-zinc-50';
+                
+                // 管理メニューの場合は少し異なるスタイル
+                const adminClass = item.admin 
+                    ? (mobile 
+                        ? 'block text-rose-700 hover:text-rose-800 font-medium transition-colors cursor-pointer py-3 px-2 text-center'
+                        : 'block text-rose-700 hover:text-rose-800 font-medium transition-colors cursor-pointer py-2 pl-5 pr-3 rounded-lg hover:bg-rose-50')
+                    : baseClass;
                 const Wrapper = item.type === "internal" ? Link : "a";
                 const wrapperProps =
                     item.type === "external"
@@ -56,12 +64,15 @@ export default function NavigationMenu({ isOpen, onClose }) {
                         )}
                         <Wrapper
                             {...wrapperProps}
-                            className={`${baseClass} data-[active=true]:text-zinc-900`}
+                            className={`${adminClass} data-[active=true]:text-zinc-900`}
                             onClick={onClose}
                             data-active={active}
                             style={{ cursor: 'pointer' }}
                         >
                             {item.label}
+                            {item.admin && !mobile && (
+                                <span className="ml-2 text-xs">✏️</span>
+                            )}
                         </Wrapper>
                     </li>
                 );

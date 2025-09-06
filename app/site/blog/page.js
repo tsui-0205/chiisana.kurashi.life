@@ -1,10 +1,13 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { Card, CardContent, CardImage } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { posts } from "@/data/posts";
 import ContactFooter from "@/components/sections/home/ContactFooter";
+import AuthenticatedFloatingWriteButton from "@/components/ui/AuthenticatedFloatingWriteButton";
+import AuthenticatedWriteButton from "@/components/ui/AuthenticatedWriteButton";
 
 const heroTitle = posts[0]?.title ?? "おすすめ記事";
 const heroImages = [
@@ -57,7 +60,7 @@ function HeroTriptych({ title, images }) {
 function PostCard({ post }) {
   return (
     <article className="group">
-      <a href={post.href}>
+      <Link href={post.href}>
         <Card>
           <CardImage
             src={post.cover}
@@ -72,7 +75,7 @@ function PostCard({ post }) {
             </p>
           </CardContent>
         </Card>
-      </a>
+      </Link>
     </article>
   );
 }
@@ -286,13 +289,22 @@ export default function BlogPage() {
 
       {/* New Articles */}
       <section id="articles" className="py-16 px-4 md:px-6 max-w-6xl mx-auto mb-4 md:mb-6 lg:mb-8">
-        <h2 className="text-4xl md:text-5xl font-semibold text-center mb-4 tracking-[0.18em] text-zinc-900">
-          ARTICLES
-        </h2>
-        <p className="text-center text-zinc-500 mb-12 font-light">記事一覧</p>
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-4">
+          <div className="text-center md:text-left">
+            <h2 className="text-4xl md:text-5xl font-semibold tracking-[0.18em] text-zinc-900">
+              ARTICLES
+            </h2>
+            <p className="text-zinc-500 mt-2 font-light">記事一覧</p>
+          </div>
+          
+          {/* 投稿ボタン（認証時のみ表示） */}
+          <div className="mt-6 md:mt-0 flex justify-center md:justify-end">
+            <AuthenticatedWriteButton />
+          </div>
+        </div>
 
         {/* Filter / Search */}
-        <div className="mb-8 flex flex-col md:flex-row gap-3 items-stretch md:items-center">
+        <div className="mt-12 mb-8 flex flex-col md:flex-row gap-3 items-stretch md:items-center">
           <div className="relative w-full md:w-2/3">
             <svg className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M21 21l-4.35-4.35" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
@@ -344,6 +356,9 @@ export default function BlogPage() {
         </div>
       </section>
       <ContactFooter />
+      
+      {/* フローティング投稿ボタン（認証時のみ表示） */}
+      <AuthenticatedFloatingWriteButton />
     </div>
   );
 }

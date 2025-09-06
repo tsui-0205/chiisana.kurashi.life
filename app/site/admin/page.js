@@ -1,6 +1,61 @@
+"use client";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function AdminDashboard() {
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const router = useRouter();
+
+    useEffect(() => {
+        checkAuthStatus();
+    }, []);
+
+    const checkAuthStatus = async () => {
+        try {
+            const response = await fetch('/api/auth/me');
+            const data = await response.json();
+            
+            if (data.authenticated) {
+                setIsAuthenticated(true);
+            } else {
+                router.push('/site/admin/login');
+            }
+        } catch (error) {
+            console.error('Auth check error:', error);
+            router.push('/site/admin/login');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleLogout = async () => {
+        try {
+            await fetch('/api/auth/login', {
+                method: 'DELETE',
+            });
+            router.push('/site/admin/login');
+        } catch (error) {
+            console.error('Logout error:', error);
+        }
+    };
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-rose-600 mx-auto"></div>
+                    <p className="mt-2 text-gray-600">認証を確認中...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (!isAuthenticated) {
+        return null; // リダイレクト中
+    }
+
     return (
         <div className="min-h-screen bg-gray-50">
             {/* ヘッダー */}
@@ -13,6 +68,12 @@ export default function AdminDashboard() {
                             </h1>
                         </div>
                         <div className="flex space-x-4">
+                            <button
+                                onClick={handleLogout}
+                                className="text-gray-600 hover:text-gray-800 font-medium"
+                            >
+                                ログアウト
+                            </button>
                             <Link href="/" className="text-rose-600 hover:text-rose-800 font-medium">
                                 サイトを見る
                             </Link>
@@ -30,7 +91,7 @@ export default function AdminDashboard() {
 
                 {/* アクション buttons */}
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-8">
-                    <Link href="/admin/new-post" className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow border border-gray-200">
+                    <Link href="/site/admin/new-post" className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow border border-gray-200">
                         <div className="flex items-center">
                             <div className="flex-shrink-0">
                                 <svg className="w-8 h-8 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
