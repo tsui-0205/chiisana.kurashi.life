@@ -73,6 +73,19 @@ export default function HeroSection({ isMenuOpen, setIsMenuOpen, onLoaded, onHer
             <div className="pointer-events-none absolute right-16 top-64 w-56 h-56 rounded-full bg-orange-100 soft-spot z-10" />
             <div className="pointer-events-none absolute right-6 top-[420px] w-72 h-72 rounded-full bg-sky-100 soft-spot z-10" />
 
+            {/* メインテキスト：写真と外枠にかかるように左寄せで配置 */}
+            <div className="absolute inset-y-0 left-4 md:left-8 lg:left-12 xl:left-20 flex items-center z-10 pointer-events-none">
+                <div className="max-w-lg md:max-w-xl lg:max-w-2xl text-left px-6 -translate-x-6 md:-translate-x-8 lg:-translate-x-12">
+                    <h1 className="text-white text-4xl md:text-6xl font-light mb-6 drop-shadow-2xl fade-in-up">
+                        <span className="block text-5xl md:text-7xl font-extralight italic" style={{ color: '#37383C' }}>Ishikawa</span>
+                        <span className="block text-5xl md:text-7xl font-extralight italic style={{ color: '#37383C' }} transform translate-x-2 md:translate-x-4">Life</span>
+                    </h1>
+                    <p className="text-white text-lg md:text-xl mb-8 drop-shadow-lg leading-relaxed fade-in-up-delay">
+                        石川でのくらし
+                    </p>
+                </div>
+            </div>
+
             <div className="fixed z-50 top-4 right-4 md:top-8 md:right-8">
                 <button
                     onClick={toggleMenu}
