@@ -171,3 +171,56 @@ export const posts = ${JSON.stringify(currentPosts, null, 4).replace(/"([^"]+)":
         return NextResponse.json({ error: 'Failed to update post' }, { status: 500 });
     }
 }
+
+// DELETEリクエスト: 投稿を削除
+export async function DELETE(request) {
+    // 認証チェック
+    if (!checkAuthentication()) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    try {
+        const { searchParams } = new URL(request.url);
+        const postId = searchParams.get('id');
+
+        if (!postId) {
+            return NextResponse.json({ error: 'Post ID is required' }, { status: 400 });
+        }
+
+        const postsPath = path.join(process.cwd(), 'data', 'posts.js');
+        const postsContent = fs.readFileSync(postsPath, 'utf8');
+
+        // 現在の posts 配列を取得
+        const postsMatch = postsContent.match(/export const posts = (\[[\s\S]*?\]);/);
+        if (!postsMatch) {
+            return NextResponse.json({ error: 'Posts data not found' }, { status: 500 });
+        }
+
+        const currentPosts = new Function('return ' + postsMatch[1])();
+
+        // 投稿を見つけて削除
+        const postIndex = currentPosts.findIndex(post => post.id === postId);
+        if (postIndex === -1) {
+            return NextResponse.json({ error: 'Post not found' }, { status: 404 });
+        }
+
+        // 投稿を配列から削除
+        const deletedPost = currentPosts.splice(postIndex, 1)[0];
+
+        // 新しい posts.js ファイルの内容を生成
+        const newPostsContent = `// ブログ投稿データ
+export const posts = ${JSON.stringify(currentPosts, null, 4).replace(/"([^"]+)":/g, '$1:')};
+`;
+
+        fs.writeFileSync(postsPath, newPostsContent, 'utf8');
+
+        return NextResponse.json({
+            message: 'Post deleted successfully',
+            deletedPost: deletedPost
+        });
+
+    } catch (error) {
+        console.error('Error deleting post:', error);
+        return NextResponse.json({ error: 'Failed to delete post' }, { status: 500 });
+    }
+}

@@ -10,6 +10,9 @@ export default function AboutUsSection({ showToTop = false, hideWhenHeroVisible 
     const [mounted, setMounted] = useState(false);
     const [visibleItems, setVisibleItems] = useState(new Set());
     const observerRef = useRef(null);
+    const sliderRef = useRef(null);
+    const [touchStart, setTouchStart] = useState(null);
+    const [touchEnd, setTouchEnd] = useState(null);
 
     useEffect(() => {
         const observer = new IntersectionObserver(
@@ -88,7 +91,19 @@ export default function AboutUsSection({ showToTop = false, hideWhenHeroVisible 
             id: 'husband',
             name: '夫',
             image: '/images/profiles/husband.jpg',
-            description: '週末はフットサルで体を動かし、平日の夜は読書の時間を楽しんでいます。最近は写真撮影にも興味を持ち、日常の風景や妻との思い出を記録することが新しい趣味になっています。'
+            description: '週末はフットサルで体を動かし、平日の夜は読書の時間を楽しんでいます。最近は写真撮影にも興味を持ち、日常の風景や妻との思い出を記録することが新しい趣味になっています。',
+            hasDetails: true,
+            detailedInfo: {
+                introduction: 'エンジニアとして働きながら、石川県での生活を満喫しています。技術への探求心と、自然豊かな環境での暮らしのバランスを大切にしています。',
+                skills: [
+                    { category: 'プログラミング', items: ['JavaScript', 'React', 'Node.js', 'Python'] },
+                    { category: 'デザイン', items: ['Figma', 'Adobe Photoshop', 'UI/UX設計'] },
+                    { category: '写真撮影', items: ['風景写真', 'ポートレート', '日常スナップ'] },
+                    { category: 'スポーツ', items: ['フットサル', 'ランニング', 'サイクリング'] }
+                ],
+                hobbies: ['読書（技術書・小説）', '写真撮影', 'コーヒー豆の焙煎', '散歩', 'ブログ執筆'],
+                philosophy: '技術と自然、都市と田舎、仕事と趣味。一見相反するものの調和を見つけることで、より豊かな人生を築けると信じています。'
+            }
         }
     ];
 
@@ -183,12 +198,12 @@ export default function AboutUsSection({ showToTop = false, hideWhenHeroVisible 
                                     {/* Left: text */}
                                     <div className="space-y-6">
                                         <div className="name-text">
-                                            <h3 className='text-[26px] font-medium tracking-[0.18em] text-[rgba(63,63,70,1)] pt-[10px] pb-[24px] mb-[32px] font-yaku'>
+                                            <h3 className='text-[18px] sm:text-[20px] md:text-[26px] font-medium tracking-[0.18em] text-[rgba(63,63,70,1)] pt-[10px] pb-[24px] mb-[32px] font-yaku'>
                                                 {profile.name}
                                             </h3>
                                         </div>
                                         <p
-                                            className="text-[14px] font-light leading-[2] tracking-[0.12em] text-[#6B6B6B] max-w-[462px] mb-[64px] text-justify"
+                                            className="text-[14px] font-light leading-[2] tracking-[0.12em] text-[#6B6B6B] max-w-[462px] mb-[32px] text-justify"
                                             style={{
                                                 fontFamily: `'YakuHanJP_Narrow', 'Zen Kaku Gothic New', sans-serif`,
                                                 letterSpacing: '0.13em'
@@ -196,6 +211,33 @@ export default function AboutUsSection({ showToTop = false, hideWhenHeroVisible 
                                         >
                                             {profile.description}
                                         </p>
+                                        
+                                        {/* 夫のプロフィールの場合のみ「詳しく見る」ボタンを表示 */}
+                                        {profile.hasDetails && (
+                                            <a
+                                                href="/site/profile/husband"
+                                                className="group inline-flex items-center gap-4 focus:outline-none"
+                                                aria-label="詳しくみる"
+                                            >
+                                                {/* 円ボタン */}
+                                                <span className="grid place-items-center w-16 h-16 rounded-full border border-[#84B5C5] bg-zinc-100/60 text-[#84B5C5] shadow-sm transition-all
+                                                    group-hover:border-zinc-600 group-hover:bg-zinc-200/80 group-focus-visible:ring-1 group-focus-visible:ring-[#84B5C5]/50">
+                                                    <svg
+                                                        width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                                        className="transition-transform duration-200 group-hover:translate-x-1"
+                                                    >
+                                                        <path d="M6 12h12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                                                        <path d="M18 9l4 3-4 3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                                                    </svg>
+                                                </span>
+
+                                                {/* テキスト */}
+                                                <span className="text-[#84B5C5] text-base tracking-wide font-medium py-2
+                                                    group-hover:underline underline-offset-4 decoration-[#84B5C5] transition-colors">
+                                                    詳しくみる
+                                                </span>
+                                            </a>
+                                        )}
                                     </div>
 
                                     {/* Right: photo card */}

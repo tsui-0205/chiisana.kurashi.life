@@ -6,6 +6,7 @@ import AboutUsSection from "../components/sections/home/AboutUsSection";
 import WorksSection from "../components/sections/home/WorksSection";
 import ContactFooter from "../components/sections/home/ContactFooter";
 import HeroSection from "../components/sections/home/HeroSection";
+import IshikawaMap from "../components/sections/home/IshikawaMap";
 
 export default function Home() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -24,7 +25,7 @@ export default function Home() {
         .font-body { font-family: 'Noto Sans JP', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, 'Apple Color Emoji', 'Segoe UI Emoji'; }
         .font-hand { font-family: 'Yomogi', 'Noto Sans JP', sans-serif; letter-spacing: .02em; }
         .vertical-rl { writing-mode: vertical-rl; text-orientation: upright; }
-        .soft-spot { filter: blur(28px); opacity: .35; }
+        .soft-spot { opacity: .35; }
         @keyframes fadeInImage {
           0% { opacity: 0; transform: scale(1.05); }
           100% { opacity: 1; transform: scale(1); }
@@ -42,6 +43,10 @@ export default function Home() {
             <div className="relative z-40 bg-white">
                 {/* わたしたちのこと */}
                 <AboutUsSection showToTop={hasMainPhoto === false} hideWhenHeroVisible={isHeroVisible} />
+                {/* 石川県の思い出マップ
+                <div className="bg-white">
+                    <IshikawaMap />
+                </div> */}
                 {/* 日々のこと */}
                 <WorksSection showToTop={hasMainPhoto === false} hideWhenHeroVisible={isHeroVisible} />
                 {/* インスタグラムフィード */}

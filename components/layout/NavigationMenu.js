@@ -32,12 +32,14 @@ export default function NavigationMenu({ isOpen, onClose }) {
     };
 
     const menuItems = [
-        { href: "/", label: "ホーム", type: "internal" },
-        { href: "#about", label: "わたしたちのこと", type: "anchor" },
-        { href: "#blog", label: "日々のこと", type: "anchor" },
+        { href: "/", label: "ホーム", en: "home", type: "internal" },
+        { href: "#about", label: "わたしたちのこと", en: "about", type: "anchor" },
+        { href: "#blog", label: "日々のこと", en: "daily", type: "anchor" },
+        { href: "/site/blog", label: "ブログ一覧", en: "posts", type: "internal" },
         {
             href: "https://www.instagram.com/chiisana.kurashi.life?igsh=MXVpeDk4YjRwbzZrag==",
             label: "Instagram",
+            en: "instagram",
             type: "external",
         },
         // 認証されているユーザーのみに管理メニューを表示
@@ -81,14 +83,33 @@ export default function NavigationMenu({ isOpen, onClose }) {
                         )}
                         <Wrapper
                             {...wrapperProps}
-                            className={`${adminClass} data-[active=true]:text-zinc-900`}
+                            className={`${adminClass} data-[active=true]:text-zinc-900 flex flex-col items-center md:items-start`}
                             onClick={onClose}
                             data-active={active}
                             style={{ cursor: 'pointer' }}
                         >
-                            {item.label}
-                            {item.admin && !mobile && (
-                                <span className="ml-2 text-xs">✏️</span>
+                            <span
+                                className={`jp-label ${mobile ? 'text-base font-medium text-zinc-900' : ''} self-center`}
+                                style={{ fontFamily: `"YakuHanJP_Narrow", "Zen Kaku Gothic New", sans-serif`, fontSize: '13.44px', color: '#6b6b6b', letterSpacing: '0.13em' }}
+                            >
+                                {item.label}
+                                {item.admin && !mobile && (
+                                    <span className="ml-2 text-xs">✏️</span>
+                                )}
+                            </span>
+                            {item.en && (
+                                <span
+                                    className="en-label mt-1 self-center"
+                                    style={{
+                                        color: '#84B5C5',
+                                        fontFamily: `"YakuHanJP_Narrow", "Zen Kaku Gothic New", sans-serif`,
+                                        fontWeight: 300,
+                                        letterSpacing: '0.15em',
+                                        fontSize: '11px'
+                                    }}
+                                >
+                                    {item.en}
+                                </span>
                             )}
                         </Wrapper>
                     </li>
@@ -103,18 +124,34 @@ export default function NavigationMenu({ isOpen, onClose }) {
             <div className={`md:hidden fixed inset-0 z-50 transition-opacity ${isOpen ? 'visible opacity-100' : 'invisible opacity-0'}`} aria-hidden={!isOpen}>
                 <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
                 <div className={`relative h-full overflow-auto bg-white/95 p-6 flex flex-col transform origin-top transition-transform duration-300 ease-out ${isOpen ? 'translate-y-0' : '-translate-y-6'}`}>
-                    <div className="flex items-center justify-end">
-                        <button onClick={onClose} className="p-2 rounded-md text-zinc-700" aria-label="閉じるメニュー">✕</button>
+                    <div className="flex items-center justify-end mt-4">
+                        <button
+                            onClick={onClose}
+                            className="w-8 h-8 relative inline-flex items-center justify-center text-zinc-700 md:hidden overflow-visible"
+                            aria-label="閉じるメニュー"
+                        >
+                            <span className="absolute inset-0 pointer-events-none before:absolute before:left-1/2 before:top-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:w-4 before:border-t-2 before:border-[#b0cdd8] before:rotate-45 after:absolute after:left-1/2 after:top-1/2 after:-translate-x-1/2 after:-translate-y-1/2 after:w-4 after:border-t-2 after:border-[#b0cdd8] after:-rotate-45" />
+                        </button>
                     </div>
                     <nav className="mt-8">{renderList(true)}</nav>
                 </div>
             </div>
 
             {/* Desktop: compact fixed panel at top-right when open; hidden when closed */}
+            {/* Desktop: right top fixed menu when open */}
             <div className="hidden md:block">
                 {isOpen && (
-                    <div className="fixed top-16 right-8 z-40 w-64 bg-white/95 backdrop-blur-sm rounded-2xl shadow-xl p-4 transition-transform duration-200">
-                        <nav>{renderList(false)}</nav>
+                    <div className="fixed top-0 right-0 z-50 w-72 max-w-[90%] bg-white/95 backdrop-blur-sm shadow-lg p-4 transition-transform duration-300 ease-out rounded-bl-3xl rounded-tl-3xl rounded-b-2xl">
+                        <div className="flex items-center justify-end mt-4">
+                            <button
+                                onClick={onClose}
+                                className="w-8 h-8 relative hidden md:inline-flex items-center justify-center text-zinc-700 overflow-visible"
+                                aria-label="閉じるメニュー"
+                            >
+                                <span className="absolute inset-0 pointer-events-none before:absolute before:left-1/2 before:top-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:w-4 before:border-t-2 before:border-[#b0cdd8] before:rotate-45 after:absolute after:left-1/2 after:top-1/2 after:-translate-x-1/2 after:-translate-y-1/2 after:w-4 after:border-t-2 after:border-[#b0cdd8] after:-rotate-45" />
+                            </button>
+                        </div>
+                        <nav className="mt-4">{renderList(false)}</nav>
                     </div>
                 )}
             </div>

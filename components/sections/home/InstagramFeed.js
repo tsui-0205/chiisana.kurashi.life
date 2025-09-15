@@ -165,8 +165,10 @@ export default function InstagramFeed({ showToTop = false, hideWhenHeroVisible =
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-zinc-200/80 text-zinc-800 hover:border-zinc-900/40 hover:bg-zinc-900/5 transition-colors"
                     >
-                        <svg className="w-5 h-5 opacity-80" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
-                            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 6c-3.403 0-6.162 2.759-6.162 6.162S8.597 18.325 12 18.325s6.162-2.759 6.162-6.163C18.162 8.759 15.403 6 12 6zm6.406-2.682a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.88z" />
+                        <svg className="w-6 h-6 opacity-90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                                  <rect x="3" y="3" width="18" height="18" rx="5" />
+                                  <circle cx="12" cy="12" r="3" />
+                                  <circle cx="17.5" cy="6.5" r="0.9" fill="currentColor" stroke="none" />
                         </svg>
                         <span className="font-medium tracking-wide">@chiisana.kurashi.life</span>
                     </a>
@@ -205,8 +207,11 @@ export default function InstagramFeed({ showToTop = false, hideWhenHeroVisible =
 
                                 {/* ホバー時オーバーレイ */}
                                 <figcaption className="pointer-events-none absolute inset-0 grid place-items-center bg-black/0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-hover:bg-black/25">
-                                    <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24" aria-hidden>
-                                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 6c-3.403 0-6.162 2.759-6.162 6.162S8.597 18.325 12 18.325s6.162-2.759 6.162-6.163C18.162 8.759 15.403 6 12 6zm6.406-2.682a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.88z" />
+                                    <svg className="w-10 h-10 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                                        <rect x="3" y="3" width="18" height="18" rx="5" />
+                                        {/* 中心を塗りつぶしてホバーでインパクトを出す */}
+                                        <circle cx="12" cy="12" r="3" fill="currentColor" stroke="none" />
+                                        <circle cx="17.5" cy="6.5" r="0.95" fill="currentColor" stroke="none" />
                                     </svg>
                                 </figcaption>
 

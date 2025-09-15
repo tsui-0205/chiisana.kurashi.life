@@ -1,32 +1,20 @@
 // ブログ投稿データ
 export const posts = [
     {
-        id: "あいう",
-        title: "あいう",
-        date: "2025-09-06",
-        cover: "/images/blog/article/20250906/1757143306602_toTop.png",
-        href: "/site/blog/あいう",
-        content: "さしす",
-        excerpt: "かきく",
-        category: "料理",
-        tags: "旅行、おでかけ",
-        sections: []
-    },
-    {
-        id: "複数写真の場合",
-        title: "複数写真の場合",
-        date: "2025-09-06",
-        cover: "/images/blog/article/20250906/1757142707158_main.jpg",
-        href: "/site/blog/複数写真の場合",
-        content: "あああ",
-        excerpt: "複数の写真を使った記事のサンプルです。",
-        category: "日常",
-        tags: "写真, サンプル, テスト",
+        id: "忘れられないお宿",
+        title: "忘れられないお宿",
+        date: "2024-11-25",
+        cover: "/images/blog/article/20250912/1757685763989_awaji.jpg",
+        href: "/site/blog/忘れられないお宿",
+        content: "私と夫は旅行が好き。\n実は2人で“ダーツの旅”をしているんです＾＾\n\n壁に大きな地図を貼って、ダーツを投げて当たった場所へ行く。\n行き先が決まる瞬間のドキドキも、旅の楽しみのひとつ。\n\nそして今回当たったのは―― 淡路島。\n\nもちろん観光もとても楽しかったのですが、\n何より心に残ったのは、泊まったホテルでの時間でした。\n\n部屋から見える海の眺め、心地よく流れる空気と音楽。\nそのすべてが心をほどき、じんわりと「幸せだなあ」と感じさせてくれました。\n",
+        excerpt: "",
+        category: "思い出",
+        tags: "旅行, 淡路島",
         sections: [
             {
-                title: "写真2",
-                content: "uturukana ",
-                image: "/images/blog/article/20250906/1757142749676_toTop.png"
+                title: "",
+                content: "夜は焚き火の炎を囲みながら静かな時間を過ごし、\n朝は地元の食材をふんだんに使ったごはんをいただく。\nどれも忘れられないひとときです。\n\nまた必ず訪れたい、特別な思い出の場所になりました。\n\n▶︎泊まったお宿：WORM",
+                image: "/images/blog/article/20250912/1757685801082_awaji2.jpg"
             }
         ]
     }

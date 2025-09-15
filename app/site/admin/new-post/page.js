@@ -14,8 +14,8 @@ export default function NewPost() {
     cover: "",
     excerpt: "",
     category: "日常",
-    tags: [],  // 配列として管理
-    sections: [], // 複数の画像セクション
+    tags: [],  
+    sections: [], 
     publishDate: new Date().toISOString().split('T')[0]
   });
 

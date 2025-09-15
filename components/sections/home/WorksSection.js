@@ -183,7 +183,7 @@ export default function WorksSection({ showToTop = false, hideWhenHeroVisible = 
                             <div className={index % 2 === 1 ? 'md:order-1' : ''}>
                                 <p className="mb-2 text-sm tracking-widest text-sky-600 font-medium">#{post.category}</p>
                                 <p className="mb-2 text-sm text-zinc-400">{post.date}</p>
-                                <h3 className="font-yaku text-[26px] font-medium tracking-[0.18em] text-[rgba(63,63,70,1)] pt-[10px] pb-[24px] mb-[32px]">
+                                <h3 className="font-yaku text-[18px] sm:text-[20px] md:text-[26px] font-medium tracking-[0.18em] text-[rgba(63,63,70,1)] pt-[10px] pb-[24px] mb-[32px]">
                                     {post.title}
                                 </h3>
                                 <>

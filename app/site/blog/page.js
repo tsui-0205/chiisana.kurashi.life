@@ -157,6 +157,7 @@ export default function BlogPage() {
 
   // Menu state
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -169,6 +170,21 @@ export default function BlogPage() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isMenuOpen]);
+
+  // Check authentication status
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      try {
+        const response = await fetch('/api/auth/me');
+        const data = await response.json();
+        setIsAuthenticated(data.authenticated);
+      } catch (error) {
+        console.error('Auth check error:', error);
+        setIsAuthenticated(false);
+      }
+    };
+    checkAuthStatus();
+  }, []);
 
   const [q, setQ] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("すべて");
@@ -207,13 +223,12 @@ export default function BlogPage() {
       <div className="fixed top-6 right-6 z-50 menu-container">
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="w-12 h-12 bg-black/80 backdrop-blur rounded-full flex items-center justify-center group hover:bg-black transition-colors"
+          className="p-2 w-14 h-10 flex flex-col justify-center items-center space-y-1.5 transition-all duration-300 group cursor-pointer"
+          aria-label="メニューを開く"
         >
-          <div className="flex flex-col gap-1">
-            <span className={`w-5 h-0.5 bg-white transition-transform origin-center ${isMenuOpen ? 'rotate-45 translate-y-1.5' : ''}`}></span>
-            <span className={`w-5 h-0.5 bg-white transition-opacity ${isMenuOpen ? 'opacity-0' : ''}`}></span>
-            <span className={`w-5 h-0.5 bg-white transition-transform origin-center ${isMenuOpen ? '-rotate-45 -translate-y-1.5' : ''}`}></span>
-          </div>
+          <span className={`w-10 h-0.5 bg-black transition-all duration-300 ${isMenuOpen ? 'rotate-45 translate-y-2 bg-zinc-700' : ''}`}></span>
+          <span className={`w-10 h-0.5 bg-black transition-all duration-300 ${isMenuOpen ? 'opacity-0' : ''}`}></span>
+          <span className={`w-10 h-0.5 bg-black transition-all duration-300 ${isMenuOpen ? '-rotate-45 -translate-y-2 bg-zinc-700' : ''}`}></span>
         </button>
       </div>
 
@@ -222,35 +237,35 @@ export default function BlogPage() {
         <>
           {/* Mobile: Full-screen overlay */}
           <div className="md:hidden fixed inset-0 z-50 transition-opacity menu-container">
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => setIsMenuOpen(false)} />
-            <div className="relative h-full overflow-auto bg-zinc-900/95 backdrop-blur p-8 flex flex-col transform origin-top transition-transform duration-300 ease-out menu-container">
-              <div className="flex items-center justify-end">
-                <button onClick={() => setIsMenuOpen(false)} className="p-3 rounded-full text-zinc-300 hover:text-white hover:bg-zinc-800 transition-all duration-200" aria-label="閉じるメニュー">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setIsMenuOpen(false)} />
+            <div className="relative h-full overflow-auto bg-white/95 p-6 flex flex-col transform origin-top transition-transform duration-300 ease-out menu-container">
+              <div className="flex items-center justify-end mt-4">
+                <button onClick={() => setIsMenuOpen(false)} className="w-10 h-10 relative inline-flex items-center justify-center text-zinc-700 md:hidden overflow-visible" aria-label="閉じるメニュー">
+                  <span className="absolute inset-0 pointer-events-none before:absolute before:left-1/2 before:top-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:w-6 before:border-t-2 before:border-[#b0cdd8] before:rotate-45 after:absolute after:left-1/2 after:top-1/2 after:-translate-x-1/2 after:-translate-y-1/2 after:w-6 after:border-t-2 after:border-[#b0cdd8] after:-rotate-45" />
                 </button>
               </div>
-              <nav className="mt-12 flex-1 flex flex-col justify-center">
+              <nav className="mt-8 flex-1 flex flex-col justify-center">
                 <ul className="space-y-8 text-xl">
                   <li>
-                    <a
+                    <Link
                       href="/"
-                      className="block text-zinc-200 hover:text-white transition-all duration-300 cursor-pointer py-4 px-6 text-center relative group"
+                      className="block transition-all duration-300 cursor-pointer py-4 px-6 text-center relative group"
                       onClick={() => setIsMenuOpen(false)}
                     >
-                      <span className="relative z-10">ホーム</span>
-                      <div className="absolute inset-0 bg-gradient-to-r from-zinc-800 to-zinc-700 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    </a>
+                      <span className="relative z-10 block" style={{ fontFamily: `"YakuHanJP_Narrow", "Zen Kaku Gothic New", sans-serif`, fontSize: '13.44px', color: '#6b6b6b', letterSpacing: '0.13em' }}>ホーム</span>
+                      <span className="block mt-1 text-xs text-[#84B5C5]" style={{ fontFamily: `"YakuHanJP_Narrow", "Zen Kaku Gothic New", sans-serif`, fontWeight: 300, letterSpacing: '0.15em', fontSize: '11px' }}>home</span>
+                      <div className="absolute inset-0 bg-gradient-to-r from-zinc-100 to-zinc-50 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" aria-hidden />
+                    </Link>
                   </li>
                   <li>
                     <a
                       href="#articles"
-                      className="block text-zinc-200 hover:text-white transition-all duration-300 cursor-pointer py-4 px-6 text-center relative group"
+                      className="block transition-all duration-300 cursor-pointer py-4 px-6 text-center relative group"
                       onClick={() => setIsMenuOpen(false)}
                     >
-                      <span className="relative z-10">記事一覧</span>
-                      <div className="absolute inset-0 bg-gradient-to-r from-zinc-800 to-zinc-700 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <span className="relative z-10 block" style={{ fontFamily: `"YakuHanJP_Narrow", "Zen Kaku Gothic New", sans-serif`, fontSize: '13.44px', color: '#6b6b6b', letterSpacing: '0.13em' }}>記事一覧</span>
+                      <span className="block mt-1 text-xs text-[#84B5C5]" style={{ fontFamily: `"YakuHanJP_Narrow", "Zen Kaku Gothic New", sans-serif`, fontWeight: 300, letterSpacing: '0.15em', fontSize: '11px' }}>articles</span>
+                      <div className="absolute inset-0 bg-gradient-to-r from-zinc-100 to-zinc-50 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" aria-hidden />
                     </a>
                   </li>
                   <li>
@@ -258,56 +273,91 @@ export default function BlogPage() {
                       href="https://www.instagram.com/chiisana.kurashi.life"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="block text-zinc-200 hover:text-white transition-all duration-300 cursor-pointer py-4 px-6 text-center relative group"
+                      className="block transition-all duration-300 cursor-pointer py-4 px-6 text-center relative group"
                       onClick={() => setIsMenuOpen(false)}
                     >
-                      <span className="relative z-10">Instagram</span>
-                      <div className="absolute inset-0 bg-gradient-to-r from-zinc-800 to-zinc-700 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <span className="relative z-10 block" style={{ fontFamily: `"YakuHanJP_Narrow", "Zen Kaku Gothic New", sans-serif`, fontSize: '13.44px', color: '#6b6b6b', letterSpacing: '0.13em' }}>Instagram</span>
+                      <span className="block mt-1 text-xs text-[#84B5C5]" style={{ fontFamily: `"YakuHanJP_Narrow", "Zen Kaku Gothic New", sans-serif`, fontWeight: 300, letterSpacing: '0.15em', fontSize: '11px' }}>instagram</span>
+                      <div className="absolute inset-0 bg-gradient-to-r from-zinc-100 to-zinc-50 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" aria-hidden />
                     </a>
                   </li>
+                  {isAuthenticated && (
+                    <li>
+                      <Link
+                        href="/site/admin"
+                        className="block transition-all duration-300 cursor-pointer py-4 px-6 text-center relative group"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        <span className="relative z-10 block" style={{ fontFamily: `"YakuHanJP_Narrow", "Zen Kaku Gothic New", sans-serif`, fontSize: '13.44px', color: '#6b6b6b', letterSpacing: '0.13em' }}>管理</span>
+                        <span className="block mt-1 text-xs text-[#84B5C5]" style={{ fontFamily: `"YakuHanJP_Narrow", "Zen Kaku Gothic New", sans-serif`, fontWeight: 300, letterSpacing: '0.15em', fontSize: '11px' }}>Admin</span>
+                        <div className="absolute inset-0 bg-gradient-to-r from-rose-50 to-rose-100 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" aria-hidden />
+                      </Link>
+                    </li>
+                  )}
                 </ul>
               </nav>
             </div>
           </div>
 
           {/* Desktop: Compact panel */}
-          <div className="hidden md:block fixed top-20 right-6 z-50 w-56 bg-zinc-900/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-zinc-700/50 menu-container">
-            <nav className="p-2">
-              <ul className="space-y-1">
-                <li>
-                  <a
-                    href="/"
-                    className="block px-4 py-3 text-zinc-300 hover:text-white hover:bg-zinc-800 rounded-xl transition-all duration-200 relative group"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <span className="relative z-10">ホーム</span>
-                    <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-0 bg-white rounded-full group-hover:h-6 transition-all duration-300"></div>
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#articles"
-                    className="block px-4 py-3 text-zinc-300 hover:text-white hover:bg-zinc-800 rounded-xl transition-all duration-200 relative group"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <span className="relative z-10">記事一覧</span>
-                    <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-0 bg-white rounded-full group-hover:h-6 transition-all duration-300"></div>
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="https://www.instagram.com/chiisana.kurashi.life"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block px-4 py-3 text-zinc-300 hover:text-white hover:bg-zinc-800 rounded-xl transition-all duration-200 relative group"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <span className="relative z-10">Instagram</span>
-                    <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-0 bg-white rounded-full group-hover:h-6 transition-all duration-300"></div>
-                  </a>
-                </li>
-              </ul>
-            </nav>
+          <div className="hidden md:block">
+            {isMenuOpen && (
+              <div className="fixed top-0 right-0 z-50 w-72 max-w-[90%] bg-white/95 backdrop-blur-sm shadow-lg p-4 transition-transform duration-300 ease-out rounded-bl-3xl rounded-tl-3xl rounded-b-2xl menu-container">
+                <div className="flex items-center justify-end mt-4">
+                  <button onClick={() => setIsMenuOpen(false)} className="w-8 h-8 relative hidden md:inline-flex items-center justify-center text-zinc-700 overflow-visible" aria-label="閉じるメニュー">
+                    <span className="absolute inset-0 pointer-events-none before:absolute before:left-1/2 before:top-1/2 before:-translate-x-1/2 before:-translate-y-1/2 before:w-4 before:border-t-2 before:border-[#b0cdd8] before:rotate-45 after:absolute after:left-1/2 after:top-1/2 after:-translate-x-1/2 after:-translate-y-1/2 after:w-4 after:border-t-2 after:border-[#b0cdd8] after:-rotate-45" />
+                  </button>
+                </div>
+                <nav className="mt-4">
+                  <ul className="space-y-2">
+                    <li className="group text-center">
+                      <Link
+                        href="/"
+                        className="block text-zinc-700 hover:text-zinc-900 transition-colors cursor-pointer py-3 px-4 rounded-lg hover:bg-zinc-50 relative"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        <span className="relative z-10 block text-base font-medium" style={{ fontFamily: `"YakuHanJP_Narrow", "Zen Kaku Gothic New", sans-serif`, fontSize: '13.44px', color: '#6b6b6b', letterSpacing: '0.13em' }}>ホーム</span>
+                        <span className="block text-xs text-[#84B5C5] mt-1" style={{ fontFamily: `"YakuHanJP_Narrow", "Zen Kaku Gothic New", sans-serif`, fontWeight: 300, letterSpacing: '0.15em', fontSize: '11px' }}>home</span>
+                      </Link>
+                    </li>
+                    <li className="group text-center">
+                      <a
+                        href="#articles"
+                        className="block text-zinc-700 hover:text-zinc-900 transition-colors cursor-pointer py-3 px-4 rounded-lg hover:bg-zinc-50 relative"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        <span className="relative z-10 block text-base font-medium" style={{ fontFamily: `"YakuHanJP_Narrow", "Zen Kaku Gothic New", sans-serif`, fontSize: '13.44px', color: '#6b6b6b', letterSpacing: '0.13em' }}>記事一覧</span>
+                        <span className="block text-xs text-[#84B5C5] mt-1" style={{ fontFamily: `"YakuHanJP_Narrow", "Zen Kaku Gothic New", sans-serif`, fontWeight: 300, letterSpacing: '0.15em', fontSize: '11px' }}>articles</span>
+                      </a>
+                    </li>
+                    <li className="group text-center">
+                      <a
+                        href="https://www.instagram.com/chiisana.kurashi.life"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block text-zinc-700 hover:text-zinc-900 transition-colors cursor-pointer py-3 px-4 rounded-lg hover:bg-zinc-50 relative"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        <span className="relative z-10 block text-base font-medium" style={{ fontFamily: `"YakuHanJP_Narrow", "Zen Kaku Gothic New", sans-serif`, fontSize: '13.44px', color: '#6b6b6b', letterSpacing: '0.13em' }}>Instagram</span>
+                        <span className="block text-xs text-[#84B5C5] mt-1" style={{ fontFamily: `"YakuHanJP_Narrow", "Zen Kaku Gothic New", sans-serif`, fontWeight: 300, letterSpacing: '0.15em', fontSize: '11px' }}>instagram</span>
+                      </a>
+                    </li>
+                    {isAuthenticated && (
+                      <li className="group text-center">
+                        <Link
+                          href="/site/admin"
+                          className="block text-rose-600 hover:text-rose-700 transition-colors cursor-pointer py-3 px-4 rounded-lg hover:bg-rose-50 relative"
+                          onClick={() => setIsMenuOpen(false)}
+                        >
+                          <span className="relative z-10 block text-base font-medium" style={{ fontFamily: `"YakuHanJP_Narrow", "Zen Kaku Gothic New", sans-serif`, fontSize: '13.44px', color: '#6b6b6b', letterSpacing: '0.13em' }}>管理</span>
+                          <span className="block text-xs text-[#84B5C5] mt-1" style={{ fontFamily: `"YakuHanJP_Narrow", "Zen Kaku Gothic New", sans-serif`, fontWeight: 300, letterSpacing: '0.15em', fontSize: '11px' }}>Admin</span>
+                        </Link>
+                      </li>
+                    )}
+                  </ul>
+                </nav>
+              </div>
+            )}
           </div>
         </>
       )}
@@ -348,8 +398,8 @@ export default function BlogPage() {
                 key={category}
                 onClick={() => setSelectedCategory(category)}
                 className={`px-6 py-2.5 text-sm font-light tracking-wider transition-all duration-300 border ${selectedCategory === category
-                    ? 'bg-zinc-900 text-white border-zinc-900 shadow-lg'
-                    : 'bg-white/90 text-zinc-700 border-zinc-200 hover:bg-zinc-50 hover:border-zinc-300 hover:text-zinc-900'
+                  ? 'bg-zinc-900 text-white border-zinc-900 shadow-lg'
+                  : 'bg-white/90 text-zinc-700 border-zinc-200 hover:bg-zinc-50 hover:border-zinc-300 hover:text-zinc-900'
                   }`}
                 style={{ letterSpacing: '0.1em' }}
               >

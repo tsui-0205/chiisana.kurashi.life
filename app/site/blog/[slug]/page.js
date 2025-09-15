@@ -125,7 +125,7 @@ export default function BlogPostSimple() {
           {post.tags && (
             <div className="flex flex-wrap gap-2 justify-center mb-8">
               {post.tags.split(',').map((tag, index) => (
-                <span key={index} className="px-3 py-1 bg-gray-100 text-gray-600 rounded-md text-sm">
+                <span key={index} className="px-3 py-1 bg-gray-200 text-gray-700 rounded-md text-sm font-medium">
                   #{tag.trim()}
                 </span>
               ))}
@@ -134,14 +134,14 @@ export default function BlogPostSimple() {
 
           {/* 大きな画像（白フチ＆影） */}
           <div className="mb-10 flex justify-center">
-            <div className="bg-white p-3 shadow-lg max-w-full">
+            <div className="bg-white p-1 shadow-lg max-w-full overflow-hidden">
               <img
                 src={post.cover || "/images/blog/default.jpg"}
                 alt={post.title}
                 className="w-full h-auto max-w-3xl mx-auto block"
                 style={{
                   aspectRatio: "4/3",
-                  objectFit: "contain",
+                  objectFit: "cover",
                 }}
               />
             </div>
@@ -177,14 +177,14 @@ export default function BlogPostSimple() {
                   {/* セクション画像 */}
                   {section.image && (
                     <div className="mb-6 flex justify-center">
-                      <div className="bg-white p-3 shadow-lg max-w-full">
+                      <div className="bg-white p-1 shadow-lg max-w-full overflow-hidden">
                         <img
                           src={section.image}
                           alt={section.title || `セクション ${index + 1}`}
                           className="w-full h-auto max-w-3xl mx-auto block"
                           style={{
                             aspectRatio: "4/3",
-                            objectFit: "contain",
+                            objectFit: "cover",
                           }}
                         />
                       </div>
