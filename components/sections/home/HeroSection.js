@@ -39,6 +39,15 @@ export default function HeroSection({ isMenuOpen, setIsMenuOpen, onLoaded, onHer
 
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
+    // wave animation timing control
+    const waveStagger = 0.15; // seconds between each character start
+    const waveDuration = 1.5; // must match CSS animation duration
+    const firstText = "きまっし";
+    const secondText = "みまっし";
+    // offset so second line starts after the last char of first line finishes
+    const firstLastDelay = (Math.max(0, firstText.length - 1) * waveStagger);
+    const secondOffset = firstLastDelay + waveDuration + 0.15; // small gap after first finishes
+
     return (
         <section id="hero" ref={sectionRef} className="relative h-screen w-full overflow-hidden">
             <style>{`
@@ -138,7 +147,7 @@ export default function HeroSection({ isMenuOpen, setIsMenuOpen, onLoaded, onHer
             animation: rotateText 20s linear infinite; 
             transform-origin: 100px 100px; 
         }
-    .bottom-right-text .circle-text { fill: #FFD54F; font-weight: 900; font-family: 'Zen Maru Gothic', 'Noto Sans JP', sans-serif; font-size: 28px; letter-spacing: 0.2em; }
+                    .bottom-right-text .circle-text { fill: #FFD54F; font-weight: 900; font-family: "YakuHanJP_Narrow", "Zen Kaku Gothic New", sans-serif; font-size: 28px; letter-spacing: 0.2em; }
         .bottom-right-text .circle-bg { fill: rgba(255,213,79,0.06); }
         @media (max-width: 640px) {
             .bottom-right-text { width: 120px; height: 120px; right: 3%; bottom: 4%; }
@@ -146,6 +155,17 @@ export default function HeroSection({ isMenuOpen, setIsMenuOpen, onLoaded, onHer
             .bottom-right-text .rotating-text { transform-origin: 60px 60px; }
             .bottom-right-text .circle-text { font-size: 22px; font-weight: 900; letter-spacing: 0.15em; }
         }
+                    @keyframes wave {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+        }
+
+        .wave-text span {
+            display: inline-block;
+            /* play once and keep end state (forwards) so it doesn't loop continuously */
+            animation: wave 1.5s ease-in-out 1 forwards;
+        }
+
       `}</style>
             <div className="fixed inset-0 w-full h-full z-0">
                 <img
@@ -158,10 +178,19 @@ export default function HeroSection({ isMenuOpen, setIsMenuOpen, onLoaded, onHer
 
             {/* 指定のテキストオーバーレイ（写真上に表示） */}
             <div className="slash left z-20" aria-hidden></div>
-            <div className="center-text z-20 text-6xl font-bold tracking-wider">
-                <div>きまっし</div>
-                <div className="ml-12 mt-4 md:mt-6">みまっし</div>
+            <div className="center-text z-20 text-6xl font-bold tracking-wider wave-text">
+                <div>
+                    {firstText.split("").map((char, i) => (
+                        <span key={i} style={{ animationDelay: `${i * waveStagger}s` }}>{char}</span>
+                    ))}
+                </div>
+                <div className="ml-12 mt-4 md:mt-6">
+                    {secondText.split("").map((char, i) => (
+                        <span key={i} style={{ animationDelay: `${(secondOffset + i * waveStagger).toFixed(2)}s` }}>{char}</span>
+                    ))}
+                </div>
             </div>
+
             <div className="slash right z-20" aria-hidden></div>
             <div className="bottom-right-text z-20" aria-hidden>
                 <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="いしかわの暮らし">

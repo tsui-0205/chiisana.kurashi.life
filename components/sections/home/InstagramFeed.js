@@ -3,26 +3,12 @@ import { useEffect, useRef, useState } from "react";
 import SectionHeader from "../../ui/SectionHeader";
 import ToTopButton from "../../ui/ToTopButton";
 
-// ▼ 実際の投稿を手動更新してください
+// ▼ 自動スクロールで流す写真（手動でファイルを置いてください）
 const instagramPosts = [
-    {
-        id: "1",
-        postUrl:
-            "https://www.instagram.com/p/DM_23O9SGfO/?utm_source=ig_web_copy_link&igsh=ZGkzdGhybzQwanZl",
-        imageUrl: "/images/instagram/a.jpg",
-    },
-    {
-        id: "2",
-        postUrl:
-            "https://www.instagram.com/p/DMkyHLmychN/?utm_source=ig_web_copy_link&igsh=MWV6eDd4MmFiY2p3NA==",
-        imageUrl: "/images/instagram/1755241937405.jpg",
-    },
-    {
-        id: "3",
-        postUrl:
-            "https://www.instagram.com/p/DMAQhUoS135/?utm_source=ig_web_copy_link&igsh=MTlsb2E2ZmpiejNiMA==",
-        imageUrl: "/images/instagram/1755241937446.jpg",
-    },
+    { id: "mizukiri", postUrl: "https://www.instagram.com/chiisana.kurashi.life/", imageUrl: "/images/instagram/mizukiri.jpg" },
+    { id: "osusumefoods", postUrl: "https://www.instagram.com/chiisana.kurashi.life/", imageUrl: "/images/instagram/osusumefoods.jpg" },
+    { id: "tateyama", postUrl: "https://www.instagram.com/chiisana.kurashi.life/", imageUrl: "/images/instagram/tateyama.jpg" },
+    { id: "utsurun", postUrl: "https://www.instagram.com/chiisana.kurashi.life/", imageUrl: "/images/instagram/utsurun.jpg" },
 ];
 
 export default function InstagramFeed({ showToTop = false, hideWhenHeroVisible = false }) {
@@ -30,6 +16,8 @@ export default function InstagramFeed({ showToTop = false, hideWhenHeroVisible =
     const [isUserInteracting, setIsUserInteracting] = useState(false);
     const trackRef = useRef(null);
     const wrapperRef = useRef(null);
+    const [visibleItems, setVisibleItems] = useState(new Set());
+    const observerRef = useRef(null);
 
     // ドラッグでスクロール（スマホ/PC両対応）
     useEffect(() => {
@@ -73,6 +61,39 @@ export default function InstagramFeed({ showToTop = false, hideWhenHeroVisible =
         };
     }, []);
 
+    // IntersectionObserver をセットアップして表示トリガーを管理
+    useEffect(() => {
+        observerRef.current = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        setVisibleItems(prev => new Set([...prev, entry.target.dataset.index]));
+                    }
+                });
+            },
+            {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            }
+        );
+
+        return () => {
+            try { observerRef.current && observerRef.current.disconnect(); } catch (e) { }
+        };
+    }, []);
+
+    // 要素に observer を適用
+    useEffect(() => {
+        const elements = document.querySelectorAll('[data-animate="true"]');
+        elements.forEach((el) => {
+            try { observerRef.current && observerRef.current.observe(el); } catch (e) { }
+        });
+
+        return () => {
+            try { observerRef.current && observerRef.current.disconnect(); } catch (e) { }
+        };
+    }, []);
+
     // ...existing code...
 
     // クリックで投稿を開く
@@ -81,14 +102,17 @@ export default function InstagramFeed({ showToTop = false, hideWhenHeroVisible =
     };
 
     // トラックの自動スクロール速度（画像数に応じて自動で伸縮）
-    const baseSeconds = 20; // 3枚で約20秒/ループ
+    const baseSeconds = 20; // 3枚で約20秒/ループ（デスクトップ想定）
     const duration = Math.max(12, Math.round((instagramPosts.length / 3) * baseSeconds));
+    // モバイルはカードが大きく見えるため体感速度が遅く感じられることがある。
+    // そのためモバイル向けに短めの duration を用意して PC 表示と近い体感に合わせる。
+    const mobileDuration = Math.max(8, Math.round(duration * 0.6));
 
     // 2周分に複製（無限ループ風）
     const doubled = [...instagramPosts, ...instagramPosts];
 
     return (
-        <section className="relative overflow-hidden bg-white text-zinc-800">
+        <section id="instagram" className="relative overflow-hidden bg-white text-zinc-800">
             <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Yomogi&display=swap');
         .font-body { font-family: 'Noto Sans JP', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; }
@@ -109,11 +133,16 @@ export default function InstagramFeed({ showToTop = false, hideWhenHeroVisible =
           will-change: transform;
           align-items: stretch;
         }
-        .marquee-track.animate {
-          animation: scrollX linear infinite;
-          animation-duration: ${duration}s;
-          animation-play-state: running;
-        }
+                        .marquee-track.animate {
+                            animation: scrollX linear infinite;
+                            animation-duration: ${duration}s;
+                            animation-play-state: running;
+                        }
+                        .marquee-track.paused { animation-play-state: paused; }
+                /* モバイル向け: より短い duration を使って体感速度を速める */
+                @media (max-width: 768px) {
+                    .marquee-track.animate { animation-duration: ${mobileDuration}s; }
+                }
         .marquee-wrapper:hover .marquee-track.animate { animation-play-state: paused; }
         @keyframes scrollX {
           from { transform: translateX(0); }
@@ -145,15 +174,16 @@ export default function InstagramFeed({ showToTop = false, hideWhenHeroVisible =
             <div className="pointer-events-none absolute -left-24 top-24 h-72 w-72 rounded-full bg-purple-200/30 blur-3xl" />
             <div className="pointer-events-none absolute left-56 -top-8 h-64 w-64 rounded-full bg-pink-100/50 blur-3xl" />
 
-            {/* セクションヘッダ */}
-            <div className="relative text-center py-20 px-6">
-                <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-zinc-800">
-                    Instagram
-                </h2>
-                <p className="mt-4 text-base md:text-lg text-zinc-500">
-                    日々のことをインスタグラムでも発信しています
-                </p>
-                <div className="mt-6 mx-auto h-0.5 w-24 bg-gradient-to-r from-sky-400 to-purple-400 rounded-full" />
+            {/* セクションヘッダ（WorksSection と同じデザインに合わせる） */}
+            <div className="font-body mx-auto" style={{ margin: '80px auto 24px', maxWidth: '1200px', position: 'relative' }}>
+                <div
+                    className={`flex items-center gap-3 fade-in-up ${visibleItems.has('header') ? 'visible' : ''}`}
+                    data-animate="true"
+                    data-index="header"
+                >
+                    <div className="h-0.5 w-24 bg-black rounded-full"></div>
+                    <h2 className="text-[22px] sm:text-[28px] md:text-[38px] font-bold text-zinc-700 tracking-[0.18em] md:pl-[80px] whitespace-nowrap">日々のこと</h2>
+                </div>
             </div>
 
             <div className="mx-auto max-w-7xl px-0 md:px-6 py-2 pb-20 font-body">
@@ -166,63 +196,63 @@ export default function InstagramFeed({ showToTop = false, hideWhenHeroVisible =
                         className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-zinc-200/80 text-zinc-800 hover:border-zinc-900/40 hover:bg-zinc-900/5 transition-colors"
                     >
                         <svg className="w-6 h-6 opacity-90" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                                  <rect x="3" y="3" width="18" height="18" rx="5" />
-                                  <circle cx="12" cy="12" r="3" />
-                                  <circle cx="17.5" cy="6.5" r="0.9" fill="currentColor" stroke="none" />
+                            <rect x="3" y="3" width="18" height="18" rx="5" />
+                            <circle cx="12" cy="12" r="3" />
+                            <circle cx="17.5" cy="6.5" r="0.9" fill="currentColor" stroke="none" />
                         </svg>
                         <span className="font-medium tracking-wide">@chiisana.kurashi.life</span>
                     </a>
                 </div>
-                {/* ▼ フルブリード横スクロール（自動で流れ続ける） */}
-                <div
-                    className="edge-fade marquee-wrapper w-screen md:w-full -mx-[calc(50vw-50%)] md:mx-0"
-                    ref={wrapperRef}
-                    aria-label="Instagram carousel (auto-scrolling)"
-                >
+
+                <div className="left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen relative">
                     <div
-                        ref={trackRef}
-                        className={`marquee-track ${isUserInteracting ? "" : "animate"}`}
-                        style={{
-                            // ビューポートに対して高さを可変に（モバイル: 45vh / デスクトップ: 60vh）
-                            // 画像は object-cover で横幅いっぱい
-                            padding: "12px 24px",
-                        }}
+                        className="edge-fade marquee-wrapper w-full"
+                        ref={wrapperRef}
+                        aria-label="Instagram carousel (auto-scrolling)"
                     >
-                        {doubled.map((post, idx) => (
-                            <figure
-                                key={`${post.id}-${idx}`}
-                                className="ig-card group relative h-[45vh] md:h-[60vh] aspect-[4/3] min-w-[66vw] sm:min-w-[50vw] md:min-w-[42vw] lg:min-w-[36vw] xl:min-w-[28vw]"
-                                onClick={() => openPost(post.postUrl)}
-                                role="button"
-                                aria-label="Open Instagram post"
-                            >
-                                <img
-                                    src={post.imageUrl}
-                                    alt="Instagram投稿"
-                                    loading="lazy"
-                                    className="h-full w-full object-cover"
-                                    onLoad={() => setLoaded((p) => ({ ...p, [post.id]: true }))}
-                                    onError={() => setLoaded((p) => ({ ...p, [post.id]: false }))}
-                                />
+                        <div
+                            ref={trackRef}
+                            className={`marquee-track animate ${isUserInteracting ? "paused" : ""}`}
+                            style={{
+                                padding: "12px 24px",
+                            }}
+                        >
+                            {doubled.map((post, idx) => (
+                                <figure
+                                    key={`${post.id}-${idx}`}
+                                    className="ig-card group relative h-[45vh] md:h-[60vh] aspect-[4/3] min-w-[66vw] sm:min-w-[50vw] md:min-w-[42vw] lg:min-w-[36vw] xl:min-w-[28vw]"
+                                    onClick={() => openPost(post.postUrl)}
+                                    role="button"
+                                    aria-label="Open Instagram post"
+                                >
+                                    <img
+                                        src={post.imageUrl}
+                                        alt="Instagram投稿"
+                                        loading="lazy"
+                                        className="h-full w-full object-cover"
+                                        onLoad={() => setLoaded((p) => ({ ...p, [post.id]: true }))}
+                                        onError={() => setLoaded((p) => ({ ...p, [post.id]: false }))}
+                                    />
 
-                                {/* ホバー時オーバーレイ */}
-                                <figcaption className="pointer-events-none absolute inset-0 grid place-items-center bg-black/0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-hover:bg-black/25">
-                                    <svg className="w-10 h-10 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                                        <rect x="3" y="3" width="18" height="18" rx="5" />
-                                        {/* 中心を塗りつぶしてホバーでインパクトを出す */}
-                                        <circle cx="12" cy="12" r="3" fill="currentColor" stroke="none" />
-                                        <circle cx="17.5" cy="6.5" r="0.95" fill="currentColor" stroke="none" />
-                                    </svg>
-                                </figcaption>
+                                    {/* ホバー時オーバーレイ */}
+                                    <figcaption className="pointer-events-none absolute inset-0 grid place-items-center bg-black/0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-hover:bg-black/25">
+                                        <svg className="w-10 h-10 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                                            <rect x="3" y="3" width="18" height="18" rx="5" />
+                                            {/* 中心を塗りつぶしてホバーでインパクトを出す */}
+                                            <circle cx="12" cy="12" r="3" fill="currentColor" stroke="none" />
+                                            <circle cx="17.5" cy="6.5" r="0.95" fill="currentColor" stroke="none" />
+                                        </svg>
+                                    </figcaption>
 
-                                {/* 読み込み失敗時のプレースホルダ */}
-                                {loaded[post.id] === false && (
-                                    <div className="absolute inset-0 grid place-items-center bg-zinc-100 text-zinc-500 text-sm">
-                                        画像を読み込めませんでした
-                                    </div>
-                                )}
-                            </figure>
-                        ))}
+                                    {/* 読み込み失敗時のプレースホルダ */}
+                                    {loaded[post.id] === false && (
+                                        <div className="absolute inset-0 grid place-items-center bg-zinc-100 text-zinc-500 text-sm">
+                                            画像を読み込めませんでした
+                                        </div>
+                                    )}
+                                </figure>
+                            ))}
+                        </div>
                     </div>
                 </div>
 
@@ -232,7 +262,7 @@ export default function InstagramFeed({ showToTop = false, hideWhenHeroVisible =
                         href="https://www.instagram.com/chiisana.kurashi.life?igsh=MXVpeDk4YjRwbzZrag=="
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="group inline-flex items-center gap-4 sm:gap-12 focus:outline-none"
+                        className="group inline-flex items-center gap-4 sm:gap-6 md:gap-8 lg:gap-6 focus:outline-none"
                         aria-label="インスタグラムへ"
                         onClick={e => {
                             e.preventDefault();
@@ -252,10 +282,11 @@ export default function InstagramFeed({ showToTop = false, hideWhenHeroVisible =
                         </span>
 
                         {/* テキスト（色・フォントを合わせる） */}
-                        <span className="text-[#84B5C5] text-base tracking-wide font-medium py-2
-       group-hover:underline underline-offset-4 decoration-[#84B5C5] transition-colors">
-                            インスタグラムへ
+                        <span className="text-[#84B5C5] text-xl sm:text-2xl tracking-wide font-semibold py-2
+                            group-hover:underline underline-offset-4 decoration-[#84B5C5] transition-colors">
+                            Instagramへ
                         </span>
+
                     </a>
                 </div>
             </div>

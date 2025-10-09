@@ -74,7 +74,7 @@ export default function ToTopButton({ className = "", onClick, href = "#top", ti
                     <img
                         src="/images/toTop.png"
                         alt=""
-                        className="absolute inset-0 m-auto max-w-full max-h-full object-contain drop-shadow-[0_8px_16px_rgba(0,0,0,0.2)] animate-bounce-gentle motion-reduce:animate-none transition-transform duration-300"
+                        className="absolute inset-0 m-auto max-w-full max-h-full object-contain  animate-bounce-gentle motion-reduce:animate-none transition-transform duration-300"
                         draggable="false"
                     />
                     {/* もっと薄い黄色の丸がイラストの右側で下から上に移動 */}

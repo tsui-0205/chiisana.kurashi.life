@@ -23,7 +23,7 @@ function formatDateYMD(dateStr) {
 function HeroTriptych({ title, images }) {
   const src = images && images.length ? images[0] : '';
   return (
-    <section className="relative h-screen w-full overflow-hidden">
+    <section className="relative h-[60vh] md:h-screen w-full overflow-hidden">
       {/* Full-screen hero image like main page */}
       <div className="absolute inset-0 w-full h-full z-0">
         <div className="w-full h-full image-figure">
@@ -115,6 +115,12 @@ export default function BlogPage() {
         100% { transform: translateY(0); }
       }
       .scroll-bounce { animation: scrollBounce 1.2s ease-in-out infinite; }
+
+      /* Reduce aggressive zoom/translate on small screens to avoid horizontal over-cropping */
+      @media (max-width: 640px) {
+        .image-figure { transform: translateY(10px) scale(1.01); }
+        .fade-in-image { animation: fadeInImage 1.1s ease-out forwards; }
+      }
     `;
     document.head.appendChild(style);
     const imgs = Array.from(document.querySelectorAll('.image-figure img'));
@@ -367,12 +373,12 @@ export default function BlogPage() {
 
       {/* New Articles */}
       <section id="articles" className="py-16 px-4 md:px-6 max-w-6xl mx-auto mb-4 md:mb-6 lg:mb-8">
-        <div className="text-center mb-4">
+        {/* <div className="text-center mb-4">
           <h2 className="text-4xl md:text-5xl font-semibold tracking-[0.18em] text-zinc-900">
             ARTICLES
           </h2>
           <p className="text-zinc-500 mt-2 font-light">記事一覧</p>
-        </div>
+        </div> */}
 
         {/* Filter / Search */}
         <div className="mt-12 mb-8 flex flex-col md:flex-row gap-3 items-stretch md:items-center">

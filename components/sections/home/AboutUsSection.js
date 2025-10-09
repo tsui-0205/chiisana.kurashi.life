@@ -5,7 +5,6 @@ import SectionHeader from '../../ui/SectionHeader';
 import ToTopButton from '../../ui/ToTopButton';
 
 export default function AboutUsSection({ showToTop = false, hideWhenHeroVisible = false }) {
-    // ...existing code...
     const [currentSlide, setCurrentSlide] = useState(0);
     const [mounted, setMounted] = useState(false);
     const [visibleItems, setVisibleItems] = useState(new Set());
@@ -79,29 +78,39 @@ export default function AboutUsSection({ showToTop = false, hideWhenHeroVisible 
             id: 'couple',
             name: '石川で暮らす夫婦',
             image: '/images/profiles/17552437879081.jpg',
-            description: '石川県の豊かな自然に囲まれて、夫婦ふたりでゆったりと暮らしています。季節ごとに変わる風景、近所への散歩、ちょっとした発見...そんな何気ない日常の中にある小さな幸せを大切にして、この場所で記録していきたいと思います。'
+            description: [
+                '2025年2月5日、ニコニコの日に入籍。',
+                '同じ地元で育った内気なふたりが、石川で過ごす小さな日常をゆるやかに綴ります。',
+                'お金では買えない、日々の小さな幸せを大切にしています。',
+                '生まれ育った町の風景や日常を少しずつ発信していきたいと考えています。'
+            ]
         },
         {
             id: 'wife',
             name: 'わたし',
             image: '/images/profiles/wife.jpg',
-            description: '毎日の生活の中で、音楽を聴きながらお菓子を作る時間が一番の楽しみです。特にピアノを弾いて過ごす午後のひととき、手作りのお菓子と一緒にコーヒーを飲む時間を大切にしています。'
+            description: [
+                'インスタグラム担当です。',
+                'ドラマとピアノとカフェめぐりが趣味です。昔から絶対音感があり、ふとした瞬間に聴いた曲の音を当てるのが得意です。'
+            ]
         },
         {
             id: 'husband',
             name: '夫',
             image: '/images/profiles/husband.jpg',
-            description: '週末はフットサルで体を動かし、平日の夜は読書の時間を楽しんでいます。最近は写真撮影にも興味を持ち、日常の風景や妻との思い出を記録することが新しい趣味になっています。',
+            description: [
+                'ホームページ担当です。',
+                '趣味はフットサルと読書、料理です。けん玉が得意で、ランニングもします。調子が良い日は2kmを6分台で走れます。'
+            ],
             hasDetails: true,
             detailedInfo: {
                 introduction: 'エンジニアとして働きながら、石川県での生活を満喫しています。技術への探求心と、自然豊かな環境での暮らしのバランスを大切にしています。',
                 skills: [
                     { category: 'プログラミング', items: ['JavaScript', 'React', 'Node.js', 'Python'] },
                     { category: 'デザイン', items: ['Figma', 'Adobe Photoshop', 'UI/UX設計'] },
-                    { category: '写真撮影', items: ['風景写真', 'ポートレート', '日常スナップ'] },
                     { category: 'スポーツ', items: ['フットサル', 'ランニング', 'サイクリング'] }
                 ],
-                hobbies: ['読書（技術書・小説）', '写真撮影', 'コーヒー豆の焙煎', '散歩', 'ブログ執筆'],
+                hobbies: ['読書（技術書・小説）', 'コーヒー豆の焙煎', '散歩', 'ブログ執筆'],
                 philosophy: '技術と自然、都市と田舎、仕事と趣味。一見相反するものの調和を見つけることで、より豊かな人生を築けると信じています。'
             }
         }
@@ -168,7 +177,7 @@ export default function AboutUsSection({ showToTop = false, hideWhenHeroVisible 
             <div className="pointer-events-none absolute right-14 bottom-20 h-64 w-64 rounded-full bg-amber-200/40 blur-3xl" />
 
             {/* Section Header - Independent positioning */}
-            <div className="font-body mx-auto" style={{ margin: '80px auto 24px', maxWidth: '1200px', position: 'relative' }}>
+            <div className="font-body mx-auto mt-20 md:mt-20 mb-6 md:mb-2 max-w-[1200px] relative px-6">
                 <div
                     className={`flex items-center gap-3 fade-in-up ${visibleItems.has('header') ? 'visible' : ''}`}
                     data-animate="true"
@@ -193,27 +202,60 @@ export default function AboutUsSection({ showToTop = false, hideWhenHeroVisible 
                         style={{ transform: `translateX(-${currentSlide * 100}%)` }}
                     >
                         {profiles.map((profile, index) => (
-                            <div key={profile.id} className="w-full flex-shrink-0 px-4">
-                                <div className="grid items-center gap-16 md:grid-cols-2 min-h-[500px]">
+                            <div key={profile.id} className="w-full flex-shrink-0 px-4 h-auto md:h-[520px] overflow-hidden">
+                                <div className="grid items-center gap-16 md:grid-cols-2 min-h-[500px] h-full">
                                     {/* Left: text */}
-                                    <div className="space-y-6">
-                                        <div className="name-text">
-                                            <h3 className='text-[18px] sm:text-[20px] md:text-[26px] font-medium tracking-[0.18em] text-[rgba(63,63,70,1)] pt-[10px] pb-[24px] mb-[32px] font-yaku'>
-                                                {profile.name}
-                                            </h3>
+                                    <div className="h-full flex flex-col justify-center space-y-6 order-2 md:order-1">
+                                        {/* Profile selector buttons placed under the header */}
+                                        <div className="mt-6 hidden md:flex justify-start gap-4 md:mb-6" role="tablist" aria-label="プロフィール切替">
+                                            {profiles.map((p, index) => (
+                                                <button
+                                                    key={p.id}
+                                                    onClick={() => setCurrentSlide(index)}
+                                                    className={`
+                                                            h-10 px-5 rounded-full text-base tracking-wide font-semibold
+                                                            whitespace-nowrap flex items-center justify-center shadow-md
+                                                            transition duration-300 ease-in-out
+                                                            ${currentSlide === index
+                                                            ? 'bg-[#84B5C5] text-white scale-105'
+                                                            : 'bg-white text-[#84B5C5] border border-[#84B5C5] hover:bg-[#eaf6f8]'
+                                                        }
+                                                    `}
+                                                    role="tab"
+                                                    aria-selected={currentSlide === index}
+                                                >
+                                                    {p.id === 'couple' ? '夫婦' : p.id === 'wife' ? 'わたし' : p.id === 'husband' ? '夫' : p.name}
+                                                </button>
+                                            ))}
                                         </div>
-                                        <p
-                                            className="text-[14px] font-light leading-[2] tracking-[0.12em] text-[#6B6B6B] max-w-[462px] mb-[32px] text-justify"
-                                            style={{
-                                                fontFamily: `'YakuHanJP_Narrow', 'Zen Kaku Gothic New', sans-serif`,
-                                                letterSpacing: '0.13em'
-                                            }}
-                                        >
-                                            {profile.description}
-                                        </p>
-                                        
+
+                                        {Array.isArray(profile.description) ? (
+                                            profile.description.map((para, idx) => (
+                                                <p
+                                                    key={idx}
+                                                    className="text-[14px] font-light leading-[2] tracking-[0.12em] text-[#6B6B6B] max-w-[462px] mb-[16px] text-justify"
+                                                    style={{
+                                                        fontFamily: `'YakuHanJP_Narrow', 'Zen Kaku Gothic New', sans-serif`,
+                                                        letterSpacing: '0.13em'
+                                                    }}
+                                                >
+                                                    {para}
+                                                </p>
+                                            ))
+                                        ) : (
+                                            <p
+                                                className="text-[14px] font-light leading-[2] tracking-[0.12em] text-[#6B6B6B] max-w-[462px] mb-[32px] text-justify"
+                                                style={{
+                                                    fontFamily: `'YakuHanJP_Narrow', 'Zen Kaku Gothic New', sans-serif`,
+                                                    letterSpacing: '0.13em'
+                                                }}
+                                            >
+                                                {profile.description}
+                                            </p>
+                                        )}
+
                                         {/* 夫のプロフィールの場合のみ「詳しく見る」ボタンを表示 */}
-                                        {profile.hasDetails && (
+                                        {profile.hasDetails ? (
                                             <a
                                                 href="/site/profile/husband"
                                                 className="group inline-flex items-center gap-4 focus:outline-none"
@@ -237,12 +279,39 @@ export default function AboutUsSection({ showToTop = false, hideWhenHeroVisible 
                                                     詳しくみる
                                                 </span>
                                             </a>
+                                        ) : (
+                                            // placeholder to keep equal height on desktop
+                                            <div className="hidden md:flex items-center gap-4" aria-hidden>
+                                                <span className="w-16 h-16" />
+                                                <span className="w-24 h-6" />
+                                            </div>
                                         )}
                                     </div>
 
-                                    {/* Right: photo card */}
-                                    <div className="relative mx-auto w-full max-w-md">
-                                        <div className="relative overflow-hidden rounded-full bg-white p-2 shadow-[0_10px_50px_rgba(0,0,0,0.08)]">
+                                    <div className="block md:hidden text-center mb-4 order-0">
+                                        <div className="flex justify-center gap-4 mb-2">
+                                            {profiles.map((p, i) => (
+                                                <button
+                                                    key={`mobile-${p.id}`}
+                                                    onClick={() => setCurrentSlide(i)}
+                                                    className={`
+                                                            px-4 py-2 rounded-full text-sm tracking-wide font-semibold 
+                                                            shadow-md transition duration-300 ease-in-out
+                                                            ${currentSlide === i
+                                                            ? 'bg-[#84B5C5] text-white scale-105'
+                                                            : 'bg-white text-[#84B5C5] hover:bg-[#eaf6f8] border border-[#84B5C5]'
+                                                        }
+                                                    `}
+                                                    aria-label={`表示: ${p.name}`}
+                                                >
+                                                    {i === 0 ? '夫婦' : i === 1 ? 'わたし' : '夫'}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div className="relative mx-auto w-full max-w-md order-1 md:order-2 h-full flex items-center justify-center">
+                                        <div className="relative overflow-hidden rounded-full bg-white p-0 md:p-2 shadow-[0_10px_50px_rgba(0,0,0,0.08)]">
                                             <img
                                                 src={profile.image}
                                                 alt={profile.name}
@@ -285,26 +354,6 @@ export default function AboutUsSection({ showToTop = false, hideWhenHeroVisible 
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.6" d="M9 5l7 7-7 7"></path>
                         </svg>
                     </button>
-
-                    {/* Slide Indicators */}
-                    <div
-                        className={`mt-12 flex justify-center gap-2 fade-in-up ${visibleItems.has('indicators') ? 'visible' : ''}`}
-                        data-animate="true"
-                        data-index="indicators"
-                        style={{ transitionDelay: '0.6s' }}
-                    >
-                        {profiles.map((_, index) => (
-                            <button
-                                key={index}
-                                onClick={() => setCurrentSlide(index)}
-                                className={`h-2 rounded-full transition-all duration-200 ${currentSlide === index
-                                    ? 'bg-zinc-600 w-8'
-                                    : 'bg-zinc-300 hover:bg-zinc-400 w-2'
-                                    }`}
-                                aria-label={`スライド ${index + 1} へ移動`}
-                            />
-                        ))}
-                    </div>
                 </div>
             </div>
 

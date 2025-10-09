@@ -34,21 +34,23 @@ export default function NavigationMenu({ isOpen, onClose }) {
     const menuItems = [
         { href: "/", label: "ホーム", en: "home", type: "internal" },
         { href: "#about", label: "わたしたちのこと", en: "about", type: "anchor" },
-        { href: "#blog", label: "日々のこと", en: "daily", type: "anchor" },
-        { href: "/site/blog", label: "ブログ一覧", en: "posts", type: "internal" },
-        {
-            href: "https://www.instagram.com/chiisana.kurashi.life?igsh=MXVpeDk4YjRwbzZrag==",
-            label: "Instagram",
-            en: "instagram",
-            type: "external",
-        },
-        // 認証されているユーザーのみに管理メニューを表示
+        { href: "#instagram", label: "日々のこと", en: "daily", type: "anchor" },
+       { href: "#blog", label: "#夫のつぶやき", en: "blog", type: "anchor" },
         ...(isAuthenticated ? [{ href: "/site/admin", label: "管理", type: "internal", admin: true }] : []),
     ];
 
     const isActive = (item) => {
         if (item.type === "anchor") return hash === item.href;
-        if (item.type === "internal") return pathname === item.href;
+        if (item.type === "internal") {
+            // internal の href にハッシュが含まれる場合は pathname を比較する
+            try {
+                const base = (typeof window !== 'undefined' && window.location && window.location.origin) ? window.location.origin : 'http://localhost';
+                const url = new URL(item.href, base);
+                return pathname === url.pathname;
+            } catch (e) {
+                return pathname === item.href;
+            }
+        }
         return false;
     };
     const renderList = (mobile = false) => (

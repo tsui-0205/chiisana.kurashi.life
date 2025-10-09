@@ -41,18 +41,18 @@ export default function Home() {
             <HeroSection isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} onLoaded={setHasMainPhoto} onHeroVisible={setIsHeroVisible} />
             {/* Content sections that will overlay the fixed image when scrolled */}
             <div className="relative z-40 bg-white">
-                {/* わたしたちのこと */}
-                <AboutUsSection showToTop={hasMainPhoto === false} hideWhenHeroVisible={isHeroVisible} />
-                {/* 石川県の思い出マップ
+                {/* 石川県の思い出マップ */}
                 <div className="bg-white">
                     <IshikawaMap />
-                </div> */}
-                {/* 日々のこと */}
-                <WorksSection showToTop={hasMainPhoto === false} hideWhenHeroVisible={isHeroVisible} />
+                </div>
+                {/* わたしたちのこと */}
+                <AboutUsSection showToTop={hasMainPhoto === false} hideWhenHeroVisible={isHeroVisible} />
                 {/* インスタグラムフィード */}
                 <div className="bg-white">
                     <InstagramFeed showToTop={hasMainPhoto === false} hideWhenHeroVisible={isHeroVisible} />
                 </div>
+                {/* 夫のつぶやき */}
+                <WorksSection showToTop={hasMainPhoto === false} hideWhenHeroVisible={isHeroVisible} />
                 {/* Contact Footer */}
                 <ContactFooter />
             </div>
