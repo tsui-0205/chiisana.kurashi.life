@@ -5,7 +5,7 @@ const SESSION_SECRET = process.env.SESSION_SECRET || 'your-secret-key';
 
 export async function GET() {
     try {
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
         const sessionToken = cookieStore.get('admin_session')?.value;
 
         if (!sessionToken) {
@@ -37,7 +37,11 @@ export async function GET() {
         }
 
         // 無効なトークンの場合はクッキーを削除
-        cookieStore.delete('admin_session');
+        try {
+            cookieStore.delete('admin_session');
+        } catch (e) {
+            // ignore
+        }
 
         return NextResponse.json({
             authenticated: false

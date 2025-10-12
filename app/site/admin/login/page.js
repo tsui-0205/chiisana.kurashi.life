@@ -18,7 +18,7 @@ export default function LoginPage() {
         try {
             const response = await fetch('/api/auth/me');
             const data = await response.json();
-            
+
             if (data.authenticated) {
                 router.push('/site/admin');
             }

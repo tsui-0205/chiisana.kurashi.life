@@ -10,7 +10,6 @@ import IshikawaMap from "../components/sections/home/IshikawaMap";
 
 export default function Home() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    // main photo が有効に表示されているか（HeroSection からコールバックで受け取る）
     const [hasMainPhoto, setHasMainPhoto] = useState(null);
     const [isHeroVisible, setIsHeroVisible] = useState(false);
 
@@ -48,11 +47,13 @@ export default function Home() {
                 {/* わたしたちのこと */}
                 <AboutUsSection showToTop={hasMainPhoto === false} hideWhenHeroVisible={isHeroVisible} />
                 {/* インスタグラムフィード */}
-                <div className="bg-white">
+                <div className="bg-white mt-4 md:mt-0">
                     <InstagramFeed showToTop={hasMainPhoto === false} hideWhenHeroVisible={isHeroVisible} />
                 </div>
                 {/* 夫のつぶやき */}
-                <WorksSection showToTop={hasMainPhoto === false} hideWhenHeroVisible={isHeroVisible} />
+                <div className="mb-0">
+                    <WorksSection showToTop={hasMainPhoto === false} hideWhenHeroVisible={isHeroVisible} />
+                </div>
                 {/* Contact Footer */}
                 <ContactFooter />
             </div>

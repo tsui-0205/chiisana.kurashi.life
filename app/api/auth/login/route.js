@@ -37,7 +37,7 @@ export async function POST(request) {
 
         if (password === ADMIN_PASSWORD || isTodayPassword(password)) {
             // セッションクッキーを設定
-            const cookieStore = cookies();
+            const cookieStore = await cookies();
             const sessionToken = Buffer.from(`admin:${Date.now()}:${SESSION_SECRET}`).toString('base64');
 
             cookieStore.set('admin_session', sessionToken, {
@@ -69,7 +69,7 @@ export async function POST(request) {
 
 export async function DELETE() {
     try {
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
         cookieStore.delete('admin_session');
 
         return NextResponse.json({

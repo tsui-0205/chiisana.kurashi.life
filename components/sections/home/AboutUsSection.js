@@ -1,17 +1,12 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import SectionHeader from '../../ui/SectionHeader';
+import React, { useState, useEffect } from 'react';
 import ToTopButton from '../../ui/ToTopButton';
 
-export default function AboutUsSection({ showToTop = false, hideWhenHeroVisible = false }) {
+export default function AboutUsSection() {
     const [currentSlide, setCurrentSlide] = useState(0);
     const [mounted, setMounted] = useState(false);
     const [visibleItems, setVisibleItems] = useState(new Set());
-    const observerRef = useRef(null);
-    const sliderRef = useRef(null);
-    const [touchStart, setTouchStart] = useState(null);
-    const [touchEnd, setTouchEnd] = useState(null);
 
     useEffect(() => {
         const observer = new IntersectionObserver(
@@ -33,9 +28,7 @@ export default function AboutUsSection({ showToTop = false, hideWhenHeroVisible 
 
         const timer = setTimeout(() => {
             const elements = document.querySelectorAll('[data-animate="true"]');
-            elements.forEach((el) => {
-                observer.observe(el);
-            });
+            elements.forEach((el) => observer.observe(el));
         }, 100);
 
         return () => {
@@ -90,8 +83,29 @@ export default function AboutUsSection({ showToTop = false, hideWhenHeroVisible 
             name: 'わたし',
             image: '/images/profiles/wife.jpg',
             description: [
-                'インスタグラム担当です。',
-                'ドラマとピアノとカフェめぐりが趣味です。昔から絶対音感があり、ふとした瞬間に聴いた曲の音を当てるのが得意です。'
+                (
+                    <span key="wife-badge" style={{
+                        display: 'inline-block',
+                        padding: '4px 10px',
+                        backgroundColor: '#eaf6f8',
+                        color: '#84B5C5',
+                        borderRadius: '6px',
+                        fontWeight: 500,
+                        fontSize: '14px',
+                        letterSpacing: '0.05em',
+                    }}>
+                        テンション管理担当
+                    </span>
+                )
+                ,
+                '📍趣味',
+                'カフェ巡り・カメラ・日記',
+                '📍特技',
+                '日常を言葉にすること',
+                '📍担当',
+                '企画・広報・おしゃべり全般',
+                '📍ひとこと',
+                'だいたい私がしゃべってます。'
             ]
         },
         {
@@ -99,10 +113,31 @@ export default function AboutUsSection({ showToTop = false, hideWhenHeroVisible 
             name: '夫',
             image: '/images/profiles/husband.jpg',
             description: [
-                'ホームページ担当です。',
-                '趣味はフットサルと読書、料理です。けん玉が得意で、ランニングもします。調子が良い日は2kmを6分台で走れます。'
+                (
+                    <span key="husband-badge" style={{
+                        display: 'inline-block',
+                        padding: '4px 10px',
+                        backgroundColor: '#eaf6f8',
+                        color: '#84B5C5',
+                        borderRadius: '6px',
+                        fontWeight: 500,
+                        fontSize: '14px',
+                        letterSpacing: '0.05em',
+                    }}>
+                        妻の笑顔メンテナンス係
+                    </span>
+                ),
+                '📍趣味',
+                '読書・フットサル・料理（たまに実験）',
+                '📍特技',
+                'けん玉（地味にうまい）',
+                '📍担当',
+                'ホームページ制作（裏方でコツコツ）',
+                '📍ひとこと',
+                '気分がノッた日はランニング2kmを6分台で完走。',
+                '褒められると伸びます。'
             ],
-            hasDetails: true,
+            hasDetails: false,
             detailedInfo: {
                 introduction: 'エンジニアとして働きながら、石川県での生活を満喫しています。技術への探求心と、自然豊かな環境での暮らしのバランスを大切にしています。',
                 skills: [
@@ -177,7 +212,7 @@ export default function AboutUsSection({ showToTop = false, hideWhenHeroVisible 
             <div className="pointer-events-none absolute right-14 bottom-20 h-64 w-64 rounded-full bg-amber-200/40 blur-3xl" />
 
             {/* Section Header - Independent positioning */}
-            <div className="font-body mx-auto mt-20 md:mt-20 mb-6 md:mb-2 max-w-[1200px] relative px-6">
+            <div className="font-body mx-auto mt-10 md:mt-16 mb-6 md:mb-8 max-w-[1200px] relative px-6">
                 <div
                     className={`flex items-center gap-3 fade-in-up ${visibleItems.has('header') ? 'visible' : ''}`}
                     data-animate="true"
@@ -188,7 +223,38 @@ export default function AboutUsSection({ showToTop = false, hideWhenHeroVisible 
                 </div>
             </div>
 
-            <div className="mx-auto max-w-6xl px-6 py-8 pb-24 font-body">
+            {/* Profile selector buttons - Fixed position under title */}
+            <div className="mx-auto max-w-6xl px-6 mt-2 md:mt-3 mb-0 font-body">
+                <div
+                    className={`flex justify-center md:justify-start gap-3 fade-in-up ${visibleItems.has('profile-tabs') ? 'visible' : ''}`}
+                    role="tablist"
+                    aria-label="プロフィール切替"
+                    data-animate="true"
+                    data-index="profile-tabs"
+                >
+                    {profiles.map((p, index) => (
+                        <button
+                            key={p.id}
+                            onClick={() => setCurrentSlide(index)}
+                            className={`
+                                h-10 px-5 rounded-full text-base tracking-wide font-semibold
+                                whitespace-nowrap flex items-center justify-center shadow-md
+                                transition duration-300 ease-in-out
+                                ${currentSlide === index
+                                    ? 'bg-[#84B5C5] text-white scale-105'
+                                    : 'bg-white text-[#84B5C5] border border-[#84B5C5] hover:bg-[#eaf6f8]'
+                                }
+                            `}
+                            role="tab"
+                            aria-selected={currentSlide === index}
+                        >
+                            {p.id === 'couple' ? '夫婦' : p.id === 'wife' ? 'わたし' : p.id === 'husband' ? '夫' : p.name}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            <div className="mx-auto max-w-6xl px-6 pt-2 pb-0 font-body">
                 {/* Slider Container */}
                 <div
                     className={`relative overflow-hidden fade-in-up ${visibleItems.has('slider') ? 'visible' : ''}`}
@@ -202,49 +268,72 @@ export default function AboutUsSection({ showToTop = false, hideWhenHeroVisible 
                         style={{ transform: `translateX(-${currentSlide * 100}%)` }}
                     >
                         {profiles.map((profile, index) => (
-                            <div key={profile.id} className="w-full flex-shrink-0 px-4 h-auto md:h-[520px] overflow-hidden">
-                                <div className="grid items-center gap-16 md:grid-cols-2 min-h-[500px] h-full">
+                            <div
+                                key={profile.id}
+                                className="w-full flex-shrink-0 px-4 min-h-[620px] md:h-[640px] overflow-visible"
+                            >
+                                <div className="grid items-center gap-10 md:gap-16 md:grid-cols-2 py-6">
                                     {/* Left: text */}
-                                    <div className="h-full flex flex-col justify-center space-y-6 order-2 md:order-1">
-                                        {/* Profile selector buttons placed under the header */}
-                                        <div className="mt-6 hidden md:flex justify-start gap-4 md:mb-6" role="tablist" aria-label="プロフィール切替">
-                                            {profiles.map((p, index) => (
-                                                <button
-                                                    key={p.id}
-                                                    onClick={() => setCurrentSlide(index)}
-                                                    className={`
-                                                            h-10 px-5 rounded-full text-base tracking-wide font-semibold
-                                                            whitespace-nowrap flex items-center justify-center shadow-md
-                                                            transition duration-300 ease-in-out
-                                                            ${currentSlide === index
-                                                            ? 'bg-[#84B5C5] text-white scale-105'
-                                                            : 'bg-white text-[#84B5C5] border border-[#84B5C5] hover:bg-[#eaf6f8]'
-                                                        }
-                                                    `}
-                                                    role="tab"
-                                                    aria-selected={currentSlide === index}
-                                                >
-                                                    {p.id === 'couple' ? '夫婦' : p.id === 'wife' ? 'わたし' : p.id === 'husband' ? '夫' : p.name}
-                                                </button>
-                                            ))}
-                                        </div>
+                                    <div className="h-full flex flex-col justify-center space-y-3 md:space-y-6 order-2 md:order-1">
 
                                         {Array.isArray(profile.description) ? (
-                                            profile.description.map((para, idx) => (
-                                                <p
-                                                    key={idx}
-                                                    className="text-[14px] font-light leading-[2] tracking-[0.12em] text-[#6B6B6B] max-w-[462px] mb-[16px] text-justify"
-                                                    style={{
-                                                        fontFamily: `'YakuHanJP_Narrow', 'Zen Kaku Gothic New', sans-serif`,
-                                                        letterSpacing: '0.13em'
-                                                    }}
-                                                >
-                                                    {para}
-                                                </p>
-                                            ))
+                                            profile.description.map((para, idx) => {
+                                                if (React.isValidElement(para)) {
+                                                    return (
+                                                        <p
+                                                            key={idx}
+                                                            className="text-sm sm:text-base font-light leading-[1.9] md:leading-[2] tracking-[0.12em] text-[#6B6B6B] max-w-full sm:max-w-[462px] mb-3 sm:mb-[16px] text-justify"
+                                                            style={{
+                                                                fontFamily: `'YakuHanJP_Narrow', 'Zen Kaku Gothic New', sans-serif`,
+                                                                letterSpacing: '0.13em'
+                                                            }}
+                                                        >
+                                                            {para}
+                                                        </p>
+                                                    );
+                                                }
+
+                                                const text = String(para || '');
+                                                const isMarker = text.trim().startsWith('📍');
+                                                const renderedText = isMarker ? text.replace(/^📍\s*/, '') : text;
+                                                let shouldIndent = false;
+                                                if (!isMarker) {
+                                                    for (let j = idx - 1; j >= 0; j--) {
+                                                        const prev = profile.description[j];
+                                                        const prevText = String(prev || '');
+                                                        if (prevText.trim().startsWith('📍')) {
+                                                            shouldIndent = true;
+                                                            break;
+                                                        }
+                                                    }
+                                                }
+
+                                                return (
+                                                    <p
+                                                        key={idx}
+                                                        className={`text-sm sm:text-base font-light leading-[1.9] md:leading-[2] tracking-[0.12em] text-[#6B6B6B] max-w-full sm:max-w-[462px] mb-3 sm:mb-[16px] text-justify${shouldIndent ? ' ml-8' : ''}`}
+                                                        style={{
+                                                            fontFamily: `'YakuHanJP_Narrow', 'Zen Kaku Gothic New', sans-serif`,
+                                                            letterSpacing: '0.13em'
+                                                        }}
+                                                    >
+                                                        {isMarker ? (
+                                                            <span className="inline-flex items-center">
+                                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="mr-2" aria-hidden>
+                                                                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#84B5C5" />
+                                                                    <circle cx="12" cy="9" r="2.5" fill="#ffffff" />
+                                                                </svg>
+                                                                <span className="text-[16px] font-medium">{renderedText}</span>
+                                                            </span>
+                                                        ) : (
+                                                            renderedText
+                                                        )}
+                                                    </p>
+                                                );
+                                            })
                                         ) : (
                                             <p
-                                                className="text-[14px] font-light leading-[2] tracking-[0.12em] text-[#6B6B6B] max-w-[462px] mb-[32px] text-justify"
+                                                className="text-sm sm:text-base font-light leading-[1.9] md:leading-[2] tracking-[0.12em] text-[#6B6B6B] max-w-full sm:max-w-[462px] mb-6 text-justify"
                                                 style={{
                                                     fontFamily: `'YakuHanJP_Narrow', 'Zen Kaku Gothic New', sans-serif`,
                                                     letterSpacing: '0.13em'
@@ -280,35 +369,15 @@ export default function AboutUsSection({ showToTop = false, hideWhenHeroVisible 
                                                 </span>
                                             </a>
                                         ) : (
-                                            // placeholder to keep equal height on desktop
-                                            <div className="hidden md:flex items-center gap-4" aria-hidden>
+                                            // placeholder to keep equal height across all profiles
+                                            <div className="flex items-center gap-4" aria-hidden>
                                                 <span className="w-16 h-16" />
                                                 <span className="w-24 h-6" />
                                             </div>
                                         )}
                                     </div>
 
-                                    <div className="block md:hidden text-center mb-4 order-0">
-                                        <div className="flex justify-center gap-4 mb-2">
-                                            {profiles.map((p, i) => (
-                                                <button
-                                                    key={`mobile-${p.id}`}
-                                                    onClick={() => setCurrentSlide(i)}
-                                                    className={`
-                                                            px-4 py-2 rounded-full text-sm tracking-wide font-semibold 
-                                                            shadow-md transition duration-300 ease-in-out
-                                                            ${currentSlide === i
-                                                            ? 'bg-[#84B5C5] text-white scale-105'
-                                                            : 'bg-white text-[#84B5C5] hover:bg-[#eaf6f8] border border-[#84B5C5]'
-                                                        }
-                                                    `}
-                                                    aria-label={`表示: ${p.name}`}
-                                                >
-                                                    {i === 0 ? '夫婦' : i === 1 ? 'わたし' : '夫'}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
+
 
                                     <div className="relative mx-auto w-full max-w-md order-1 md:order-2 h-full flex items-center justify-center">
                                         <div className="relative overflow-hidden rounded-full bg-white p-0 md:p-2 shadow-[0_10px_50px_rgba(0,0,0,0.08)]">

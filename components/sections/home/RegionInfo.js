@@ -25,24 +25,55 @@ export default function RegionInfo({ region, onClose }) {
     };
 
     const data = CONTENT[region] || { title: region, body: "説明はありません。" };
+    const handleClose = () => {
+        // Prefer parent callback
+        if (typeof onClose === 'function') {
+            onClose();
+            return;
+        }
+
+        // Fallback: dispatch a custom event so a parent or window listener can react
+        try {
+            const ev = new CustomEvent('regioninfo:close', { detail: { region } });
+            window.dispatchEvent(ev);
+        } catch (e) {
+            // noop
+        }
+    };
 
     return (
-        <div className="rounded-2xl bg-white/95 p-4 md:p-6 shadow-md border border-black/5 w-full overflow-visible max-h-max md:max-w-[480px] lg:max-w-[520px]">
-            <div className="flex flex-col md:flex-row items-center md:items-start gap-4">
-                <div className="flex-1 min-w-0">
-                    <h3 className="text-lg md:text-xl font-semibold">{data.title}</h3>
-                    <p className="mt-2 text-sm md:text-base text-neutral-700 whitespace-normal break-words">{data.body}</p>
-                </div>
-                <div className="md:ml-4 flex-shrink-0">
-                    <a
-                        href="#"
-                        onClick={(e) => { e.preventDefault(); onClose && onClose(); }}
-                        aria-label="この地域を閉じる"
-                        className="group mt-2 inline-flex items-center justify-between gap-3 rounded-2xl bg-yellow-400 px-4 py-2 text-[14px] md:text-[15px] font-semibold text-neutral-900 shadow-sm hover:bg-yellow-300 active:bg-yellow-400/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-500/60 whitespace-nowrap"
-                    >
-                        <span>もっと見る</span>
-                        <ArrowRight className="size-5 transition-transform group-hover:translate-x-0.5" />
-                    </a>
+        <div className="rounded-lg bg-white p-4 md:p-6 shadow-lg border border-gray-200 w-full relative">
+            {/* 閉じるボタン（右上） */}
+            <button
+                type="button"
+                onClick={handleClose}
+                onTouchEnd={handleClose}
+                onPointerDown={handleClose}
+                aria-label="閉じる"
+                className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded-full bg-white/0 hover:bg-[rgba(132,181,197,0.12)] transition-colors z-20 touch-manipulation"
+                style={{ WebkitTapHighlightColor: 'transparent', color: 'rgb(132,181,197)' }}
+            >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+                    <path d="M18 6 6 18M6 6l12 12" />
+                </svg>
+            </button>
+
+            <div className="pr-8">
+                <h3 className="text-lg md:text-xl font-semibold mb-2">{data.title}</h3>
+                <p className="text-sm md:text-base text-gray-700 mb-4">{data.body}</p>
+
+                <div className="flex gap-2 flex-wrap items-center">
+                    <div className="flex-1" />
+                    <div>
+                        <button
+                            type="button"
+                            className="hidden group items-center gap-2 rounded-lg bg-yellow-400 px-4 py-2 text-sm font-semibold text-neutral-900 shadow-sm hover:bg-yellow-300 transition-colors touch-manipulation"
+                            style={{ WebkitTapHighlightColor: 'transparent' }}
+                        >
+                            <span>もっと見る</span>
+                            <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

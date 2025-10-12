@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import Image from 'next/image';
 import ToTopButton from '../../ui/ToTopButton';
 
 export default function ContactFooter() {
@@ -13,38 +14,12 @@ export default function ContactFooter() {
 
     return (
         <section className="relative bg-white border-t border-neutral-200">
-            <style>{`
-                @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap');
-                .font-body { font-family: 'Noto Sans JP', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; }
-            `}</style>
-
             <div className="relative z-10">
                 {/* メインコンテンツ */}
                 <div className="mx-auto max-w-4xl px-6 py-16 text-center font-body">
                     <div className="mb-12 text-3xl sm:text-4xl md:text-5xl font-bold text-neutral-900" style={{ letterSpacing: '0.2em' }}>
-                        <span className="relative inline-block">
-                            CONTACT
-                        </span>
+                        <span className="relative inline-block">CONTACT</span>
                     </div>
-
-                    {/* メールイラスト */}
-                    {/* <div className="mb-8 flex justify-center">
-                        <div
-                            className="relative w-24 h-24 sm:w-32 sm:h-32 transition-transform duration-300 hover:scale-105"
-                            onMouseEnter={() => setIsHovered(true)}
-                            onMouseLeave={() => setIsHovered(false)}
-                            onClick={handleClick}
-                        >
-                            <img
-                                src={(isHovered || isClicked) ? "/images/mail/open-mail.jpg" : "/images/mail/close-mail.jpg"}
-                                alt={(isHovered || isClicked) ? "開いたメール" : "閉じたメール"}
-                                className="w-full h-full object-cover rounded-lg shadow-sm transition-all duration-300 cursor-pointer"
-                                style={{
-                                    filter: (isHovered || isClicked) ? 'brightness(1.1)' : 'brightness(1)',
-                                }}
-                            />
-                        </div>
-                    </div> */}
 
                     <p className="mb-8 text-neutral-600 leading-7 text-sm max-w-md mx-auto">
                         下記のメールアドレスまでお気軽にご連絡ください
@@ -60,13 +35,12 @@ export default function ContactFooter() {
                     >
                         {/* 小さなメールイラスト */}
                         <div className="w-6 h-6 flex-shrink-0">
-                            <img
+                            <Image
                                 src={(isHovered || isClicked) ? "/images/mail/open-mail.jpg" : "/images/mail/close-mail.jpg"}
                                 alt={(isHovered || isClicked) ? "開いたメール" : "閉じたメール"}
-                                className="w-full h-full object-cover rounded transition-all duration-300"
-                                style={{
-                                    filter: (isHovered || isClicked) ? 'brightness(1.1)' : 'brightness(1)',
-                                }}
+                                width={24}
+                                height={24}
+                                className="rounded transition-all duration-300"
                             />
                         </div>
                         <span className="text-sm font-medium text-neutral-700 group-hover:text-neutral-900 select-all transition-colors">
@@ -82,9 +56,7 @@ export default function ContactFooter() {
 
                 {/* コピーライト */}
                 <div className="mx-auto max-w-4xl px-6 pb-8">
-                    <div className="text-center text-xs text-neutral-400">
-                        © わたしと夫の小さな暮らし
-                    </div>
+                    <div className="text-center text-xs text-neutral-400">© わたしと夫の小さな暮らし</div>
                 </div>
 
                 {/* ページトップへ（共通部品） */}

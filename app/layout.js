@@ -1,5 +1,8 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "../styles/globals.css";
+import dynamic from 'next/dynamic';
+
+const PageLoaderHost = dynamic(() => import('../components/ui/PageLoaderHost'));
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,6 +41,7 @@ export default function RootLayout({ children }) {
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
+        <PageLoaderHost />
       </body>
     </html>
   );

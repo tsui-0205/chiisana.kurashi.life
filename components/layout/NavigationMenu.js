@@ -35,7 +35,7 @@ export default function NavigationMenu({ isOpen, onClose }) {
         { href: "/", label: "ホーム", en: "home", type: "internal" },
         { href: "#about", label: "わたしたちのこと", en: "about", type: "anchor" },
         { href: "#instagram", label: "日々のこと", en: "daily", type: "anchor" },
-       { href: "#blog", label: "#夫のつぶやき", en: "blog", type: "anchor" },
+        { href: "#blog", label: "#夫のつぶやき", en: "blog", type: "anchor" },
         ...(isAuthenticated ? [{ href: "/site/admin", label: "管理", type: "internal", admin: true }] : []),
     ];
 

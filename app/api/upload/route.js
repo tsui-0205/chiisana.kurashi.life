@@ -5,16 +5,16 @@ import path from 'path';
 
 const SESSION_SECRET = process.env.SESSION_SECRET || 'your-secret-key';
 
-// 認証チェック関数
-function checkAuthentication() {
-    const cookieStore = cookies();
-    const sessionToken = cookieStore.get('admin_session')?.value;
-
-    if (!sessionToken) {
-        return false;
-    }
-
+// 認証チェック関数 (非同期化: cookies() が Promise を返すため)
+async function checkAuthentication() {
     try {
+        const cookieStore = await cookies();
+        const sessionToken = cookieStore.get('admin_session')?.value;
+
+        if (!sessionToken) {
+            return false;
+        }
+
         const decoded = Buffer.from(sessionToken, 'base64').toString();
         const [user, timestamp, secret] = decoded.split(':');
 
@@ -34,7 +34,7 @@ function checkAuthentication() {
 
 export async function POST(request) {
     // 認証チェック
-    if (!checkAuthentication()) {
+    if (!(await checkAuthentication())) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

@@ -4,11 +4,11 @@ import { useEffect, useMemo, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import RegionInfo from "./RegionInfo";
 
-// 画像は /public/images/ishikawa 以下に配置されている前提
+// 画像は /public/images/ishikawa 
 // noto.jpg, kanazawa.jpg, hakusan.jpg, kaga.jpg を使用
 
 // ====== アイドル（未ホバー時）演出レイヤ ============================
-function IdleBackdrop({ active }) {
+function IdleBackdrop({ active, onChangeIndex }) {
     const prefersReduced = useReducedMotion();
 
     // Ken Burns 的にスライド&ズームする画像セット
@@ -25,11 +25,22 @@ function IdleBackdrop({ active }) {
     const [index, setIndex] = useState(0);
 
     useEffect(() => {
-        if (!active) return; // 非アクティブなら回さない（無駄な re-render を抑える）
-        if (prefersReduced) return; // 低動作設定では停止
+        if (!active) return;
+        if (prefersReduced) return;
         const t = setInterval(() => setIndex((i) => (i + 1) % slides.length), 4000);
-        return () => clearInterval(t);
+        return () => {
+            try {
+                clearInterval(t);
+            } catch (e) {
+                // Ignore errors during cleanup
+            }
+        };
     }, [active, prefersReduced, slides.length]);
+
+    // 親コンポーネントへ index 変化を通知
+    useEffect(() => {
+        if (typeof onChangeIndex === "function") onChangeIndex(index);
+    }, [index, onChangeIndex]);
 
     // 浮遊するグラデーションブロブ
     const blob = (
@@ -99,17 +110,51 @@ function IdleBackdrop({ active }) {
 
 // ====== MAIN ======================================================
 export default function IshikawaMapApp() {
+    // Production: no development instrumentation here. Normal behavior only.
     const [hoveredRegion, setHoveredRegion] = useState(null);
     const [selectedRegion, setSelectedRegion] = useState(null);
     const [selectedOrigin, setSelectedOrigin] = useState("none");
     const [mainHovered, setMainHovered] = useState(false);
+    const [idleIndex, setIdleIndex] = useState(0);
+    const prefersReduced = useReducedMotion();
 
     useEffect(() => {
         function onKey(e) {
             if (e.key === "Escape") setSelectedRegion(null);
         }
-        window.addEventListener("keydown", onKey);
-        return () => window.removeEventListener("keydown", onKey);
+        if (typeof window !== 'undefined') {
+            window.addEventListener("keydown", onKey);
+        }
+        return () => {
+            if (typeof window !== 'undefined') {
+                try {
+                    window.removeEventListener("keydown", onKey);
+                } catch (e) {
+                    // Ignore errors during cleanup
+                }
+            }
+        };
+    }, []);
+
+    // Fallback: listen for RegionInfo fallback close events
+    useEffect(() => {
+        function onRegionInfoClose() {
+            setSelectedRegion(null);
+            setSelectedOrigin('none');
+            setHoveredRegion(null);
+        }
+        if (typeof window !== 'undefined') {
+            window.addEventListener('regioninfo:close', onRegionInfoClose);
+        }
+        return () => {
+            if (typeof window !== 'undefined') {
+                try {
+                    window.removeEventListener('regioninfo:close', onRegionInfoClose);
+                } catch (e) {
+                    // Ignore errors during cleanup
+                }
+            }
+        };
     }, []);
 
     // Hover と選択の同期
@@ -129,10 +174,9 @@ export default function IshikawaMapApp() {
 
     // スクロールで説明カードを自動的に閉じる（短いデバウンス付き）
     useEffect(() => {
-        if (!selectedRegion) return;
+        if (!selectedRegion || typeof window === 'undefined') return;
         let t = null;
         function onScroll() {
-            // スクロール開始で即閉じるのではなく、少しだけ待って連続スクロールをまとめる
             if (t) clearTimeout(t);
             t = setTimeout(() => {
                 setSelectedRegion(null);
@@ -141,8 +185,14 @@ export default function IshikawaMapApp() {
         }
         window.addEventListener('scroll', onScroll, { passive: true });
         return () => {
-            window.removeEventListener('scroll', onScroll);
-            if (t) clearTimeout(t);
+            try {
+                if (typeof window !== 'undefined') {
+                    window.removeEventListener('scroll', onScroll);
+                }
+                if (t) clearTimeout(t);
+            } catch (e) {
+
+            }
         };
     }, [selectedRegion]);
 
@@ -152,7 +202,7 @@ export default function IshikawaMapApp() {
         setSelectedOrigin("click");
     }
 
-    const idleActive = !hoveredRegion; // 未ホバー時にアニメ出す
+    const idleActive = !hoveredRegion && !selectedRegion;
 
     return (
         <div className="min-h-screen bg-[var(--background)] p-6">
@@ -172,7 +222,7 @@ export default function IshikawaMapApp() {
                 <div className="relative left-1/2 right-1/2 w-screen -ml-[50vw] -mr-[50vw] md:col-span-5">
                     <div className="relative h-[95vh] w-full overflow-hidden bg-transparent" onTouchStart={() => setHoveredRegion(null)}>
                         {/* === 追加: 未ホバー時のアイドル背景レイヤ === */}
-                        <IdleBackdrop active={idleActive} />
+                        <IdleBackdrop active={idleActive} onChangeIndex={setIdleIndex} />
 
                         {/* === ホバー中：対象写真を前面にフェード === */}
                         {hoveredRegion && (
@@ -229,109 +279,169 @@ export default function IshikawaMapApp() {
                                     </div>
                                 )}
 
-                                {/* 縦書きタイトル（ホバー時のみ） */}
-                                {hoveredRegion && (
-                                    // タブレット(md)では横書きのみを表示するため、縦書きは lg 以上でのみ表示
-                                    <div className="absolute left-[-240px] top-8 z-40 hidden lg:flex flex-col items-center lg:left-[-320px]">
-                                        <div className="flex flex-col items-center text-[2.8rem] lg:text-[3.6rem] font-extrabold leading-[1] tracking-[0.28em] text-white drop-shadow-md">
-                                            {hoveredRegion === "noto" && (
-                                                <>
-                                                    <span className="block">能</span>
-                                                    <span className="block">登</span>
-                                                </>
-                                            )}
-                                            {hoveredRegion === "kanazawa" && (
-                                                <>
-                                                    <span className="block">金</span>
-                                                    <span className="block">沢</span>
-                                                </>
-                                            )}
-                                            {hoveredRegion === "hakusan" && (
-                                                <>
-                                                    <span className="block">白</span>
-                                                    <span className="block">山</span>
-                                                </>
-                                            )}
-                                            {hoveredRegion === "kaga" && (
-                                                <>
-                                                    <span className="block">加</span>
-                                                    <span className="block">賀</span>
-                                                </>
-                                            )}
-                                        </div>
-                                        <div className="mt-4 flex flex-col items-center text-lg lg:text-xl font-medium text-white drop-shadow-sm tracking-[0.3em]">
-                                            {(hoveredRegion === "noto"
-                                                ? "Noto"
-                                                : hoveredRegion === "kanazawa"
-                                                    ? "Kanazawa"
-                                                    : hoveredRegion === "hakusan"
-                                                        ? "Hakusan"
-                                                        : hoveredRegion === "kaga"
-                                                            ? "Kaga"
-                                                            : ""
-                                            )
-                                                .split("")
-                                                .map((ch, i) => (
+                                {/* モバイル用：未ホバー（Idle）時にも表示する */}
+                                {!hoveredRegion && idleActive && (
+                                    <div className="absolute -top-8 left-3 z-40 flex items-center gap-2 lg:hidden">
+                                        <span className="text-3xl md:text-4xl font-extrabold text-white tracking-[0.2em]">
+                                            {idleIndex === 0 && "能登"}
+                                            {idleIndex === 1 && "金沢"}
+                                            {idleIndex === 2 && "白山"}
+                                            {idleIndex === 3 && "加賀"}
+                                        </span>
+                                        <span className="text-sm md:text-xl font-medium text-white/90 tracking-wider">
+                                            {idleIndex === 0 && "Noto"}
+                                            {idleIndex === 1 && "Kanazawa"}
+                                            {idleIndex === 2 && "Hakusan"}
+                                            {idleIndex === 3 && "Kaga"}
+                                        </span>
+                                    </div>
+                                )}
+
+                                {/* buttons moved below background slideshow */}
+
+                                {/* 縦書きタイトル（ホバー時または Idle スライド時に表示） */}
+                                {(() => {
+                                    // hoveredRegion があれば優先。なければ idleIndex に対応する領域を表示。
+                                    const regions = ["noto", "kanazawa", "hakusan", "kaga"];
+                                    const displayRegion = hoveredRegion || (idleActive ? regions[idleIndex % regions.length] : null);
+                                    if (!displayRegion) return null;
+
+                                    const enName = displayRegion === "noto" ? "Noto" : displayRegion === "kanazawa" ? "Kanazawa" : displayRegion === "hakusan" ? "Hakusan" : displayRegion === "kaga" ? "Kaga" : "";
+
+                                    // motion を使い、表示はゆっくりフェード&スライドインさせる
+                                    return (
+                                        <motion.div
+                                            key={displayRegion}
+                                            aria-hidden={!!hoveredRegion ? false : true}
+                                            initial={prefersReduced ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+                                            animate={prefersReduced ? { opacity: 1, y: 0 } : { opacity: 1, y: 0 }}
+                                            transition={prefersReduced ? {} : { duration: 1.8, ease: "easeOut" }}
+                                            className="absolute left-[-240px] top-8 z-40 hidden lg:flex flex-col items-center lg:left-[-320px]"
+                                        >
+                                            <div className="flex flex-col items-center text-[2.8rem] lg:text-[3.6rem] font-extrabold leading-[1] tracking-[0.28em] text-white drop-shadow-md">
+                                                {displayRegion === "noto" && (
+                                                    <>
+                                                        <span className="block">能</span>
+                                                        <span className="block">登</span>
+                                                    </>
+                                                )}
+                                                {displayRegion === "kanazawa" && (
+                                                    <>
+                                                        <span className="block">金</span>
+                                                        <span className="block">沢</span>
+                                                    </>
+                                                )}
+                                                {displayRegion === "hakusan" && (
+                                                    <>
+                                                        <span className="block">白</span>
+                                                        <span className="block">山</span>
+                                                    </>
+                                                )}
+                                                {displayRegion === "kaga" && (
+                                                    <>
+                                                        <span className="block">加</span>
+                                                        <span className="block">賀</span>
+                                                    </>
+                                                )}
+                                            </div>
+                                            <div className="mt-4 flex flex-col items-center text-lg lg:text-xl font-medium text-white drop-shadow-sm tracking-[0.3em]">
+                                                {enName.split("").map((ch, i) => (
                                                     <span key={i} className="block leading-none">
                                                         {ch}
                                                     </span>
                                                 ))}
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* ==== マーカー群（既存） ==== */}
-                                <Marker
-                                    id="noto"
-                                    src="/images/ishikawa/mapMarker/notoM.png"
-                                    className="absolute left-[46%] top-[8%] z-40 h-auto w-44 -translate-x-1/2 cursor-pointer object-contain sm:w-48 md:w-64 lg:w-56"
-                                    onHover={setHoveredRegion}
-                                    onClick={handleMarkerClick}
-                                    selectedOrigin={selectedOrigin}
-                                />
-
-                                <Marker
-                                    id="kanazawa"
-                                    src="/images/ishikawa/mapMarker/kanazawaM.png"
-                                    className="absolute left-[8%] top-[42%] z-40 h-auto w-44 cursor-pointer object-contain sm:bottom-[22%] sm:left-[8%] sm:top-auto md:bottom-[32%] md:left-[10%] md:top-auto md:w-64 lg:w-56 sm:w-48"
-                                    onHover={setHoveredRegion}
-                                    onClick={handleMarkerClick}
-                                    selectedOrigin={selectedOrigin}
-                                />
-
-                                <Marker
-                                    id="hakusan"
-                                    src="/images/ishikawa/mapMarker/hakusanM.png"
-                                    className="absolute left-[40%] top-[72%] z-40 h-auto w-44 -translate-x-1/2 cursor-pointer object-contain sm:w-48 md:w-64 lg:w-56"
-                                    onHover={setHoveredRegion}
-                                    onClick={handleMarkerClick}
-                                    selectedOrigin={selectedOrigin}
-                                />
-
-                                <Marker
-                                    id="kaga"
-                                    src="/images/ishikawa/mapMarker/kagaM.png"
-                                    className="absolute left-[14%] top-[66%] z-40 h-auto w-44 -translate-x-1/2 cursor-pointer object-contain sm:w-48 md:w-64 lg:w-56"
-                                    onHover={setHoveredRegion}
-                                    onClick={handleMarkerClick}
-                                    selectedOrigin={selectedOrigin}
-                                />
+                                            </div>
+                                        </motion.div>
+                                    );
+                                })()}
                             </div>
                         </div>
                     </div>
 
-                    {/* 説明カード - 小さいサイズで背景内下部に配置 */}
-                    {selectedRegion && (
-                        <div className="absolute bottom-6 left-6 right-6 z-50 max-w-sm mx-auto md:fixed md:top-1/2 md:left-[62%] md:right-auto md:bottom-auto md:transform md:-translate-y-1/2 md:w-[380px] lg:w-[400px] md:max-w-none">
-                            {/*
-                                小画面: 背景画像エリア内の下部、max-w-smで小さく表示、main画像に重ならない
-                                md+: 固定配置で main の右側に表示
-                            */}
-                            <div className="scale-90 md:scale-100 origin-bottom md:origin-center">
-                                <RegionInfo region={selectedRegion} onClose={() => setSelectedRegion(null)} />
-                            </div>
+                    {/* === 追加: 背景スライド下の地域ボタン群 === */}
+                    {/* === 地域ナビゲーション（シンプルスタイル） === */}
+                    <div className="mt-8 w-full flex justify-center">
+                        <div className="flex flex-wrap gap-8 md:gap-20 lg:gap-28 justify-center items-center font-medium text-lg">
+                            <button
+                                onClick={() => setHoveredRegion('noto')}
+                                onKeyDown={(e) => e.key === 'Enter' && setHoveredRegion('noto')}
+                                className="transition-colors duration-200 cursor-pointer hover:opacity-70"
+                                style={{ color: '#84b5c5' }}
+                            >
+                                能登 &gt;
+                            </button>
+                            <button
+                                onClick={() => setHoveredRegion('kanazawa')}
+                                onKeyDown={(e) => e.key === 'Enter' && setHoveredRegion('kanazawa')}
+                                className="transition-colors duration-200 cursor-pointer hover:opacity-70"
+                                style={{ color: '#84b5c5' }}
+                            >
+                                金沢 &gt;
+                            </button>
+                            <button
+                                onClick={() => setHoveredRegion('hakusan')}
+                                onKeyDown={(e) => e.key === 'Enter' && setHoveredRegion('hakusan')}
+                                className="transition-colors duration-200 cursor-pointer hover:opacity-70"
+                                style={{ color: '#84b5c5' }}
+                            >
+                                白山 &gt;
+                            </button>
+                            <button
+                                onClick={() => setHoveredRegion('kaga')}
+                                onKeyDown={(e) => e.key === 'Enter' && setHoveredRegion('kaga')}
+                                className="transition-colors duration-200 cursor-pointer hover:opacity-70"
+                                style={{ color: '#84b5c5' }}
+                            >
+                                加賀 &gt;
+                            </button>
                         </div>
-                    )}
+
+                        {/* 説明カード - モバイル:下部、デスクトップ:右側 */}
+                        {selectedRegion && (
+                            <div className="absolute inset-0 z-50 pointer-events-auto">
+                                {/* オーバーレイ: 外側クリック/タッチで閉じる */}
+                                <div
+                                    className="absolute inset-0 bg-black/20 md:bg-transparent"
+                                    role="button"
+                                    tabIndex={0}
+                                    onClick={() => {
+                                        setSelectedRegion(null);
+                                        setSelectedOrigin('none');
+                                        setHoveredRegion(null);
+                                    }}
+                                    onPointerDown={() => {
+                                        setSelectedRegion(null);
+                                        setSelectedOrigin('none');
+                                        setHoveredRegion(null);
+                                    }}
+                                    onTouchEnd={() => {
+                                        setSelectedRegion(null);
+                                        setSelectedOrigin('none');
+                                        setHoveredRegion(null);
+                                    }}
+                                />
+
+                                {/* パネル: モバイルでは下部、デスクトップでは右側に配置 */}
+                                <div className="absolute inset-x-4 bottom-4 pointer-events-none md:top-[60%] md:-translate-y-1/2 md:right-[5%] md:inset-x-auto md:w-[30%] md:max-w-md">
+                                    <div
+                                        className="pointer-events-auto bg-white/95 backdrop-blur-sm rounded-lg shadow-xl max-h-full overflow-y-auto"
+                                        onClick={(e) => e.stopPropagation()}
+                                        onTouchStart={(e) => e.stopPropagation()}
+                                        onTouchEnd={(e) => e.stopPropagation()}
+                                    >
+                                        <RegionInfo
+                                            region={selectedRegion}
+                                            onClose={() => {
+                                                setSelectedRegion(null);
+                                                setSelectedOrigin('none');
+                                                setHoveredRegion(null);
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>
