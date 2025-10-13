@@ -58,18 +58,18 @@ function HeroTriptych({ title, images }) {
 function PostCard({ post }) {
   return (
     <article className="group">
-      <Link href={post.href}>
+      <Link href={post.href} onClick={() => { try { window.dispatchEvent(new Event('__page-loader:show')); } catch {} }}>
         <Card>
           <CardImage
             src={post.cover}
             alt={post.title}
           />
           <CardContent>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-[10px] px-2 py-1 bg-rose-100 text-rose-600 rounded-full font-medium">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-2 text-nowrap">
+              <span className="text-[10px] px-2 py-1 bg-rose-100 text-rose-600 rounded-full font-medium whitespace-nowrap">
                 {post.category || "日常"}
               </span>
-              <p className="text-[10px] text-neutral-500 tracking-[0.08em]">
+              <p className="text-[10px] text-neutral-500 tracking-[0.08em] whitespace-nowrap">
                 {formatDateYMD(post.date)}
               </p>
             </div>
@@ -185,7 +185,6 @@ export default function BlogPage() {
         const data = await response.json();
         setIsAuthenticated(data.authenticated);
       } catch (error) {
-        console.error('Auth check error:', error);
         setIsAuthenticated(false);
       }
     };

@@ -33,7 +33,7 @@ export async function GET() {
                 }
             }
         } catch (decodeError) {
-            console.error('Token decode error:', decodeError);
+
         }
 
         // 無効なトークンの場合はクッキーを削除
@@ -48,7 +48,6 @@ export async function GET() {
         });
 
     } catch (error) {
-        console.error('Auth check error:', error);
         return NextResponse.json({
             authenticated: false
         }, { status: 500 });

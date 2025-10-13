@@ -1,5 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import { motion } from 'framer-motion';
+import useInView from '@/hooks/useInView';
 import SectionHeader from "../../ui/SectionHeader";
 import ToTopButton from "../../ui/ToTopButton";
 
@@ -102,14 +104,18 @@ export default function InstagramFeed({ showToTop = false, hideWhenHeroVisible =
     };
 
     // トラックの自動スクロール速度（画像数に応じて自動で伸縮）
-    const baseSeconds = 20; // 3枚で約20秒/ループ（デスクトップ想定）
+    const baseSeconds = 40; // 3枚で約20秒/ループ（デスクトップ想定） — ゆっくり目
     const duration = Math.max(12, Math.round((instagramPosts.length / 3) * baseSeconds));
     // モバイルはカードが大きく見えるため体感速度が遅く感じられることがある。
     // そのためモバイル向けに短めの duration を用意して PC 表示と近い体感に合わせる。
     const mobileDuration = Math.max(8, Math.round(duration * 0.6));
 
-    // 2周分に複製（無限ループ風）
-    const doubled = [...instagramPosts, ...instagramPosts];
+    // 複製数を可変に（ここを 2 / 3 / 4 に変更して挙動を切替可能）
+    // ① 簡単に戻す場合は DUPLICATES = 2
+    const DUPLICATES = 2; // change to 2/3/4 ...
+    const doubled = Array(DUPLICATES).fill(instagramPosts).flat();
+    const movePercent = 470 / DUPLICATES; // 1セット分の幅をパーセンテージで計算
+    const [ref, inView] = useInView({ threshold: 0.12 });
 
     return (
         <section id="instagram" className="relative overflow-hidden bg-white text-zinc-800">
@@ -138,16 +144,14 @@ export default function InstagramFeed({ showToTop = false, hideWhenHeroVisible =
                             animation-duration: ${duration}s;
                             animation-play-state: running;
                         }
-                        .marquee-track.paused { animation-play-state: paused; }
                 /* モバイル向け: より短い duration を使って体感速度を速める */
                 @media (max-width: 768px) {
                     .marquee-track.animate { animation-duration: ${mobileDuration}s; }
                 }
-        .marquee-wrapper:hover .marquee-track.animate { animation-play-state: paused; }
-        @keyframes scrollX {
-          from { transform: translateX(0); }
-          to   { transform: translateX(-50%); }
-        }
+                @keyframes scrollX {
+                    from { transform: translateX(0); }
+                    to   { transform: translateX(-${movePercent}%); }
+                }
         @media (prefers-reduced-motion: reduce) {
           .marquee-track.animate { animation: none; }
         }
@@ -185,7 +189,13 @@ export default function InstagramFeed({ showToTop = false, hideWhenHeroVisible =
                 </div>
             </div>
 
-            <div className="mx-auto max-w-7xl px-0 md:px-6 py-2 pb-20 font-body">
+            <motion.div
+                ref={ref}
+                initial={{ opacity: 0, y: 30 }}
+                animate={inView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.9, ease: 'easeOut' }}
+                className="mx-auto max-w-7xl px-0 md:px-6 py-2 pb-20 font-body"
+            >
                 {/* アカウントリンク */}
                 <div className="text-center mb-10 px-6">
                     <a
@@ -211,7 +221,7 @@ export default function InstagramFeed({ showToTop = false, hideWhenHeroVisible =
                     >
                         <div
                             ref={trackRef}
-                            className={`marquee-track animate ${isUserInteracting ? "paused" : ""}`}
+                            className={`marquee-track animate`}
                             style={{
                                 padding: "12px 24px",
                             }}
@@ -219,7 +229,7 @@ export default function InstagramFeed({ showToTop = false, hideWhenHeroVisible =
                             {doubled.map((post, idx) => (
                                 <figure
                                     key={`${post.id}-${idx}`}
-                                    className="ig-card group relative h-[45vh] md:h-[60vh] aspect-[4/3] min-w-[66vw] sm:min-w-[50vw] md:min-w-[42vw] lg:min-w-[36vw] xl:min-w-[28vw]"
+                                    className="ig-card group relative h-[45vh] md:h-[60vh] aspect-[4/3] min-w-[50vw] sm:min-w-[36vw] md:min-w-[36vw] lg:min-w-[36vw] xl:min-w-[28vw]"
                                     onClick={() => openPost(post.postUrl)}
                                     role="button"
                                     aria-label="Open Instagram post"
@@ -256,7 +266,7 @@ export default function InstagramFeed({ showToTop = false, hideWhenHeroVisible =
                 </div>
 
                 {/* もっと見るボタン */}
-                <div className="mt-14 text-center fade-in-up">
+                <div className="mt-14 text-center">
                     <a
                         href="https://www.instagram.com/chiisana.kurashi.life?igsh=MXVpeDk4YjRwbzZrag=="
                         target="_blank"
@@ -288,7 +298,7 @@ export default function InstagramFeed({ showToTop = false, hideWhenHeroVisible =
 
                     </a>
                 </div>
-            </div>
+            </motion.div>
 
             {/* ページトップへ（共通部品） */}
             <ToTopButton />

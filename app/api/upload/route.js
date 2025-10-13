@@ -26,7 +26,6 @@ async function checkAuthentication() {
             return now - tokenTime < weekInMs;
         }
     } catch (error) {
-        console.error('Auth check error:', error);
     }
 
     return false;
@@ -81,7 +80,6 @@ export async function POST(request) {
         });
 
     } catch (error) {
-        console.error('Error uploading file:', error);
         return NextResponse.json({ error: 'Failed to upload file' }, { status: 500 });
     }
 }

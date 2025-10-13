@@ -41,7 +41,7 @@ export default function Home() {
             {/* Content sections that will overlay the fixed image when scrolled */}
             <div className="relative z-40 bg-white">
                 {/* 石川県の思い出マップ */}
-                <div className="bg-white">
+                <div className="bg-white mb-12 md:mb-0">
                     <IshikawaMap />
                 </div>
                 {/* わたしたちのこと */}

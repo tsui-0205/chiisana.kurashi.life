@@ -147,7 +147,7 @@ export default function HeroSection({ isMenuOpen, setIsMenuOpen, onLoaded, onHer
             animation: rotateText 20s linear infinite; 
             transform-origin: 100px 100px; 
         }
-                    .bottom-right-text .circle-text { fill: #FFD54F; font-weight: 900; font-family: "YakuHanJP_Narrow", "Zen Kaku Gothic New", sans-serif; font-size: 28px; letter-spacing: 0.2em; }
+                    .bottom-right-text .circle-text { fill: #FFD54F; font-weight: 900; /* use やさしさフォント if available */ font-family: "YasashisaGothic", "YakuHanJP_Narrow", "Zen Kaku Gothic New", sans-serif; font-size: 28px; letter-spacing: 0.2em; }
         .bottom-right-text .circle-bg { fill: rgba(255,213,79,0.06); }
         @media (max-width: 640px) {
             .bottom-right-text { width: 120px; height: 120px; right: 3%; bottom: 4%; }

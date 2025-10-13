@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import useInView from '@/hooks/useInView';
 import ToTopButton from '../../ui/ToTopButton';
 
 export default function AboutUsSection() {
@@ -160,6 +162,7 @@ export default function AboutUsSection() {
     };
 
     useEffect(() => { setMounted(true); }, []);
+    const [bodyRef, bodyInView] = useInView({ threshold: 0.15 });
 
     if (!mounted) {
         return <section id="about" className="relative overflow-hidden bg-white text-zinc-800" style={{ minHeight: 520 }} />;
@@ -223,208 +226,217 @@ export default function AboutUsSection() {
                 </div>
             </div>
 
-            {/* Profile selector buttons - Fixed position under title */}
-            <div className="mx-auto max-w-6xl px-6 mt-2 md:mt-3 mb-0 font-body">
-                <div
-                    className={`flex justify-center md:justify-start gap-3 fade-in-up ${visibleItems.has('profile-tabs') ? 'visible' : ''}`}
-                    role="tablist"
-                    aria-label="プロフィール切替"
-                    data-animate="true"
-                    data-index="profile-tabs"
-                >
-                    {profiles.map((p, index) => (
-                        <button
-                            key={p.id}
-                            onClick={() => setCurrentSlide(index)}
-                            className={`
-                                h-10 px-5 rounded-full text-base tracking-wide font-semibold
-                                whitespace-nowrap flex items-center justify-center shadow-md
-                                transition duration-300 ease-in-out
-                                ${currentSlide === index
-                                    ? 'bg-[#84B5C5] text-white scale-105'
-                                    : 'bg-white text-[#84B5C5] border border-[#84B5C5] hover:bg-[#eaf6f8]'
-                                }
-                            `}
-                            role="tab"
-                            aria-selected={currentSlide === index}
-                        >
-                            {p.id === 'couple' ? '夫婦' : p.id === 'wife' ? 'わたし' : p.id === 'husband' ? '夫' : p.name}
-                        </button>
-                    ))}
-                </div>
-            </div>
-
-            <div className="mx-auto max-w-6xl px-6 pt-2 pb-0 font-body">
-                {/* Slider Container */}
-                <div
-                    className={`relative overflow-hidden fade-in-up ${visibleItems.has('slider') ? 'visible' : ''}`}
-                    data-animate="true"
-                    data-index="slider"
-                    style={{ transitionDelay: '0.2s' }}
-                >
-                    {/* Slides */}
+            {/* Profile selector + slider: body content that should fade up (title remains static) */}
+            <motion.div
+                ref={bodyRef}
+                initial={{ opacity: 0, y: 30 }}
+                animate={bodyInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.9, ease: 'easeOut' }}
+                className="mx-auto max-w-6xl"
+            >
+                <div className="px-6 mt-2 md:mt-3 mb-0 font-body">
                     <div
-                        className="flex transition-transform duration-500 ease-in-out"
-                        style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+                        className={`flex justify-center md:justify-start gap-3 fade-in-up ${visibleItems.has('profile-tabs') ? 'visible' : ''}`}
+                        role="tablist"
+                        aria-label="プロフィール切替"
+                        data-animate="true"
+                        data-index="profile-tabs"
                     >
-                        {profiles.map((profile, index) => (
-                            <div
-                                key={profile.id}
-                                className="w-full flex-shrink-0 px-4 min-h-[620px] md:h-[640px] overflow-visible"
+                        {profiles.map((p, index) => (
+                            <button
+                                key={p.id}
+                                onClick={() => setCurrentSlide(index)}
+                                className={`
+                                                h-10 px-5 rounded-full text-base tracking-wide font-semibold
+                                                whitespace-nowrap flex items-center justify-center shadow-md
+                                                transition duration-300 ease-in-out
+                                                ${currentSlide === index
+                                        ? 'bg-[#84B5C5] text-white scale-105'
+                                        : 'bg-white text-[#84B5C5] border border-[#84B5C5] hover:bg-[#eaf6f8]'
+                                    }
+                                            `}
+                                role="tab"
+                                aria-selected={currentSlide === index}
                             >
-                                <div className="grid items-center gap-10 md:gap-16 md:grid-cols-2 py-6">
-                                    {/* Left: text */}
-                                    <div className="h-full flex flex-col justify-center space-y-3 md:space-y-6 order-2 md:order-1">
+                                {p.id === 'couple' ? '夫婦' : p.id === 'wife' ? 'わたし' : p.id === 'husband' ? '夫' : p.name}
+                            </button>
+                        ))}
+                    </div>
+                </div>
 
-                                        {Array.isArray(profile.description) ? (
-                                            profile.description.map((para, idx) => {
-                                                if (React.isValidElement(para)) {
+                <div className="px-6 pt-2 pb-0 font-body">
+                    {/* Slider Container */}
+                    <div
+                        className={`relative overflow-hidden fade-in-up ${visibleItems.has('slider') ? 'visible' : ''}`}
+                        data-animate="true"
+                        data-index="slider"
+                        style={{ transitionDelay: '0.2s' }}
+                    >
+                        {/* Slides */}
+                        <div
+                            className="flex transition-transform duration-500 ease-in-out"
+                            style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+                        >
+                            {profiles.map((profile, index) => (
+                                <div
+                                    key={profile.id}
+                                    className="w-full flex-shrink-0 px-4 min-h-[620px] md:h-[640px] overflow-visible"
+                                >
+                                    <div className="grid items-center gap-10 md:gap-16 md:grid-cols-2 py-6">
+                                        {/* Left: text */}
+                                        <div className="h-full flex flex-col justify-center space-y-3 md:space-y-6 order-2 md:order-1">
+
+                                            {Array.isArray(profile.description) ? (
+                                                profile.description.map((para, idx) => {
+                                                    if (React.isValidElement(para)) {
+                                                        return (
+                                                            <p
+                                                                key={idx}
+                                                                className="text-sm sm:text-base font-light leading-[1.9] md:leading-[2] tracking-[0.12em] text-[#6B6B6B] max-w-full sm:max-w-[462px] mb-3 sm:mb-[16px] text-justify"
+                                                                style={{
+                                                                    fontFamily: `'YakuHanJP_Narrow', 'Zen Kaku Gothic New', sans-serif`,
+                                                                    letterSpacing: '0.13em'
+                                                                }}
+                                                            >
+                                                                {para}
+                                                            </p>
+                                                        );
+                                                    }
+
+                                                    const text = String(para || '');
+                                                    const isMarker = text.trim().startsWith('📍');
+                                                    const renderedText = isMarker ? text.replace(/^📍\s*/, '') : text;
+                                                    let shouldIndent = false;
+                                                    if (!isMarker) {
+                                                        for (let j = idx - 1; j >= 0; j--) {
+                                                            const prev = profile.description[j];
+                                                            const prevText = String(prev || '');
+                                                            if (prevText.trim().startsWith('📍')) {
+                                                                shouldIndent = true;
+                                                                break;
+                                                            }
+                                                        }
+                                                    }
+
                                                     return (
                                                         <p
                                                             key={idx}
-                                                            className="text-sm sm:text-base font-light leading-[1.9] md:leading-[2] tracking-[0.12em] text-[#6B6B6B] max-w-full sm:max-w-[462px] mb-3 sm:mb-[16px] text-justify"
+                                                            className={`text-sm sm:text-base font-light leading-[1.9] md:leading-[2] tracking-[0.12em] text-[#6B6B6B] max-w-full sm:max-w-[462px] mb-3 sm:mb-[16px] text-justify${shouldIndent ? ' ml-8' : ''}`}
                                                             style={{
                                                                 fontFamily: `'YakuHanJP_Narrow', 'Zen Kaku Gothic New', sans-serif`,
                                                                 letterSpacing: '0.13em'
                                                             }}
                                                         >
-                                                            {para}
+                                                            {isMarker ? (
+                                                                <span className="inline-flex items-center">
+                                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="mr-2" aria-hidden>
+                                                                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#84B5C5" />
+                                                                        <circle cx="12" cy="9" r="2.5" fill="#ffffff" />
+                                                                    </svg>
+                                                                    <span className="text-[16px] font-medium">{renderedText}</span>
+                                                                </span>
+                                                            ) : (
+                                                                renderedText
+                                                            )}
                                                         </p>
                                                     );
-                                                }
+                                                })
+                                            ) : (
+                                                <p
+                                                    className="text-sm sm:text-base font-light leading-[1.9] md:leading-[2] tracking-[0.12em] text-[#6B6B6B] max-w-full sm:max-w-[462px] mb-6 text-justify"
+                                                    style={{
+                                                        fontFamily: `'YakuHanJP_Narrow', 'Zen Kaku Gothic New', sans-serif`,
+                                                        letterSpacing: '0.13em'
+                                                    }}
+                                                >
+                                                    {profile.description}
+                                                </p>
+                                            )}
 
-                                                const text = String(para || '');
-                                                const isMarker = text.trim().startsWith('📍');
-                                                const renderedText = isMarker ? text.replace(/^📍\s*/, '') : text;
-                                                let shouldIndent = false;
-                                                if (!isMarker) {
-                                                    for (let j = idx - 1; j >= 0; j--) {
-                                                        const prev = profile.description[j];
-                                                        const prevText = String(prev || '');
-                                                        if (prevText.trim().startsWith('📍')) {
-                                                            shouldIndent = true;
-                                                            break;
-                                                        }
-                                                    }
-                                                }
-
-                                                return (
-                                                    <p
-                                                        key={idx}
-                                                        className={`text-sm sm:text-base font-light leading-[1.9] md:leading-[2] tracking-[0.12em] text-[#6B6B6B] max-w-full sm:max-w-[462px] mb-3 sm:mb-[16px] text-justify${shouldIndent ? ' ml-8' : ''}`}
-                                                        style={{
-                                                            fontFamily: `'YakuHanJP_Narrow', 'Zen Kaku Gothic New', sans-serif`,
-                                                            letterSpacing: '0.13em'
-                                                        }}
-                                                    >
-                                                        {isMarker ? (
-                                                            <span className="inline-flex items-center">
-                                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="mr-2" aria-hidden>
-                                                                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#84B5C5" />
-                                                                    <circle cx="12" cy="9" r="2.5" fill="#ffffff" />
-                                                                </svg>
-                                                                <span className="text-[16px] font-medium">{renderedText}</span>
-                                                            </span>
-                                                        ) : (
-                                                            renderedText
-                                                        )}
-                                                    </p>
-                                                );
-                                            })
-                                        ) : (
-                                            <p
-                                                className="text-sm sm:text-base font-light leading-[1.9] md:leading-[2] tracking-[0.12em] text-[#6B6B6B] max-w-full sm:max-w-[462px] mb-6 text-justify"
-                                                style={{
-                                                    fontFamily: `'YakuHanJP_Narrow', 'Zen Kaku Gothic New', sans-serif`,
-                                                    letterSpacing: '0.13em'
-                                                }}
-                                            >
-                                                {profile.description}
-                                            </p>
-                                        )}
-
-                                        {/* 夫のプロフィールの場合のみ「詳しく見る」ボタンを表示 */}
-                                        {profile.hasDetails ? (
-                                            <a
-                                                href="/site/profile/husband"
-                                                className="group inline-flex items-center gap-4 focus:outline-none"
-                                                aria-label="詳しくみる"
-                                            >
-                                                {/* 円ボタン */}
-                                                <span className="grid place-items-center w-16 h-16 rounded-full border border-[#84B5C5] bg-zinc-100/60 text-[#84B5C5] shadow-sm transition-all
+                                            {/* 夫のプロフィールの場合のみ「詳しく見る」ボタンを表示 */}
+                                            {profile.hasDetails ? (
+                                                <a
+                                                    href="/site/profile/husband"
+                                                    className="group inline-flex items-center gap-4 focus:outline-none"
+                                                    aria-label="詳しくみる"
+                                                >
+                                                    {/* 円ボタン */}
+                                                    <span className="grid place-items-center w-16 h-16 rounded-full border border-[#84B5C5] bg-zinc-100/60 text-[#84B5C5] shadow-sm transition-all
                                                     group-hover:border-zinc-600 group-hover:bg-zinc-200/80 group-focus-visible:ring-1 group-focus-visible:ring-[#84B5C5]/50">
-                                                    <svg
-                                                        width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                                        className="transition-transform duration-200 group-hover:translate-x-1"
-                                                    >
-                                                        <path d="M6 12h12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-                                                        <path d="M18 9l4 3-4 3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                                                    </svg>
-                                                </span>
+                                                        <svg
+                                                            width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                                            className="transition-transform duration-200 group-hover:translate-x-1"
+                                                        >
+                                                            <path d="M6 12h12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                                                            <path d="M18 9l4 3-4 3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                                                        </svg>
+                                                    </span>
 
-                                                {/* テキスト */}
-                                                <span className="text-[#84B5C5] text-base tracking-wide font-medium py-2
+                                                    {/* テキスト */}
+                                                    <span className="text-[#84B5C5] text-base tracking-wide font-medium py-2
                                                     group-hover:underline underline-offset-4 decoration-[#84B5C5] transition-colors">
-                                                    詳しくみる
-                                                </span>
-                                            </a>
-                                        ) : (
-                                            // placeholder to keep equal height across all profiles
-                                            <div className="flex items-center gap-4" aria-hidden>
-                                                <span className="w-16 h-16" />
-                                                <span className="w-24 h-6" />
+                                                        詳しくみる
+                                                    </span>
+                                                </a>
+                                            ) : (
+                                                // placeholder to keep equal height across all profiles
+                                                <div className="flex items-center gap-4" aria-hidden>
+                                                    <span className="w-16 h-16" />
+                                                    <span className="w-24 h-6" />
+                                                </div>
+                                            )}
+                                        </div>
+
+
+
+                                        <div className="relative mx-auto w-full max-w-md order-1 md:order-2 h-full flex items-center justify-center">
+                                            <div className="relative overflow-hidden rounded-full bg-white p-0 md:p-2 shadow-[0_10px_50px_rgba(0,0,0,0.08)]">
+                                                <img
+                                                    src={profile.image}
+                                                    alt={profile.name}
+                                                    className="aspect-square w-full rounded-full object-cover text-shadow-soft"
+                                                    loading="lazy"
+                                                    onError={(e) => {
+                                                        e.currentTarget.style.display = "none";
+                                                    }}
+                                                />
+                                                {/* inner soft shadow */}
+                                                <div className="pointer-events-none absolute inset-0 rounded-full shadow-[inset_0_0_80px_rgba(0,0,0,0.06)]" />
                                             </div>
-                                        )}
-                                    </div>
-
-
-
-                                    <div className="relative mx-auto w-full max-w-md order-1 md:order-2 h-full flex items-center justify-center">
-                                        <div className="relative overflow-hidden rounded-full bg-white p-0 md:p-2 shadow-[0_10px_50px_rgba(0,0,0,0.08)]">
-                                            <img
-                                                src={profile.image}
-                                                alt={profile.name}
-                                                className="aspect-square w-full rounded-full object-cover text-shadow-soft"
-                                                loading="lazy"
-                                                onError={(e) => {
-                                                    e.currentTarget.style.display = "none";
-                                                }}
-                                            />
-                                            {/* inner soft shadow */}
-                                            <div className="pointer-events-none absolute inset-0 rounded-full shadow-[inset_0_0_80px_rgba(0,0,0,0.06)]" />
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
+
+                        {/* Navigation Arrows */}
+                        <button
+                            onClick={prevSlide}
+                            className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-16 w-12 h-12 bg-white hover:bg-zinc-50 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 z-10 border border-zinc-200 fade-in-left ${visibleItems.has('nav') ? 'visible' : ''}`}
+                            aria-label="前のスライド"
+                            data-animate="true"
+                            data-index="nav"
+                            style={{ transitionDelay: '0.4s' }}
+                        >
+                            <svg className="w-5 h-5 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.6" d="M15 19l-7-7 7-7"></path>
+                            </svg>
+                        </button>
+
+                        <button
+                            onClick={nextSlide}
+                            className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-16 w-12 h-12 bg-white hover:bg-zinc-50 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 z-10 border border-zinc-200 fade-in-right ${visibleItems.has('nav') ? 'visible' : ''}`}
+                            aria-label="次のスライド"
+                            style={{ transitionDelay: '0.4s' }}
+                        >
+                            <svg className="w-5 h-5 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.6" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </button>
                     </div>
-
-                    {/* Navigation Arrows */}
-                    <button
-                        onClick={prevSlide}
-                        className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-16 w-12 h-12 bg-white hover:bg-zinc-50 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 z-10 border border-zinc-200 fade-in-left ${visibleItems.has('nav') ? 'visible' : ''}`}
-                        aria-label="前のスライド"
-                        data-animate="true"
-                        data-index="nav"
-                        style={{ transitionDelay: '0.4s' }}
-                    >
-                        <svg className="w-5 h-5 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.6" d="M15 19l-7-7 7-7"></path>
-                        </svg>
-                    </button>
-
-                    <button
-                        onClick={nextSlide}
-                        className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-16 w-12 h-12 bg-white hover:bg-zinc-50 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 z-10 border border-zinc-200 fade-in-right ${visibleItems.has('nav') ? 'visible' : ''}`}
-                        aria-label="次のスライド"
-                        style={{ transitionDelay: '0.4s' }}
-                    >
-                        <svg className="w-5 h-5 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.6" d="M9 5l7 7-7 7"></path>
-                        </svg>
-                    </button>
                 </div>
-            </div>
+
+            </motion.div>
 
             {/* ページトップへ（共通部品） */}
             <ToTopButton />

@@ -31,20 +31,15 @@ export default function BlogPostSimple() {
   // URLのslugから該当する投稿を検索（デコード済みで比較）
   const post = posts.find(p => p.id === decodedSlug);
 
-  // デバッグ用（確認後に削除可能）
-  console.log('Decoded slug:', decodedSlug);
-  console.log('Found post:', post ? post.title : 'Not found');
-  console.log('Post sections:', post ? post.sections : 'No post found');
-
   const handleBackClick = () => {
     router.push('/site/blog');
-  };    // 投稿が見つからない場合のデフォルト
+  };
   if (!post) {
     return (
       <main className="min-h-screen bg-neutral-100 text-neutral-900 flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-semibold mb-8">記事が見つかりません</h1>
-          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+          <div className="flex flex-row flex-wrap gap-6 justify-center items-center">
             <Link href="/site/blog" className="group flex items-center gap-3 transition-all duration-200">
               {/* 円ボタン */}
               <span className="grid place-items-center w-12 h-12 rounded-full border border-zinc-700 bg-zinc-100/60 text-zinc-700 shadow-sm transition-all
@@ -69,20 +64,16 @@ export default function BlogPostSimple() {
               {/* 円ボタン */}
               <span className="grid place-items-center w-12 h-12 rounded-full border border-zinc-700 bg-zinc-100/60 text-zinc-700 shadow-sm transition-all
                               group-hover:border-zinc-900 group-hover:bg-zinc-200/80 group-focus-visible:ring-1 group-focus-visible:ring-zinc-700/50">
-                <svg
-                  width="20" height="20" viewBox="0 0 24 24" fill="none"
-                  className="transition-transform duration-200 group-hover:scale-110"
-                >
-                  <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                  <path d="M9 22V12h6v10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
+                <img src="/images/blog/homeicon.png" alt="home" className="w-6 h-6 object-contain" />
               </span>
 
               {/* テキスト */}
-              <span className="text-zinc-700 text-base tracking-wider font-bold py-2
-                              group-hover:underline underline-offset-4 decoration-zinc-700 transition-colors" style={{ letterSpacing: '0.12em' }}>
-                ホーム
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-zinc-700 text-base tracking-wider font-bold py-2
+                                group-hover:underline underline-offset-4 decoration-zinc-700 transition-colors" style={{ letterSpacing: '0.12em' }}>
+                  ホーム
+                </span>
+              </div>
             </Link>
           </div>
         </div>
@@ -210,7 +201,7 @@ export default function BlogPostSimple() {
 
           {/* ナビゲーションボタン */}
           <div className="mt-12 text-center">
-            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+            <div className="flex flex-row flex-wrap gap-6 justify-center items-center">
               <Link
                 href="/site/blog"
                 className="group flex items-center gap-3 transition-all duration-200"
@@ -241,20 +232,16 @@ export default function BlogPostSimple() {
                 {/* 円ボタン */}
                 <span className="grid place-items-center w-12 h-12 rounded-full border border-zinc-700 bg-zinc-100/60 text-zinc-700 shadow-sm transition-all
                                   group-hover:border-zinc-900 group-hover:bg-zinc-200/80 group-focus-visible:ring-1 group-focus-visible:ring-zinc-700/50">
-                  <svg
-                    width="20" height="20" viewBox="0 0 24 24" fill="none"
-                    className="transition-transform duration-200 group-hover:scale-110"
-                  >
-                    <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                    <path d="M9 22V12h6v10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
+                  <img src="/images/blog/homeicon.png" alt="home" className="w-6 h-6 object-contain" />
                 </span>
 
                 {/* テキスト */}
-                <span className="text-zinc-700 text-base tracking-wider font-bold py-2
-                                  group-hover:underline underline-offset-4 decoration-zinc-700 transition-colors" style={{ letterSpacing: '0.12em' }}>
-                  ホーム
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-zinc-700 text-base tracking-wider font-bold py-2
+                                    group-hover:underline underline-offset-4 decoration-zinc-700 transition-colors" style={{ letterSpacing: '0.12em' }}>
+                    ホーム
+                  </span>
+                </div>
               </Link>
             </div>
           </div>

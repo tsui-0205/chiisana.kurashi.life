@@ -23,7 +23,6 @@ export default function LoginPage() {
                 router.push('/site/admin');
             }
         } catch (error) {
-            console.error('Auth check error:', error);
         }
     };
 
@@ -49,7 +48,6 @@ export default function LoginPage() {
                 setError(data.message || 'ログインに失敗しました');
             }
         } catch (error) {
-            console.error('Login error:', error);
             setError('ログイン中にエラーが発生しました');
         } finally {
             setIsLoading(false);

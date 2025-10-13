@@ -48,7 +48,6 @@ export default function NewPost() {
         router.push('/site/admin/login');
       }
     } catch (error) {
-      console.error('Auth check error:', error);
       router.push('/site/admin/login');
     } finally {
       setIsLoading(false);
@@ -130,7 +129,6 @@ export default function NewPost() {
         showToast('画像のアップロードに失敗しました。', 'error');
       }
     } catch (error) {
-      console.error('Upload error:', error);
       showToast('画像のアップロードエラーが発生しました。', 'error');
     } finally {
       setUploadingImage(false);
@@ -222,7 +220,6 @@ export default function NewPost() {
         showToast(`エラー: ${error.error}`, 'error');
       }
     } catch (error) {
-      console.error('Submit error:', error);
       showToast('投稿中にエラーが発生しました。', 'error');
     } finally {
       setIsSubmitting(false);

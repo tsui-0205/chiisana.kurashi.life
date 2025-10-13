@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
+import useInView from '@/hooks/useInView';
 import RegionInfo from "./RegionInfo";
 
 // 画像は /public/images/ishikawa 
@@ -45,7 +46,7 @@ function IdleBackdrop({ active, onChangeIndex }) {
     // 浮遊するグラデーションブロブ
     const blob = (
         <motion.div
-            aria-hidden
+            aria-hidden={true}
             className="absolute -left-32 -top-32 h-[42vh] w-[42vh] rounded-full bg-gradient-to-br from-sky-300/30 via-indigo-300/20 to-fuchsia-300/30 blur-3xl"
             initial={{ opacity: 0, scale: 0.9, x: -40, y: -20 }}
             animate={active && !prefersReduced ? { opacity: 1, scale: 1, x: [0, 30, -20, 0], y: [0, -10, 10, 0] } : { opacity: 1 }}
@@ -55,7 +56,7 @@ function IdleBackdrop({ active, onChangeIndex }) {
 
     const blob2 = (
         <motion.div
-            aria-hidden
+            aria-hidden={true}
             className="absolute -right-32 bottom-10 h-[48vh] w-[48vh] rounded-full bg-gradient-to-tr from-emerald-300/25 via-teal-300/20 to-cyan-300/25 blur-3xl"
             initial={{ opacity: 0, scale: 0.9, x: 40, y: 20 }}
             animate={active && !prefersReduced ? { opacity: 1, scale: 1, x: [0, -20, 20, 0], y: [0, 15, -10, 0] } : { opacity: 1 }}
@@ -89,12 +90,12 @@ function IdleBackdrop({ active, onChangeIndex }) {
             {/* 薄いビネットとノイズで紙っぽい質感 */}
             <div className="absolute inset-0 bg-black/20" />
             <div
-                aria-hidden
+                aria-hidden={true}
                 className="absolute inset-0 opacity-[0.08] mix-blend-overlay"
                 style={{
-                    backgroundImage:
-                        "radial-gradient(transparent 60%, rgba(0,0,0,0.35)), url('data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'160\\' height=\\'160\\'><filter id=\\'n\\'><feTurbulence type=\\'fractalNoise\\' baseFrequency=\\'0.8\\' numOctaves=\\'4\\' stitchTiles=\\'stitch\\'/></filter><rect width=\\'100%\\' height=\\'100%\\' filter=\\'url(%23n)\\' opacity=\\'0.5\\'/></svg>')",
-                    backgroundSize: "cover, 160px 160px",
+                    // Use a simple radial gradient here to avoid embedding complex data URIs
+                    backgroundImage: "radial-gradient(transparent 60%, rgba(0,0,0,0.35))",
+                    backgroundSize: "cover",
                     backgroundPosition: "center",
                 }}
             />
@@ -203,6 +204,7 @@ export default function IshikawaMapApp() {
     }
 
     const idleActive = !hoveredRegion && !selectedRegion;
+    const [ref, inView] = useInView({ threshold: 0.12 });
 
     return (
         <div className="min-h-screen bg-[var(--background)] p-6">
@@ -218,7 +220,13 @@ export default function IshikawaMapApp() {
                 </div>
             </div>
 
-            <div className="mx-auto grid max-w-6xl grid-cols-1 gap-6 md:grid-cols-5">
+            <motion.div
+                ref={ref}
+                initial={{ opacity: 0, y: 30 }}
+                animate={inView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.9, ease: 'easeOut' }}
+                className="mx-auto grid max-w-6xl grid-cols-1 gap-6 md:grid-cols-5"
+            >
                 <div className="relative left-1/2 right-1/2 w-screen -ml-[50vw] -mr-[50vw] md:col-span-5">
                     <div className="relative h-[95vh] w-full overflow-hidden bg-transparent" onTouchStart={() => setHoveredRegion(null)}>
                         {/* === 追加: 未ホバー時のアイドル背景レイヤ === */}
@@ -360,90 +368,96 @@ export default function IshikawaMapApp() {
 
                     {/* === 追加: 背景スライド下の地域ボタン群 === */}
                     {/* === 地域ナビゲーション（シンプルスタイル） === */}
-                    <div className="mt-8 w-full flex justify-center">
-                        <div className="flex flex-wrap gap-8 md:gap-20 lg:gap-28 justify-center items-center font-medium text-lg">
-                            <button
-                                onClick={() => setHoveredRegion('noto')}
-                                onKeyDown={(e) => e.key === 'Enter' && setHoveredRegion('noto')}
-                                className="transition-colors duration-200 cursor-pointer hover:opacity-70"
-                                style={{ color: '#84b5c5' }}
-                            >
-                                能登 &gt;
-                            </button>
-                            <button
-                                onClick={() => setHoveredRegion('kanazawa')}
-                                onKeyDown={(e) => e.key === 'Enter' && setHoveredRegion('kanazawa')}
-                                className="transition-colors duration-200 cursor-pointer hover:opacity-70"
-                                style={{ color: '#84b5c5' }}
-                            >
-                                金沢 &gt;
-                            </button>
-                            <button
-                                onClick={() => setHoveredRegion('hakusan')}
-                                onKeyDown={(e) => e.key === 'Enter' && setHoveredRegion('hakusan')}
-                                className="transition-colors duration-200 cursor-pointer hover:opacity-70"
-                                style={{ color: '#84b5c5' }}
-                            >
-                                白山 &gt;
-                            </button>
-                            <button
-                                onClick={() => setHoveredRegion('kaga')}
-                                onKeyDown={(e) => e.key === 'Enter' && setHoveredRegion('kaga')}
-                                className="transition-colors duration-200 cursor-pointer hover:opacity-70"
-                                style={{ color: '#84b5c5' }}
-                            >
-                                加賀 &gt;
-                            </button>
+                    <div className="button-grid" style={{ marginTop: 32 }}>
+                        <div className="button-13">
+                            <a href="#" onClick={(e) => {
+                                e.preventDefault();
+                                setHoveredRegion('noto');
+                                setSelectedRegion('noto');
+                                setSelectedOrigin('click');
+                            }}>能登</a>
                         </div>
 
-                        {/* 説明カード - モバイル:下部、デスクトップ:右側 */}
-                        {selectedRegion && (
-                            <div className="absolute inset-0 z-50 pointer-events-auto">
-                                {/* オーバーレイ: 外側クリック/タッチで閉じる */}
-                                <div
-                                    className="absolute inset-0 bg-black/20 md:bg-transparent"
-                                    role="button"
-                                    tabIndex={0}
-                                    onClick={() => {
-                                        setSelectedRegion(null);
-                                        setSelectedOrigin('none');
-                                        setHoveredRegion(null);
-                                    }}
-                                    onPointerDown={() => {
-                                        setSelectedRegion(null);
-                                        setSelectedOrigin('none');
-                                        setHoveredRegion(null);
-                                    }}
-                                    onTouchEnd={() => {
-                                        setSelectedRegion(null);
-                                        setSelectedOrigin('none');
-                                        setHoveredRegion(null);
-                                    }}
-                                />
+                        <div className="button-13">
+                            <a href="#" onClick={(e) => {
+                                e.preventDefault();
+                                setHoveredRegion('kanazawa');
+                                setSelectedRegion('kanazawa');
+                                setSelectedOrigin('click');
+                            }}>金沢</a>
+                        </div>
 
-                                {/* パネル: モバイルでは下部、デスクトップでは右側に配置 */}
-                                <div className="absolute inset-x-4 bottom-4 pointer-events-none md:top-[60%] md:-translate-y-1/2 md:right-[5%] md:inset-x-auto md:w-[30%] md:max-w-md">
-                                    <div
-                                        className="pointer-events-auto bg-white/95 backdrop-blur-sm rounded-lg shadow-xl max-h-full overflow-y-auto"
-                                        onClick={(e) => e.stopPropagation()}
-                                        onTouchStart={(e) => e.stopPropagation()}
-                                        onTouchEnd={(e) => e.stopPropagation()}
-                                    >
-                                        <RegionInfo
-                                            region={selectedRegion}
-                                            onClose={() => {
-                                                setSelectedRegion(null);
-                                                setSelectedOrigin('none');
-                                                setHoveredRegion(null);
-                                            }}
-                                        />
-                                    </div>
+                        <div className="button-13">
+                            <a href="#" onClick={(e) => {
+                                e.preventDefault();
+                                setHoveredRegion('hakusan');
+                                setSelectedRegion('hakusan');
+                                setSelectedOrigin('click');
+                            }}>白山</a>
+                        </div>
+
+                        <div className="button-13">
+                            <a href="#" onClick={(e) => {
+                                e.preventDefault();
+                                setHoveredRegion('kaga');
+                                setSelectedRegion('kaga');
+                                setSelectedOrigin('click');
+                            }}>加賀</a>
+                        </div>
+                    </div>
+
+                    {/* 説明カード - モバイル:下部、デスクトップ:右側 */}
+                    {selectedRegion && (
+                        <div className="absolute inset-0 z-50 pointer-events-auto">
+                            {/* オーバーレイ: 外側クリック/タッチで閉じる */}
+                            <div
+                                className="absolute inset-0 bg-black/20 md:bg-transparent"
+                                role="button"
+                                tabIndex={0}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    e.preventDefault();
+                                    setSelectedRegion(null);
+                                    setSelectedOrigin('none');
+                                    setHoveredRegion(null);
+                                }}
+                                onPointerDown={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedRegion(null);
+                                    setSelectedOrigin('none');
+                                    setHoveredRegion(null);
+                                }}
+                                onTouchEnd={(e) => {
+                                    e.stopPropagation();
+                                    e.preventDefault();
+                                    setSelectedRegion(null);
+                                    setSelectedOrigin('none');
+                                    setHoveredRegion(null);
+                                }}
+                            />
+
+                            {/* パネル: モバイルでは下部、デスクトップでは右側に配置 */}
+                            <div className="absolute inset-x-4 bottom-16 pointer-events-none md:top-[60%] md:-translate-y-1/2 md:right-[5%] md:inset-x-auto md:w-[30%] md:max-w-md">
+                                <div
+                                    className="pointer-events-auto bg-white/95 backdrop-blur-sm rounded-lg shadow-xl max-h-full overflow-y-auto"
+                                    onClick={(e) => e.stopPropagation()}
+                                    onTouchStart={(e) => e.stopPropagation()}
+                                    onTouchEnd={(e) => e.stopPropagation()}
+                                >
+                                    <RegionInfo
+                                        region={selectedRegion}
+                                        onClose={() => {
+                                            setSelectedRegion(null);
+                                            setSelectedOrigin('none');
+                                            setHoveredRegion(null);
+                                        }}
+                                    />
                                 </div>
                             </div>
-                        )}
-                    </div>
+                        </div>
+                    )}
                 </div>
-            </div>
+            </motion.div>
         </div>
     );
 }
@@ -475,7 +489,8 @@ function Marker({
             }}
             onTouchStart={(e) => {
                 e.stopPropagation();
-                onHover((prev) => (prev === id ? null : id));
+                // call onHover with the id directly to avoid using a functional updater here
+                onHover(id);
             }}
             whileHover={{ scale: 1.15 }}
             whileFocus={{ scale: 1.15 }}

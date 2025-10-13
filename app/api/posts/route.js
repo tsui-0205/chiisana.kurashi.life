@@ -26,7 +26,7 @@ async function checkAuthentication() {
             return now - tokenTime < weekInMs;
         }
     } catch (error) {
-        console.error('Auth check error:', error);
+       
     }
 
     return false;
@@ -49,7 +49,6 @@ export async function GET() {
 
         return NextResponse.json({ posts: postsData });
     } catch (error) {
-        console.error('Error reading posts:', error);
         return NextResponse.json({ error: 'Failed to read posts' }, { status: 500 });
     }
 }
@@ -113,7 +112,6 @@ export const posts = ${JSON.stringify(currentPosts, null, 4).replace(/"([^"]+)":
         });
 
     } catch (error) {
-        console.error('Error creating post:', error);
         return NextResponse.json({ error: 'Failed to create post' }, { status: 500 });
     }
 }
@@ -167,7 +165,6 @@ export const posts = ${JSON.stringify(currentPosts, null, 4).replace(/"([^"]+)":
         });
 
     } catch (error) {
-        console.error('Error updating post:', error);
         return NextResponse.json({ error: 'Failed to update post' }, { status: 500 });
     }
 }
@@ -220,7 +217,6 @@ export const posts = ${JSON.stringify(currentPosts, null, 4).replace(/"([^"]+)":
         });
 
     } catch (error) {
-        console.error('Error deleting post:', error);
         return NextResponse.json({ error: 'Failed to delete post' }, { status: 500 });
     }
 }

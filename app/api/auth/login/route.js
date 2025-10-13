@@ -59,7 +59,6 @@ export async function POST(request) {
             }, { status: 401 });
         }
     } catch (error) {
-        console.error('Login error:', error);
         return NextResponse.json({
             success: false,
             message: 'ログインエラーが発生しました'

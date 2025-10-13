@@ -46,9 +46,9 @@ export default function RegionInfo({ region, onClose }) {
             {/* 閉じるボタン（右上） */}
             <button
                 type="button"
-                onClick={handleClose}
-                onTouchEnd={handleClose}
-                onPointerDown={handleClose}
+                onClick={(e) => { e.stopPropagation(); e.preventDefault(); handleClose(); }}
+                onTouchEnd={(e) => { e.stopPropagation(); e.preventDefault(); handleClose(); }}
+                onPointerDown={(e) => { e.stopPropagation(); /* don't prevent pointerdown default to allow focus */ handleClose(); }}
                 aria-label="閉じる"
                 className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center rounded-full bg-white/0 hover:bg-[rgba(132,181,197,0.12)] transition-colors z-20 touch-manipulation"
                 style={{ WebkitTapHighlightColor: 'transparent', color: 'rgb(132,181,197)' }}

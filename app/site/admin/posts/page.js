@@ -28,7 +28,6 @@ export default function PostsManagement() {
                 router.push('/site/admin/login');
             }
         } catch (error) {
-            console.error('Auth check error:', error);
             router.push('/site/admin/login');
         } finally {
             setIsLoading(false);
@@ -44,7 +43,6 @@ export default function PostsManagement() {
                 setPosts(data.posts);
             }
         } catch (error) {
-            console.error('Posts load error:', error);
         } finally {
             setLoadingPosts(false);
         }
@@ -81,7 +79,6 @@ export default function PostsManagement() {
                 showToast(`削除に失敗しました: ${error.error}`, 'error');
             }
         } catch (error) {
-            console.error('Delete error:', error);
             showToast('削除中にエラーが発生しました', 'error');
         } finally {
             setDeleteModal({ show: false, post: null });
