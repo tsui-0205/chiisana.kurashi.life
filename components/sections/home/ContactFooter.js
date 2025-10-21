@@ -3,7 +3,7 @@ import MailImageToggle from '../../ui/MailImageToggle';
 import ToTopButton from '../../ui/ToTopButton';
 
 export default function ContactFooter() {
-    
+
 
     return (
         <section className="relative bg-white border-t border-neutral-200">

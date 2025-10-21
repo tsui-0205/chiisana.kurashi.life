@@ -6,6 +6,8 @@ import { Card, CardContent, CardImage } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { posts } from "@/data/posts";
 import ContactFooter from "@/components/sections/home/ContactFooter";
+import { motion } from 'framer-motion';
+import useInView from '@/hooks/useInView';
 
 const heroTitle = posts[0]?.title ?? "おすすめ記事";
 const heroImages = [
@@ -55,10 +57,18 @@ function HeroTriptych({ title, images }) {
   );
 }
 
-function PostCard({ post }) {
+function PostCard({ post, index }) {
+  const [ref, inView] = useInView({ threshold: 0.15 });
+
   return (
-    <article className="group">
-      <Link href={post.href} onClick={() => { try { window.dispatchEvent(new Event('__page-loader:show')); } catch {} }}>
+    <motion.article
+      ref={ref}
+      initial={{ opacity: 0, x: -40 }}
+      animate={inView ? { opacity: 1, x: 0 } : {}}
+      transition={{ duration: 0.6, ease: 'easeOut', delay: index * 0.1 }}
+      className="group"
+    >
+      <Link href={post.href} onClick={() => { try { window.dispatchEvent(new Event('__page-loader:show')); } catch { } }}>
         <Card>
           <CardImage
             src={post.cover}
@@ -66,9 +76,15 @@ function PostCard({ post }) {
           />
           <CardContent>
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-2 text-nowrap">
-              <span className="text-[10px] px-2 py-1 bg-rose-100 text-rose-600 rounded-full font-medium whitespace-nowrap">
-                {post.category || "日常"}
-              </span>
+              {(() => {
+                const cat = post.category || "日常";
+                const catClass = cat === '思い出' ? 'bg-[#e5e1dc] text-[#333]' : 'bg-zinc-100 text-zinc-600';
+                return (
+                  <span className={`text-[10px] px-2 py-1 rounded-full font-medium whitespace-nowrap ${catClass}`}>
+                    {cat}
+                  </span>
+                );
+              })()}
               <p className="text-[10px] text-neutral-500 tracking-[0.08em] whitespace-nowrap">
                 {formatDateYMD(post.date)}
               </p>
@@ -83,8 +99,8 @@ function PostCard({ post }) {
             )}
             {post.tags && (
               <div className="flex flex-wrap gap-1 mt-2">
-                {post.tags.split(',').slice(0, 3).map((tag, index) => (
-                  <span key={index} className="text-[9px] px-1.5 py-0.5 bg-gray-100 text-gray-500 rounded">
+                {post.tags.split(',').slice(0, 3).map((tag, idx) => (
+                  <span key={idx} className="text-[9px] px-1.5 py-0.5 bg-gray-100 text-gray-500 rounded">
                     #{tag.trim()}
                   </span>
                 ))}
@@ -93,7 +109,7 @@ function PostCard({ post }) {
           </CardContent>
         </Card>
       </Link>
-    </article>
+    </motion.article>
   );
 }
 
@@ -415,8 +431,8 @@ export default function BlogPage() {
         </div>
         <div className="relative pb-6 md:pb-6 lg:pb-20">
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {filtered.map((p) => (
-              <PostCard key={p.id} post={p} />
+            {filtered.map((p, i) => (
+              <PostCard key={p.id} post={p} index={i} />
             ))}
           </div>
 

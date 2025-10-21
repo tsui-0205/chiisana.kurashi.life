@@ -30,6 +30,7 @@ export default function BlogPostSimple() {
 
   // URLのslugから該当する投稿を検索（デコード済みで比較）
   const post = posts.find(p => p.id === decodedSlug);
+  const cat = post?.category || null;
 
   const handleBackClick = () => {
     router.push('/site/blog');
@@ -93,9 +94,9 @@ export default function BlogPostSimple() {
 
           {/* カテゴリと日付 */}
           <div className="flex items-center justify-center gap-3 mb-4">
-            {post.category && (
-              <span className="px-3 py-1 bg-rose-100 text-rose-600 rounded-full text-sm font-medium">
-                {post.category}
+            {cat && (
+              <span className={`px-3 py-1 rounded-full text-sm font-medium ${cat === '思い出' ? 'bg-[#e5e1dc] text-[#333]' : 'bg-zinc-100 text-zinc-600'}`}>
+                {cat}
               </span>
             )}
             <p className="text-base text-neutral-600">

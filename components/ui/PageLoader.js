@@ -23,28 +23,69 @@ export default function PageLoader() {
     return (
         <div className="page-loader-root">
             <div className="loader-container" role="status" aria-live="polite">
-                <span className="loader-char">い</span>
-                <span className="loader-char">し</span>
-                <span className="loader-char">か</span>
-                <span className="loader-char">わ</span>
+                <img className="loader-image" src="/images/loadishikawa.png" alt="loader1" />
+                <img className="loader-image" src="/images/loadishikawa.png" alt="loader2" />
+                <img className="loader-image" src="/images/loadishikawa.png" alt="loader3" />
             </div>
             <div className="loading-text">ロード中...</div>
 
             <style jsx>{`
                 .page-loader-root {
-                    position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column;
+                    position: fixed;
+                    inset: 0;
+                    z-index: 9999;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    flex-direction: column;
                     background: linear-gradient(145deg, #fefcea, #f1daff);
                     font-family: 'Helvetica Neue', sans-serif;
                 }
-                .loader-container { display: flex; gap: 1rem; font-size: 4rem; color: #333; font-weight: bold; }
-                .loader-char { opacity: 0; transform: translateY(20px); animation: fadeUp 0.6s ease forwards; }
-                .loader-char:nth-child(1) { animation-delay: 0.2s; }
-                .loader-char:nth-child(2) { animation-delay: 0.6s; }
-                .loader-char:nth-child(3) { animation-delay: 1s; }
-                .loader-char:nth-child(4) { animation-delay: 1.4s; }
-                @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
-                .loading-text { margin-top: 2rem; font-size: 1.2rem; color: #666; opacity: 0; animation: fadeIn 1s ease forwards; animation-delay: 2s; }
-                @keyframes fadeIn { to { opacity: 1; } }
+
+                .loader-container {
+                    display: flex;
+                    gap: 1.5rem;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                .loader-image {
+                    width: 100px;
+                    height: auto;
+                    opacity: 0;
+                    transform: translateY(20px);
+                    animation: fadeUp 0.6s ease forwards;
+                }
+
+                .loader-image:nth-child(1) {
+                    animation-delay: 0.2s;
+                }
+
+                .loader-image:nth-child(2) {
+                    animation-delay: 0.6s;
+                }
+
+                .loader-image:nth-child(3) {
+                    animation-delay: 1s;
+                }
+
+                @keyframes fadeUp {
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+
+                /* make loading text animate with the images (use same fadeUp) */
+                .loading-text {
+                    margin-top: 1.6rem;
+                    font-size: 1.2rem;
+                    color: #666;
+                    opacity: 0;
+                    transform: translateY(20px);
+                    animation: fadeUp 0.6s ease forwards;
+                    animation-delay: 1s; /* sync with 3rd image */
+                }
             `}</style>
         </div>
     );
