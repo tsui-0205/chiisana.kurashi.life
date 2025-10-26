@@ -2,7 +2,7 @@
   "name": "watashi-to-otto-no-chiisana-kurashi",
   "version": "0.1.0",
   "private": true,
-  "description": "わたしと夫の小さな暮らし - 夫婦の日常を綴るふんわりホームページ",
+  "description": "わたしと夫の小さな暮らし - いしかわでの夫婦の日常を綴るホームページ",
   "keywords": [
     "夫婦",
     "日常",
@@ -11,11 +11,11 @@
     "石川県",
     "ブログ"
   ],
-  "author": "河岸夫妻",
+  "author": "いしかわ夫妻",
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build",
-    "start": "next start",
+    "build": "next build && next export",
+    "start": "npx serve out",  
     "lint": "next lint"
   },
   "dependencies": {
