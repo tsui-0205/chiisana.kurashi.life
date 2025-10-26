@@ -18,7 +18,6 @@ export function useInView(options = {}) {
       try {
         if (node) observer.unobserve(node);
       } catch (e) {
-        // ignore
       }
     };
   }, [ref, options]);

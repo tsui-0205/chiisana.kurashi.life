@@ -47,7 +47,7 @@ export default function Home() {
                 {/* わたしたちのこと */}
                 <AboutUsSection showToTop={hasMainPhoto === false} hideWhenHeroVisible={isHeroVisible} />
                 {/* インスタグラムフィード */}
-                <div className="bg-white mt-4 md:mt-0">
+                <div className="bg-white">
                     <InstagramFeed showToTop={hasMainPhoto === false} hideWhenHeroVisible={isHeroVisible} />
                 </div>
                 {/* 夫のつぶやき */}

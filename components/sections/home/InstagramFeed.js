@@ -178,7 +178,7 @@ export default function InstagramFeed({ showToTop = false, hideWhenHeroVisible =
             <div className="pointer-events-none absolute -left-24 top-24 h-72 w-72 rounded-full bg-purple-200/30 blur-3xl" />
             <div className="pointer-events-none absolute left-56 -top-8 h-64 w-64 rounded-full bg-pink-100/50 blur-3xl" />
 
-            <div className="font-body mx-auto mt-0 md:mt-0 mb-6 md:mb-12 max-w-[1200px] relative px-6">
+            <div className="font-body mx-auto mt-6 md:mt-8 mb-6 md:mb-12 max-w-[1200px] relative px-6">
                 <div
                     className={`flex items-center gap-3 fade-in-up ${visibleItems.has('header') ? 'visible' : ''}`}
                     data-animate="true"
