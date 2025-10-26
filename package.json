@@ -12,12 +12,12 @@
     "ブログ"
   ],
   "author": "いしかわ夫妻",
-  "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build && next export",
-    "start": "npx serve out",  
-    "lint": "next lint"
-  },
+ "scripts": {
+  "dev": "next dev --turbopack",
+  "build": "next build",
+  "start": "next start",
+  "lint": "next lint"
+},
   "dependencies": {
     "framer-motion": "^12.23.12",
     "lucide-react": "^0.542.0",
