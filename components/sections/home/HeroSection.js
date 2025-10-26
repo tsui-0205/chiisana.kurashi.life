@@ -51,8 +51,15 @@ export default function HeroSection({ isMenuOpen, setIsMenuOpen, onLoaded, onHer
     return (
         <section id="hero" ref={sectionRef} className="relative h-screen w-full overflow-hidden">
             <style>{`
-    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Yomogi&display=swap');
-    @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Yomogi&display=swap');
+        /* Yasashisa Gothic: self-hosting fallback - place woff2 at /public/fonts/yasashisa-gothic.woff2 */
+        @font-face {
+            font-family: 'YasashisaGothic';
+            src: url('/fonts/yasashisa-gothic.woff2') format('woff2');
+            font-weight: 400 900;
+            font-style: normal;
+            font-display: swap;
+        }
     :root{ --letter-spacing: 0.06em; --font-size: clamp(40px, 9vw, 96px); --stroke-width: 10px; --slash-tilt: 35deg; }
     .font-body { font-family: 'Noto Sans JP', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, 'Apple Color Emoji', 'Segoe UI Emoji'; }
     .font-hand { font-family: 'Yomogi', 'Noto Sans JP', sans-serif; letter-spacing: .02em; }
@@ -147,7 +154,7 @@ export default function HeroSection({ isMenuOpen, setIsMenuOpen, onLoaded, onHer
             animation: rotateText 20s linear infinite; 
             transform-origin: 100px 100px; 
         }
-                    .bottom-right-text .circle-text { fill: #FFD54F; font-weight: 900; /* use やさしさフォント if available */ font-family: "YasashisaGothic", "YakuHanJP_Narrow", "Zen Kaku Gothic New", sans-serif; font-size: 28px; letter-spacing: 0.2em; }
+                    .circle-text { fill: #FFD54F; font-weight: 900; font-family: 'YasashisaGothic', 'Zen Maru Gothic', 'Kosugi Maru', 'Yomogi', "Noto Sans JP", sans-serif; font-size: 28px; letter-spacing: 0.2em; }
         .bottom-right-text .circle-bg { fill: rgba(255,213,79,0.06); }
         @media (max-width: 640px) {
             .bottom-right-text { width: 120px; height: 120px; right: 3%; bottom: 4%; }

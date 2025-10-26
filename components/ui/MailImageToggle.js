@@ -29,7 +29,7 @@ export default function MailImageToggle() {
 
             {/* メールアドレス */}
             <span className="text-sm font-medium text-neutral-700 select-all transition-colors">
-                chiisana.kurashi.life@gmail.com
+                tsui.chiisana.kurashi@gmail.com
             </span>
         </div>
     );
