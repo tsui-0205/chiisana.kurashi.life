@@ -31,11 +31,15 @@ export async function POST(request) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Cloudinary 設定が必要
+    // Cloudinary 設定が必要 (明示的なエラーメッセージを返す)
     const CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME;
     const UPLOAD_PRESET = process.env.CLOUDINARY_UPLOAD_PRESET;
-    if (!CLOUD_NAME || !UPLOAD_PRESET) {
-        return NextResponse.json({ error: 'Cloudinary not configured' }, { status: 500 });
+    const missing = [];
+    if (!CLOUD_NAME) missing.push('CLOUDINARY_CLOUD_NAME');
+    if (!UPLOAD_PRESET) missing.push('CLOUDINARY_UPLOAD_PRESET');
+    if (missing.length) {
+        // どの env が足りないか明示して返す（値は出さない）
+        return NextResponse.json({ error: 'Cloudinary not configured', missing }, { status: 500 });
     }
 
     try {
@@ -55,10 +59,19 @@ export async function POST(request) {
             { method: 'POST', body: uploadForm }
         );
 
-        const json = await cloudRes.json();
+        let json;
+        try {
+            json = await cloudRes.json();
+        } catch (e) {
+            console.error('failed to parse cloudinary response', e);
+            const text = await cloudRes.text().catch(() => 'no-body');
+            console.error('cloudinary raw response', text);
+            return NextResponse.json({ error: 'Upload failed', details: 'Invalid response from Cloudinary', status: cloudRes.status }, { status: 502 });
+        }
+
         if (!cloudRes.ok) {
-            console.error('cloudinary error', json);
-            return NextResponse.json({ error: 'Upload failed', details: json }, { status: 500 });
+            console.error('cloudinary error', { status: cloudRes.status, body: json });
+            return NextResponse.json({ error: 'Upload failed', details: json, status: cloudRes.status }, { status: 502 });
         }
 
         return NextResponse.json({ message: 'File uploaded successfully', url: json.secure_url, raw: json });
