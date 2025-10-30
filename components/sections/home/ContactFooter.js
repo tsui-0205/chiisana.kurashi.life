@@ -19,7 +19,7 @@ export default function ContactFooter() {
                     </p>
 
                     <a
-                        href="mailto:chiisana.kurashi.life@gmail.com"
+                        href="mailto:tsui.chiisana.kurashi@gmail.com"
                         className="inline-flex items-center gap-3 rounded-lg border border-neutral-300 bg-neutral-50 px-6 py-3 shadow-sm transition-all hover:bg-neutral-100 hover:border-neutral-400 hover:shadow-md group cursor-pointer"
                         aria-label="メールアドレスに連絡"
                     >

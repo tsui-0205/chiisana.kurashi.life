@@ -1,6 +1,18 @@
 // ブログ投稿データ
 export const posts = [
     {
+        id: "プロポーズ",
+        title: "プロポーズ",
+        date: "2024-12-25",
+        cover: "/images/blog/article/20251030/1761829314129_1000002726.jpg",
+        href: "/site/blog/プロポーズ",
+        content: "プロポーズをしました",
+        excerpt: "",
+        category: "日常",
+        tags: "",
+        sections: []
+    },
+    {
         id: "忘れられないお宿",
         title: "忘れられないお宿",
         date: "2024-11-25",
