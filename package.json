@@ -12,16 +12,17 @@
     "ブログ"
   ],
   "author": "いしかわ夫妻",
- "scripts": {
-  "dev": "next dev --turbopack",
-  "build": "next build",
-  "start": "next start",
-  "lint": "next lint"
-},
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
   "dependencies": {
     "framer-motion": "^12.23.12",
     "lucide-react": "^0.542.0",
     "next": "^16.0.0-canary.1",
+    "next-cloudinary": "^6.17.0",
     "react": "19.1.0",
     "react-dom": "19.1.0"
   },

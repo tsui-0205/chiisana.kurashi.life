@@ -31,12 +31,14 @@ export async function POST(request) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Cloudinary 設定が必要 (明示的なエラーメッセージを返す)
+    // Cloudinary 設定が必要 (API Key/Secret を使った署名付きアップロード)
     const CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME;
-    const UPLOAD_PRESET = process.env.CLOUDINARY_UPLOAD_PRESET;
+    const API_KEY = process.env.CLOUDINARY_API_KEY;
+    const API_SECRET = process.env.CLOUDINARY_API_SECRET;
     const missing = [];
     if (!CLOUD_NAME) missing.push('CLOUDINARY_CLOUD_NAME');
-    if (!UPLOAD_PRESET) missing.push('CLOUDINARY_UPLOAD_PRESET');
+    if (!API_KEY) missing.push('CLOUDINARY_API_KEY');
+    if (!API_SECRET) missing.push('CLOUDINARY_API_SECRET');
     if (missing.length) {
         // どの env が足りないか明示して返す（値は出さない）
         return NextResponse.json({ error: 'Cloudinary not configured', missing }, { status: 500 });
@@ -48,11 +50,22 @@ export async function POST(request) {
         if (!file) return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
 
         const arrayBuffer = await file.arrayBuffer();
-        const blob = new Blob([arrayBuffer]);
+        const buffer = Buffer.from(arrayBuffer);
+        const base64File = `data:${file.type || 'image/jpeg'};base64,${buffer.toString('base64')}`;
+
+        // 署名生成 (timestamp + folder 指定)
+        const timestamp = Math.round(Date.now() / 1000);
+        const folder = 'blog'; // Cloudinary のフォルダ名（任意で変更可）
+        const crypto = await import('crypto');
+        const stringToSign = `folder=${folder}&timestamp=${timestamp}${API_SECRET}`;
+        const signature = crypto.createHash('sha1').update(stringToSign).digest('hex');
 
         const uploadForm = new FormData();
-        uploadForm.append('file', blob, file.name || 'upload.jpg');
-        uploadForm.append('upload_preset', UPLOAD_PRESET);
+        uploadForm.append('file', base64File);
+        uploadForm.append('api_key', API_KEY);
+        uploadForm.append('timestamp', String(timestamp));
+        uploadForm.append('signature', signature);
+        uploadForm.append('folder', folder);
 
         const cloudRes = await fetch(
             `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
