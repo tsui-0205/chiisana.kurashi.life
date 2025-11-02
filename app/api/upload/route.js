@@ -28,6 +28,7 @@ async function checkAuthentication() {
 export async function POST(request) {
     // 認証チェック
     if (!(await checkAuthentication())) {
+        console.error('[upload] Authentication failed');
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -35,12 +36,24 @@ export async function POST(request) {
     const CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME;
     const API_KEY = process.env.CLOUDINARY_API_KEY;
     const API_SECRET = process.env.CLOUDINARY_API_SECRET;
+    
+    // デバッグ: 環境変数の存在チェック（値は出さない）
+    console.log('[upload] Environment check:', {
+        hasCloudName: !!CLOUD_NAME,
+        hasApiKey: !!API_KEY,
+        hasApiSecret: !!API_SECRET,
+        cloudNameLength: CLOUD_NAME?.length || 0,
+        apiKeyLength: API_KEY?.length || 0,
+        apiSecretLength: API_SECRET?.length || 0
+    });
+    
     const missing = [];
     if (!CLOUD_NAME) missing.push('CLOUDINARY_CLOUD_NAME');
     if (!API_KEY) missing.push('CLOUDINARY_API_KEY');
     if (!API_SECRET) missing.push('CLOUDINARY_API_SECRET');
     if (missing.length) {
         // どの env が足りないか明示して返す（値は出さない）
+        console.error('[upload] Missing environment variables:', missing);
         return NextResponse.json({ error: 'Cloudinary not configured', missing }, { status: 500 });
     }
 
@@ -78,7 +91,7 @@ export async function POST(request) {
         try {
             json = await cloudRes.json();
         } catch (e) {
-
+            console.error('[upload] Cloudinary response parse error:', e, 'Status:', cloudRes.status);
             return NextResponse.json({
                 error: 'Upload failed',
                 details: 'Invalid response from Cloudinary',
@@ -87,6 +100,10 @@ export async function POST(request) {
         }
 
         if (!cloudRes.ok) {
+            console.error('[upload] Cloudinary upload failed:', {
+                status: cloudRes.status,
+                response: json
+            });
             return NextResponse.json({
                 error: 'Upload failed',
                 details: json,
@@ -94,12 +111,14 @@ export async function POST(request) {
             }, { status: 502 });
         }
 
+        console.log('[upload] Upload successful, URL:', json.secure_url);
         return NextResponse.json({
             message: 'File uploaded successfully',
             url: json.secure_url,
             raw: json
         });
     } catch (error) {
+        console.error('[upload] Unexpected error:', error);
         return NextResponse.json({
             error: 'Failed to upload file',
             details: String(error)
