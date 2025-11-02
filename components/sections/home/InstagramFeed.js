@@ -80,7 +80,13 @@ export default function InstagramFeed({ showToTop = false, hideWhenHeroVisible =
         );
 
         return () => {
-            try { observerRef.current && observerRef.current.disconnect(); } catch (e) { }
+            try {
+                if (observerRef.current) {
+                    observerRef.current.disconnect();
+                }
+            } catch (e) {
+                // noop
+            }
         };
     }, []);
 
@@ -88,11 +94,23 @@ export default function InstagramFeed({ showToTop = false, hideWhenHeroVisible =
     useEffect(() => {
         const elements = document.querySelectorAll('[data-animate="true"]');
         elements.forEach((el) => {
-            try { observerRef.current && observerRef.current.observe(el); } catch (e) { }
+            try {
+                if (observerRef.current) {
+                    observerRef.current.observe(el);
+                }
+            } catch (e) {
+                // noop
+            }
         });
 
         return () => {
-            try { observerRef.current && observerRef.current.disconnect(); } catch (e) { }
+            try {
+                if (observerRef.current) {
+                    observerRef.current.disconnect();
+                }
+            } catch (e) {
+                // noop
+            }
         };
     }, []);
 

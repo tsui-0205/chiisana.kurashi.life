@@ -61,7 +61,11 @@ export default function AboutUsSection() {
 
         return () => {
             clearTimeout(timer);
-            observer.disconnect();
+            try {
+                observer.disconnect();
+            } catch (e) {
+                // noop
+            }
         };
     }, [imagesLoaded]);
 
