@@ -9,7 +9,7 @@ import RegionInfo from "./RegionInfo";
 // noto.jpg, kanazawa.jpg, hakusan.jpg, kaga.jpg を使用
 
 // ====== アイドル（未ホバー時）演出レイヤ ============================
-function IdleBackdrop({ active, onChangeIndex }) {
+function IdleBackdrop({ active, onChangeIndex, setImagesLoaded: setParentImagesLoaded }) {
     const prefersReduced = useReducedMotion();
 
     // Ken Burns 的にスライド&ズームする画像セット
@@ -24,9 +24,32 @@ function IdleBackdrop({ active, onChangeIndex }) {
     );
 
     const [index, setIndex] = useState(0);
+    const [imagesLoaded, setImagesLoaded] = useState(false);
+
+    // 画像をプリロード
+    useEffect(() => {
+        const imagePromises = slides.map((slide) => {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = resolve;
+                img.onerror = reject;
+                img.src = slide.src;
+            });
+        });
+
+        Promise.all(imagePromises)
+            .then(() => {
+                setImagesLoaded(true);
+                if (setParentImagesLoaded) setParentImagesLoaded(true);
+            })
+            .catch(() => {
+                setImagesLoaded(true);
+                if (setParentImagesLoaded) setParentImagesLoaded(true);
+            }); // エラーでも続行
+    }, [slides, setParentImagesLoaded]);
 
     useEffect(() => {
-        if (!active) return;
+        if (!active || !imagesLoaded) return;
         if (prefersReduced) return;
         const t = setInterval(() => setIndex((i) => (i + 1) % slides.length), 4000);
         return () => {
@@ -36,7 +59,7 @@ function IdleBackdrop({ active, onChangeIndex }) {
                 // Ignore errors during cleanup
             }
         };
-    }, [active, prefersReduced, slides.length]);
+    }, [active, prefersReduced, slides.length, imagesLoaded]);
 
     // 親コンポーネントへ index 変化を通知
     useEffect(() => {
@@ -117,6 +140,7 @@ export default function IshikawaMapApp() {
     const [selectedOrigin, setSelectedOrigin] = useState("none");
     const [mainHovered, setMainHovered] = useState(false);
     const [idleIndex, setIdleIndex] = useState(0);
+    const [imagesLoaded, setImagesLoaded] = useState(false);
     const prefersReduced = useReducedMotion();
 
     useEffect(() => {
@@ -207,7 +231,7 @@ export default function IshikawaMapApp() {
     const [ref, inView] = useInView({ threshold: 0.12 });
 
     return (
-        <div className="min-h-screen bg-[var(--background)] p-6">
+        <div className="min-h-screen bg-white text-zinc-800 relative overflow-hidden p-6">
             {/* セクションヘッダ（InstagramFeed と同じ左寄せスタイル） */}
             <div className="font-body mx-auto" style={{ margin: '80px auto 24px', maxWidth: '1200px', position: 'relative' }}>
                 <div
@@ -230,7 +254,7 @@ export default function IshikawaMapApp() {
                 <div className="relative left-1/2 right-1/2 w-screen -ml-[50vw] -mr-[50vw] md:col-span-5">
                     <div className="relative h-[95vh] w-full overflow-hidden bg-transparent" onTouchStart={() => setHoveredRegion(null)}>
                         {/* === 追加: 未ホバー時のアイドル背景レイヤ === */}
-                        <IdleBackdrop active={idleActive} onChangeIndex={setIdleIndex} />
+                        <IdleBackdrop active={idleActive} onChangeIndex={setIdleIndex} setImagesLoaded={setImagesLoaded} />
 
                         {/* === ホバー中：対象写真を前面にフェード === */}
                         {hoveredRegion && (
@@ -271,14 +295,14 @@ export default function IshikawaMapApp() {
                                 {/* モバイル用：横書きオーバーレイ（ホバー/タッチ時） */}
                                 {hoveredRegion && (
                                     // 左上横書き（モバイル/タブレット）: md(iPad)で読みやすくするためサイズを拡大
-                                    <div className="absolute top-3 left-3 z-40 flex items-center gap-2 lg:hidden">
-                                        <span className="text-3xl md:text-4xl font-extrabold text-white tracking-[0.2em]">
+                                    <div className="absolute top-3 left-3 z-40 flex items-center gap-2 lg:hidden bg-black/40 backdrop-blur-sm px-4 py-2 rounded-lg">
+                                        <span className="text-2xl md:text-3xl font-extrabold text-white tracking-[0.2em]">
                                             {hoveredRegion === "noto" && "能登"}
                                             {hoveredRegion === "kanazawa" && "金沢"}
                                             {hoveredRegion === "hakusan" && "白山"}
                                             {hoveredRegion === "kaga" && "加賀"}
                                         </span>
-                                        <span className="text-sm md:text-xl font-medium text-white/90 tracking-wider">
+                                        <span className="text-xs md:text-lg font-medium text-white/90 tracking-wider">
                                             {hoveredRegion === "noto" && "Noto"}
                                             {hoveredRegion === "kanazawa" && "Kanazawa"}
                                             {hoveredRegion === "hakusan" && "Hakusan"}
@@ -289,14 +313,14 @@ export default function IshikawaMapApp() {
 
                                 {/* モバイル用：未ホバー（Idle）時にも表示する */}
                                 {!hoveredRegion && idleActive && (
-                                    <div className="absolute -top-8 left-3 z-40 flex items-center gap-2 lg:hidden">
-                                        <span className="text-3xl md:text-4xl font-extrabold text-white tracking-[0.2em]">
+                                    <div className="absolute top-3 left-3 z-40 flex items-center gap-2 lg:hidden">
+                                        <span className="text-2xl md:text-3xl font-extrabold text-white tracking-[0.2em] drop-shadow-lg">
                                             {idleIndex === 0 && "能登"}
                                             {idleIndex === 1 && "金沢"}
                                             {idleIndex === 2 && "白山"}
                                             {idleIndex === 3 && "加賀"}
                                         </span>
-                                        <span className="text-sm md:text-xl font-medium text-white/90 tracking-wider">
+                                        <span className="text-xs md:text-lg font-medium text-white/90 tracking-wider drop-shadow-lg">
                                             {idleIndex === 0 && "Noto"}
                                             {idleIndex === 1 && "Kanazawa"}
                                             {idleIndex === 2 && "Hakusan"}
@@ -458,6 +482,10 @@ export default function IshikawaMapApp() {
                     )}
                 </div>
             </motion.div>
+
+            {/* 背景ぼかしエフェクト */}
+            <div className="pointer-events-none absolute -left-16 bottom-8 h-72 w-72 rounded-full bg-blue-300/30 blur-3xl z-0" />
+            <div className="pointer-events-none absolute right-14 bottom-20 h-64 w-64 rounded-full bg-amber-200/40 blur-3xl z-0" />
         </div>
     );
 }
@@ -489,7 +517,6 @@ function Marker({
             }}
             onTouchStart={(e) => {
                 e.stopPropagation();
-                // call onHover with the id directly to avoid using a functional updater here
                 onHover(id);
             }}
             whileHover={{ scale: 1.15 }}

@@ -9,8 +9,34 @@ export default function AboutUsSection() {
     const [currentSlide, setCurrentSlide] = useState(0);
     const [mounted, setMounted] = useState(false);
     const [visibleItems, setVisibleItems] = useState(new Set());
+    const [imagesLoaded, setImagesLoaded] = useState(false);
 
+    // 画像をプリロード
     useEffect(() => {
+        const imageSources = [
+            '/images/profiles/fufu_explan.jpg',
+            '/images/profiles/wife.jpg',
+            '/images/profiles/husband.jpg'
+        ];
+
+        const imagePromises = imageSources.map((src) => {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = resolve;
+                img.onerror = resolve; // エラーでも続行
+                img.src = src;
+            });
+        });
+
+        Promise.all(imagePromises)
+            .then(() => setImagesLoaded(true))
+            .catch(() => setImagesLoaded(true));
+    }, []);
+
+    // IntersectionObserverを統合（重複を削除）
+    useEffect(() => {
+        if (!imagesLoaded) return; // 画像がロードされるまで待つ
+
         const observer = new IntersectionObserver(
             (entries) => {
                 entries.forEach((entry) => {
@@ -23,50 +49,21 @@ export default function AboutUsSection() {
                 });
             },
             {
-                threshold: 0.2,
-                rootMargin: '-10% 0px -10% 0px'
+                threshold: 0.1,
+                rootMargin: '0px 0px -5% 0px'
             }
         );
 
         const timer = setTimeout(() => {
             const elements = document.querySelectorAll('[data-animate="true"]');
             elements.forEach((el) => observer.observe(el));
-        }, 100);
+        }, 50);
 
         return () => {
             clearTimeout(timer);
             observer.disconnect();
         };
-    }, []);
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            const elements = document.querySelectorAll('[data-animate="true"]:not([data-observed])');
-            const observer = new IntersectionObserver(
-                (entries) => {
-                    entries.forEach((entry) => {
-                        if (entry.isIntersecting) {
-                            const index = entry.target.getAttribute('data-index');
-                            if (index) {
-                                setVisibleItems(prev => new Set([...prev, index]));
-                            }
-                        }
-                    });
-                },
-                {
-                    threshold: 0.2,
-                    rootMargin: '-10% 0px -10% 0px'
-                }
-            );
-
-            elements.forEach((el) => {
-                observer.observe(el);
-                el.setAttribute('data-observed', 'true');
-            });
-        }, 100);
-
-        return () => clearTimeout(timer);
-    }, [currentSlide]);
+    }, [imagesLoaded]);
 
     const profiles = [
         {
@@ -165,7 +162,17 @@ export default function AboutUsSection() {
     const [bodyRef, bodyInView] = useInView({ threshold: 0.15 });
 
     if (!mounted) {
-        return <section id="about" className="relative overflow-hidden bg-white text-zinc-800" style={{ minHeight: 520 }} />;
+        return (
+            <section id="about" className="relative overflow-hidden bg-white text-zinc-800" style={{ minHeight: 520 }}>
+                {/* 初期読み込み中のスケルトン */}
+                <div className="font-body mx-auto mt-10 md:mt-16 mb-6 md:mb-8 max-w-[1200px] relative px-6">
+                    <div className="flex items-center gap-3 opacity-50">
+                        <div className="h-0.5 w-24 bg-zinc-200 rounded-full"></div>
+                        <div className="h-8 w-48 bg-zinc-100 rounded animate-pulse"></div>
+                    </div>
+                </div>
+            </section>
+        );
     }
 
     return (
@@ -178,8 +185,9 @@ export default function AboutUsSection() {
 
                 .fade-in-up {
                     opacity: 0;
-                    transform: translateY(50px);
-                    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+                    transform: translateY(30px);
+                    transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+                    will-change: opacity, transform;
                 }
                 
                 .fade-in-up.visible {
@@ -189,8 +197,9 @@ export default function AboutUsSection() {
                 
                 .fade-in-left {
                     opacity: 0;
-                    transform: translateX(-50px);
-                    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+                    transform: translateX(-30px);
+                    transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+                    will-change: opacity, transform;
                 }
                 
                 .fade-in-left.visible {
@@ -200,8 +209,9 @@ export default function AboutUsSection() {
                 
                 .fade-in-right {
                     opacity: 0;
-                    transform: translateX(50px);
-                    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+                    transform: translateX(30px);
+                    transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+                    will-change: opacity, transform;
                 }
                 
                 .fade-in-right.visible {
@@ -391,11 +401,13 @@ export default function AboutUsSection() {
 
                                         <div className="relative mx-auto w-full max-w-md order-1 md:order-2 h-full flex items-center justify-center">
                                             <div className="relative overflow-hidden rounded-full bg-white p-0 md:p-2 shadow-[0_10px_50px_rgba(0,0,0,0.08)]">
+                                                {!imagesLoaded && (
+                                                    <div className="aspect-square w-full rounded-full bg-zinc-100 animate-pulse" />
+                                                )}
                                                 <img
                                                     src={profile.image}
                                                     alt={profile.name}
-                                                    className="aspect-square w-full rounded-full object-cover text-shadow-soft"
-                                                    loading="lazy"
+                                                    className={`aspect-square w-full rounded-full object-cover text-shadow-soft transition-opacity duration-300 ${imagesLoaded ? 'opacity-100' : 'opacity-0'}`}
                                                     onError={(e) => {
                                                         e.currentTarget.style.display = "none";
                                                     }}

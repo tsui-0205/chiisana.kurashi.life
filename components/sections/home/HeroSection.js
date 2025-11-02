@@ -6,13 +6,30 @@ import NavigationMenu from "../../layout/NavigationMenu";
 export default function HeroSection({ isMenuOpen, setIsMenuOpen, onLoaded, onHeroVisible }) {
     const hasMainPhoto = useImageLoaded('/images/main.jpg');
     const sectionRef = useRef(null);
+    const [fontsLoaded, setFontsLoaded] = React.useState(false);
+
+    // フォントをプリロード
+    useEffect(() => {
+        if (typeof document !== 'undefined' && 'fonts' in document) {
+            Promise.all([
+                document.fonts.load('400 16px "Noto Sans JP"'),
+                document.fonts.load('400 16px "Yomogi"'),
+                document.fonts.load('400 16px "YasashisaGothic"'),
+            ]).then(() => setFontsLoaded(true))
+              .catch(() => setFontsLoaded(true)); // エラーでも続行
+        } else {
+            setFontsLoaded(true);
+        }
+    }, []);
 
     useEffect(() => {
-        if (typeof onLoaded === 'function') onLoaded(hasMainPhoto);
-    }, [hasMainPhoto, onLoaded]);
+        if (typeof onLoaded === 'function') onLoaded(hasMainPhoto && fontsLoaded);
+    }, [hasMainPhoto, fontsLoaded, onLoaded]);
 
     useEffect(() => {
-        if (!sectionRef.current) return;
+        const currentRef = sectionRef.current;
+        if (!currentRef) return;
+        
         const obs = new IntersectionObserver(
             (entries) => {
                 entries.forEach((entry) => {
@@ -30,10 +47,16 @@ export default function HeroSection({ isMenuOpen, setIsMenuOpen, onLoaded, onHer
             },
             { threshold: 0.5 }
         );
-        obs.observe(sectionRef.current);
+        
+        obs.observe(currentRef);
+        
         return () => {
-            obs.disconnect();
-            try { document.documentElement.classList.remove('hero-visible'); } catch (e) { }
+            try {
+                obs.disconnect();
+                document.documentElement.classList.remove('hero-visible');
+            } catch (e) {
+                // noop
+            }
         };
     }, [onHeroVisible]);
 
@@ -175,17 +198,20 @@ export default function HeroSection({ isMenuOpen, setIsMenuOpen, onLoaded, onHer
 
       `}</style>
             <div className="fixed inset-0 w-full h-full z-0">
+                <div className={`absolute inset-0 w-full h-full bg-gray-200 animate-pulse transition-opacity duration-500 ${hasMainPhoto ? 'opacity-0 pointer-events-none' : 'opacity-100'}`} />
                 <img
                     src="/images/main.jpg"
                     alt="メイン写真"
-                    className="w-full h-full object-cover object-center fade-in-image"
+                    className={`absolute inset-0 w-full h-full object-cover object-center fade-in-image transition-opacity duration-500 ${hasMainPhoto ? 'opacity-100' : 'opacity-0'}`}
+                    loading="eager"
+                    fetchpriority="high"
                 />
                 <div className="absolute inset-0 bg-gray-300/30"></div>
             </div>
 
             {/* 指定のテキストオーバーレイ（写真上に表示） */}
             <div className="slash left z-20" aria-hidden></div>
-            <div className="center-text z-20 text-6xl font-bold tracking-wider wave-text">
+            <div className={`center-text z-20 text-6xl font-bold tracking-wider wave-text ${fontsLoaded ? '' : 'opacity-0'}`}>
                 <div>
                     {firstText.split("").map((char, i) => (
                         <span key={i} style={{ animationDelay: `${i * waveStagger}s` }}>{char}</span>
@@ -199,7 +225,7 @@ export default function HeroSection({ isMenuOpen, setIsMenuOpen, onLoaded, onHer
             </div>
 
             <div className="slash right z-20" aria-hidden></div>
-            <div className="bottom-right-text z-20" aria-hidden>
+            <div className={`bottom-right-text z-20 transition-opacity duration-500 ${fontsLoaded ? 'opacity-100' : 'opacity-0'}`} aria-hidden>
                 <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="いしかわの暮らし">
                     <defs>
                         <path id="circlePathLarge" d="M100,20 a80,80 0 1,1 -0.1,0" />
