@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import useInView from '@/hooks/useInView';
 import RegionInfo from "./RegionInfo";
@@ -134,7 +134,6 @@ function IdleBackdrop({ active, onChangeIndex, setImagesLoaded: setParentImagesL
 
 // ====== MAIN ======================================================
 export default function IshikawaMapApp() {
-    // Production: no development instrumentation here. Normal behavior only.
     const [hoveredRegion, setHoveredRegion] = useState(null);
     const [selectedRegion, setSelectedRegion] = useState(null);
     const [selectedOrigin, setSelectedOrigin] = useState("none");
@@ -143,44 +142,53 @@ export default function IshikawaMapApp() {
     const [imagesLoaded, setImagesLoaded] = useState(false);
     const prefersReduced = useReducedMotion();
 
+    // イベントハンドラをメモ化
+    const handleKeyDown = useCallback((e) => {
+        if (e.key === "Escape") setSelectedRegion(null);
+    }, []);
+
+    const handleRegionInfoClose = useCallback(() => {
+        setSelectedRegion(null);
+        setSelectedOrigin('none');
+        setHoveredRegion(null);
+    }, []);
+
+    const handleMarkerClick = useCallback((id, e) => {
+        if (e?.stopPropagation) e.stopPropagation();
+        setSelectedRegion((s) => (s === id ? null : id));
+        setSelectedOrigin("click");
+    }, []);
+
     useEffect(() => {
-        function onKey(e) {
-            if (e.key === "Escape") setSelectedRegion(null);
-        }
         if (typeof window !== 'undefined') {
-            window.addEventListener("keydown", onKey);
+            window.addEventListener("keydown", handleKeyDown);
         }
         return () => {
             if (typeof window !== 'undefined') {
                 try {
-                    window.removeEventListener("keydown", onKey);
+                    window.removeEventListener("keydown", handleKeyDown);
                 } catch (e) {
                     // Ignore errors during cleanup
                 }
             }
         };
-    }, []);
+    }, [handleKeyDown]);
 
     // Fallback: listen for RegionInfo fallback close events
     useEffect(() => {
-        function onRegionInfoClose() {
-            setSelectedRegion(null);
-            setSelectedOrigin('none');
-            setHoveredRegion(null);
-        }
         if (typeof window !== 'undefined') {
-            window.addEventListener('regioninfo:close', onRegionInfoClose);
+            window.addEventListener('regioninfo:close', handleRegionInfoClose);
         }
         return () => {
             if (typeof window !== 'undefined') {
                 try {
-                    window.removeEventListener('regioninfo:close', onRegionInfoClose);
+                    window.removeEventListener('regioninfo:close', handleRegionInfoClose);
                 } catch (e) {
                     // Ignore errors during cleanup
                 }
             }
         };
-    }, []);
+    }, [handleRegionInfoClose]);
 
     // Hover と選択の同期
     useEffect(() => {
@@ -221,26 +229,25 @@ export default function IshikawaMapApp() {
         };
     }, [selectedRegion]);
 
-    function handleMarkerClick(id, e) {
-        if (e?.stopPropagation) e.stopPropagation();
-        setSelectedRegion((s) => (s === id ? null : id));
-        setSelectedOrigin("click");
-    }
-
     const idleActive = !hoveredRegion && !selectedRegion;
     const [ref, inView] = useInView({ threshold: 0.12 });
 
+    // 地域選択ハンドラをメモ化
+    const handleRegionSelect = useCallback((region) => {
+        setHoveredRegion(region);
+        setSelectedRegion(region);
+        setSelectedOrigin('click');
+    }, []);
+
     return (
-        <div className="min-h-screen bg-white text-zinc-800 relative overflow-hidden p-6">
-            {/* セクションヘッダ（InstagramFeed と同じ左寄せスタイル） */}
-            <div className="font-body mx-auto" style={{ margin: '80px auto 24px', maxWidth: '1200px', position: 'relative' }}>
-                <div
-                    className={`flex items-center gap-3 fade-in-up`}
-                    data-animate="true"
-                    data-index="header"
-                >
-                    <div className="h-0.5 w-24 bg-black rounded-full" />
-                    <h2 className="text-[22px] sm:text-[28px] md:text-[38px] font-bold text-zinc-700 tracking-[0.18em] md:pl-[80px] whitespace-nowrap">石川の、ココいきまっし</h2>
+        <div className="min-h-screen bg-white text-zinc-800 relative overflow-hidden py-12 px-4 sm:px-6">
+            {/* セクションヘッダ（文字切れ対策：padding と overflow 調整） */}
+            <div className="font-body container mx-auto mb-8 md:mb-12 relative px-4 sm:px-6">
+                <div className="flex items-center gap-3 overflow-visible">
+                    <div className="h-0.5 w-16 sm:w-24 bg-black rounded-full flex-shrink-0" />
+                    <h2 className="text-[18px] sm:text-[22px] md:text-[28px] lg:text-[38px] font-bold text-zinc-700 tracking-[0.12em] md:tracking-[0.18em] md:pl-8 lg:pl-20 whitespace-nowrap overflow-visible">
+                        石川の、ココいきまっし
+                    </h2>
                 </div>
             </div>
 
@@ -396,36 +403,28 @@ export default function IshikawaMapApp() {
                         <div className="button-13">
                             <a href="#" onClick={(e) => {
                                 e.preventDefault();
-                                setHoveredRegion('noto');
-                                setSelectedRegion('noto');
-                                setSelectedOrigin('click');
+                                handleRegionSelect('noto');
                             }}>能登</a>
                         </div>
 
                         <div className="button-13">
                             <a href="#" onClick={(e) => {
                                 e.preventDefault();
-                                setHoveredRegion('kanazawa');
-                                setSelectedRegion('kanazawa');
-                                setSelectedOrigin('click');
+                                handleRegionSelect('kanazawa');
                             }}>金沢</a>
                         </div>
 
                         <div className="button-13">
                             <a href="#" onClick={(e) => {
                                 e.preventDefault();
-                                setHoveredRegion('hakusan');
-                                setSelectedRegion('hakusan');
-                                setSelectedOrigin('click');
+                                handleRegionSelect('hakusan');
                             }}>白山</a>
                         </div>
 
                         <div className="button-13">
                             <a href="#" onClick={(e) => {
                                 e.preventDefault();
-                                setHoveredRegion('kaga');
-                                setSelectedRegion('kaga');
-                                setSelectedOrigin('click');
+                                handleRegionSelect('kaga');
                             }}>加賀</a>
                         </div>
                     </div>
@@ -438,26 +437,9 @@ export default function IshikawaMapApp() {
                                 className="absolute inset-0 bg-black/20 md:bg-transparent"
                                 role="button"
                                 tabIndex={0}
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    e.preventDefault();
-                                    setSelectedRegion(null);
-                                    setSelectedOrigin('none');
-                                    setHoveredRegion(null);
-                                }}
-                                onPointerDown={(e) => {
-                                    e.stopPropagation();
-                                    setSelectedRegion(null);
-                                    setSelectedOrigin('none');
-                                    setHoveredRegion(null);
-                                }}
-                                onTouchEnd={(e) => {
-                                    e.stopPropagation();
-                                    e.preventDefault();
-                                    setSelectedRegion(null);
-                                    setSelectedOrigin('none');
-                                    setHoveredRegion(null);
-                                }}
+                                onClick={handleRegionInfoClose}
+                                onPointerDown={handleRegionInfoClose}
+                                onTouchEnd={handleRegionInfoClose}
                             />
 
                             {/* パネル: モバイルでは下部、デスクトップでは右側に配置 */}
@@ -470,11 +452,7 @@ export default function IshikawaMapApp() {
                                 >
                                     <RegionInfo
                                         region={selectedRegion}
-                                        onClose={() => {
-                                            setSelectedRegion(null);
-                                            setSelectedOrigin('none');
-                                            setHoveredRegion(null);
-                                        }}
+                                        onClose={handleRegionInfoClose}
                                     />
                                 </div>
                             </div>

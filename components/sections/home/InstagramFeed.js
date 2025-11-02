@@ -1,8 +1,8 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { motion } from 'framer-motion';
 import useInView from '@/hooks/useInView';
-import SectionHeader from "../../ui/SectionHeader";
+import Image from 'next/image';
 import ToTopButton from "../../ui/ToTopButton";
 
 // ▼ 自動スクロールで流す写真（手動でファイルを置いてください）
@@ -20,6 +20,22 @@ export default function InstagramFeed({ showToTop = false, hideWhenHeroVisible =
     const wrapperRef = useRef(null);
     const [visibleItems, setVisibleItems] = useState(new Set());
     const observerRef = useRef(null);
+
+    // クリックで投稿を開く（メモ化）
+    const openPost = useCallback((url) => {
+        window.open(url, "_blank", "noopener,noreferrer");
+    }, []);
+
+    // アニメーション設定をメモ化
+    const { duration, mobileDuration, doubled, movePercent } = useMemo(() => {
+        const baseSeconds = 40;
+        const dur = Math.max(12, Math.round((instagramPosts.length / 3) * baseSeconds));
+        const mobDur = Math.max(8, Math.round(dur * 0.6));
+        const DUPLICATES = 2;
+        const dbl = Array(DUPLICATES).fill(instagramPosts).flat();
+        const mvPercent = 470 / DUPLICATES;
+        return { duration: dur, mobileDuration: mobDur, doubled: dbl, movePercent: mvPercent };
+    }, []);
 
     // ドラッグでスクロール（スマホ/PC両対応）
     useEffect(() => {
@@ -63,7 +79,7 @@ export default function InstagramFeed({ showToTop = false, hideWhenHeroVisible =
         };
     }, []);
 
-    // IntersectionObserver をセットアップして表示トリガーを管理
+    // IntersectionObserver を統合してパフォーマンス改善
     useEffect(() => {
         observerRef.current = new IntersectionObserver(
             (entries) => {
@@ -79,19 +95,7 @@ export default function InstagramFeed({ showToTop = false, hideWhenHeroVisible =
             }
         );
 
-        return () => {
-            try {
-                if (observerRef.current) {
-                    observerRef.current.disconnect();
-                }
-            } catch (e) {
-                // noop
-            }
-        };
-    }, []);
-
-    // 要素に observer を適用
-    useEffect(() => {
+        // 要素を即座に監視開始
         const elements = document.querySelectorAll('[data-animate="true"]');
         elements.forEach((el) => {
             try {
@@ -114,31 +118,11 @@ export default function InstagramFeed({ showToTop = false, hideWhenHeroVisible =
         };
     }, []);
 
-    // ...existing code...
-
-    // クリックで投稿を開く
-    const openPost = (url) => {
-        window.open(url, "_blank", "noopener,noreferrer");
-    };
-
-    // トラックの自動スクロール速度（画像数に応じて自動で伸縮）
-    const baseSeconds = 40; // 3枚で約20秒/ループ（デスクトップ想定） — ゆっくり目
-    const duration = Math.max(12, Math.round((instagramPosts.length / 3) * baseSeconds));
-    // モバイルはカードが大きく見えるため体感速度が遅く感じられることがある。
-    // そのためモバイル向けに短めの duration を用意して PC 表示と近い体感に合わせる。
-    const mobileDuration = Math.max(8, Math.round(duration * 0.6));
-
-    // 複製数を可変に（ここを 2 / 3 / 4 に変更して挙動を切替可能）
-    // ① 簡単に戻す場合は DUPLICATES = 2
-    const DUPLICATES = 2; // change to 2/3/4 ...
-    const doubled = Array(DUPLICATES).fill(instagramPosts).flat();
-    const movePercent = 470 / DUPLICATES; // 1セット分の幅をパーセンテージで計算
     const [ref, inView] = useInView({ threshold: 0.12 });
 
     return (
-        <section id="instagram" className="relative overflow-hidden bg-white text-zinc-800">
+        <section id="instagram" className="instagram-section relative overflow-hidden text-zinc-800">
             <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Yomogi&display=swap');
         .font-body { font-family: 'Noto Sans JP', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; }
         .font-hand { font-family: 'Yomogi', 'Noto Sans JP', sans-serif; letter-spacing: .02em; }
 
@@ -190,11 +174,12 @@ export default function InstagramFeed({ showToTop = false, hideWhenHeroVisible =
         }
         .ig-card:hover { transform: translateY(-4px); box-shadow: 0 20px 60px rgba(0,0,0,.12); }
         .ig-card::after { content: ""; position: absolute; inset: 0; box-shadow: inset 0 0 80px rgba(0,0,0,.06); border-radius: 1rem; }
+        
+        /* セクション背景 */
+        .instagram-section {
+          padding: 2rem 1rem;
+        }
       `}</style>
-
-            {/* 背景の柔らかい色味 */}
-            <div className="pointer-events-none absolute -left-24 top-24 h-72 w-72 rounded-full bg-purple-200/30 blur-3xl" />
-            <div className="pointer-events-none absolute left-56 -top-8 h-64 w-64 rounded-full bg-pink-100/50 blur-3xl" />
 
             <div className="font-body mx-auto mt-6 md:mt-8 mb-6 md:mb-12 max-w-[1200px] relative px-6">
                 <div
@@ -252,11 +237,13 @@ export default function InstagramFeed({ showToTop = false, hideWhenHeroVisible =
                                     role="button"
                                     aria-label="Open Instagram post"
                                 >
-                                    <img
+                                    <Image
                                         src={post.imageUrl}
                                         alt="Instagram投稿"
+                                        fill
+                                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 36vw, 28vw"
+                                        className="object-cover"
                                         loading="lazy"
-                                        className="h-full w-full object-cover"
                                         onLoad={() => setLoaded((p) => ({ ...p, [post.id]: true }))}
                                         onError={() => setLoaded((p) => ({ ...p, [post.id]: false }))}
                                     />

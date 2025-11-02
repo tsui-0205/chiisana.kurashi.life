@@ -68,7 +68,6 @@ export default function HeroSection({ isMenuOpen, setIsMenuOpen, onLoaded, onHer
     const waveDuration = 1.5; // must match CSS animation duration
     const firstText = "きまっし";
     const secondText = "みまっし";
-    // offset so second line starts after the last char of first line finishes
     const firstLastDelay = (Math.max(0, firstText.length - 1) * waveStagger);
     const secondOffset = firstLastDelay + waveDuration + 0.15; // small gap after first finishes
 
@@ -117,6 +116,12 @@ export default function HeroSection({ isMenuOpen, setIsMenuOpen, onLoaded, onHer
             pointer-events: none;
             text-shadow: 0 2px 16px rgba(0,0,0,.35);
             white-space: nowrap;
+            /* Android対策: 強制的に新しいレイヤーを作成して描画を保証 */
+            will-change: transform;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            transform-style: preserve-3d;
+            -webkit-transform-style: preserve-3d;
         }
         @media (max-width: 640px) {
             /* スマホでも文字のインパクトを保持 */
@@ -140,23 +145,55 @@ export default function HeroSection({ isMenuOpen, setIsMenuOpen, onLoaded, onHer
         }
 
     /* 斜めスラッシュ（長めで急角度） */
-    .slash { position: absolute; top: 46%; width: 12vw; max-width: 280px; height: var(--stroke-width); background: #fff; border-radius: 999px; transform-origin: center; opacity: .95; }
+    .slash { 
+        position: absolute; 
+        top: 46%; 
+        width: 12vw; 
+        max-width: 280px; 
+        height: var(--stroke-width); 
+        background: #fff; 
+        border-radius: 999px; 
+        transform-origin: center; 
+        opacity: .95;
+        /* Android対策: レイヤー描画を強制 */
+        will-change: transform;
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+        transform-style: preserve-3d;
+        -webkit-transform-style: preserve-3d;
+        z-index: 20;
+        pointer-events: none;
+    }
     /* 左右とも center 基準で文字から十分離れた位置に配置 */
-    .slash.left { left: 50%; transform: translate(-320%, -75%) rotate(var(--slash-tilt)); }
-    .slash.right { left: 50%; transform: translate(220%, -75%) rotate(calc(var(--slash-tilt) * -1)); }
+    .slash.left { 
+        left: 50%; 
+        transform: translate(-320%, -75%) rotate(var(--slash-tilt)) translateZ(0);
+    }
+    .slash.right { 
+        left: 50%; 
+        transform: translate(220%, -75%) rotate(calc(var(--slash-tilt) * -1)) translateZ(0);
+    }
     @media (max-width: 768px){ 
         .slash { width: 15vw; max-width: 180px; top: 46%; }
         /* move slashes further out on tablet */
-        .slash.left { transform: translate(-260%, -70%) rotate(var(--slash-tilt)); }
+        .slash.left { 
+            transform: translate(-260%, -70%) rotate(var(--slash-tilt)) translateZ(0);
+        }
         /* push the right slash further out for better spacing */
-        .slash.right { transform: translate(200%, -70%) rotate(calc(var(--slash-tilt) * -1)); }
+        .slash.right { 
+            transform: translate(200%, -70%) rotate(calc(var(--slash-tilt) * -1)) translateZ(0);
+        }
     }
     @media (max-width: 520px){ 
         .slash { width: 20vw; max-width: 120px; top: 46%; }
         /* move slashes further out on small screens */
-        .slash.left { transform: translate(-220%, -65%) rotate(30deg); }
+        .slash.left { 
+            transform: translate(-220%, -65%) rotate(30deg) translateZ(0);
+        }
         /* increase right translation to separate from text */
-        .slash.right { transform: translate(140%, -65%) rotate(-30deg); }
+        .slash.right { 
+            transform: translate(140%, -65%) rotate(-30deg) translateZ(0);
+        }
     }
 
         .bottom-right-text {
@@ -180,7 +217,7 @@ export default function HeroSection({ isMenuOpen, setIsMenuOpen, onLoaded, onHer
             transform-origin: 100px 100px; 
         }
                     .circle-text { fill: #FFD54F; font-weight: 900; font-family: 'YasashisaGothic', 'Zen Maru Gothic', 'Kosugi Maru', 'Yomogi', "Noto Sans JP", sans-serif; font-size: 28px; letter-spacing: 0.2em; }
-        .bottom-right-text .circle-bg { fill: rgba(255,213,79,0.06); }
+        .bottom-right-text .circle-bg { fill: rgba(255,213,79,0); } /* 背景円を透明に */
         @media (max-width: 640px) {
             .bottom-right-text { width: 120px; height: 120px; right: 3%; bottom: 4%; }
             .bottom-right-text svg { width: 120px; height: 120px; }
@@ -196,6 +233,9 @@ export default function HeroSection({ isMenuOpen, setIsMenuOpen, onLoaded, onHer
             display: inline-block;
             /* play once and keep end state (forwards) so it doesn't loop continuously */
             animation: wave 1.5s ease-in-out 1 forwards;
+            /* Android対策: スムーズなアニメーション */
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
         }
 
       `}</style>
@@ -252,12 +292,20 @@ export default function HeroSection({ isMenuOpen, setIsMenuOpen, onLoaded, onHer
             </div>
             <NavigationMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
 
-            <div className="absolute bottom-16 left-1/2 transform -translate-x-1/2 z-20">
-                <div className="animate-bounce text-white">
+            <div className="fixed bottom-16 left-1/2 transform -translate-x-1/2 z-30">
+                <div className="animate-bounce text-white" style={{
+                    willChange: 'transform',
+                    backfaceVisibility: 'hidden',
+                    WebkitBackfaceVisibility: 'hidden',
+                    transform: 'translateZ(0)'
+                }}>
                     <svg className="w-6 h-6 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
                     </svg>
-                    <p className="text-sm mt-2">Scroll</p>
+                    <p className="text-sm mt-2" style={{
+                        textShadow: '0 2px 8px rgba(0,0,0,0.5)',
+                        fontWeight: 500
+                    }}>Scroll</p>
                 </div>
             </div>
         </section>
