@@ -76,7 +76,7 @@ export default function HeroSection({ isMenuOpen, setIsMenuOpen, onLoaded, onHer
         <section id="hero" ref={sectionRef} className="relative h-screen w-full overflow-hidden">
             <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Yomogi&display=swap');
-        /* Yasashisa Gothic: self-hosting - フォントを /public/fonts/yasashisa-gothic.woff2 に配置してください */
+        /* Yasashisa Gothic: フォントファイルを public/fonts/yasashisa-gothic.woff2 に配置後、以下のコメントを外してください
         @font-face {
             font-family: 'YasashisaGothic';
             src: url('/fonts/yasashisa-gothic.woff2') format('woff2');
@@ -84,6 +84,7 @@ export default function HeroSection({ isMenuOpen, setIsMenuOpen, onLoaded, onHer
             font-style: normal;
             font-display: swap;
         }
+        */
     :root{ --letter-spacing: 0.06em; --font-size: clamp(40px, 9vw, 96px); --stroke-width: 10px; --slash-tilt: 35deg; }
     .font-body { font-family: 'Noto Sans JP', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, 'Apple Color Emoji', 'Segoe UI Emoji'; }
     .font-hand { font-family: 'Yomogi', 'Noto Sans JP', sans-serif; letter-spacing: .02em; }
