@@ -183,6 +183,14 @@ export default function AboutUsSection() {
                 .font-hand { font-family: 'Yomogi', 'Noto Sans JP', sans-serif; letter-spacing: .02em; }
                 .text-shadow-soft { text-shadow: 0 6px 30px rgba(0,0,0,.06); }
 
+                /* タイトル用の背景 */
+                .section-header-bg {
+                    background: rgba(255, 255, 255, 0.95);
+                    backdrop-filter: blur(8px);
+                    padding: 1rem 0;
+                    border-radius: 12px;
+                }
+
                 .fade-in-up {
                     opacity: 0;
                     transform: translateY(30px);
@@ -224,15 +232,17 @@ export default function AboutUsSection() {
             <div className="pointer-events-none absolute -right-16 bottom-8 h-72 w-72 rounded-full bg-blue-300/30 blur-3xl" />
             <div className="pointer-events-none absolute right-14 bottom-20 h-64 w-64 rounded-full bg-amber-200/40 blur-3xl" />
 
-            {/* Section Header - Independent positioning */}
+            {/* Section Header - Independent positioning with background */}
             <div className="font-body mx-auto mt-10 md:mt-16 mb-6 md:mb-8 max-w-[1200px] relative px-6">
-                <div
-                    className={`flex items-center gap-3 fade-in-up ${visibleItems.has('header') ? 'visible' : ''}`}
-                    data-animate="true"
-                    data-index="header"
-                >
-                    <div className="h-0.5 w-24 bg-black rounded-full"></div>
-                    <h2 className="text-[22px] sm:text-[28px] md:text-[38px] font-bold text-zinc-700 tracking-[0.18em] md:pl-[80px] whitespace-nowrap">わたしたちのこと</h2>
+                <div className="section-header-bg">
+                    <div
+                        className="flex items-center gap-3 px-4"
+                        data-animate="true"
+                        data-index="header"
+                    >
+                        <div className="h-0.5 w-24 bg-black rounded-full"></div>
+                        <h2 className="text-[22px] sm:text-[28px] md:text-[38px] font-bold text-zinc-700 tracking-[0.18em] md:pl-[80px] whitespace-nowrap">わたしたちのこと</h2>
+                    </div>
                 </div>
             </div>
 

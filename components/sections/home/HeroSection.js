@@ -14,7 +14,8 @@ export default function HeroSection({ isMenuOpen, setIsMenuOpen, onLoaded, onHer
             Promise.all([
                 document.fonts.load('400 16px "Noto Sans JP"'),
                 document.fonts.load('400 16px "Yomogi"'),
-                document.fonts.load('400 16px "YasashisaGothic"'),
+                // YasashisaGothicはファイルが配置されたら有効化
+                // document.fonts.load('400 16px "YasashisaGothic"'),
             ]).then(() => setFontsLoaded(true))
               .catch(() => setFontsLoaded(true)); // エラーでも続行
         } else {
@@ -75,7 +76,7 @@ export default function HeroSection({ isMenuOpen, setIsMenuOpen, onLoaded, onHer
         <section id="hero" ref={sectionRef} className="relative h-screen w-full overflow-hidden">
             <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Yomogi&display=swap');
-        /* Yasashisa Gothic: self-hosting fallback - place woff2 at /public/fonts/yasashisa-gothic.woff2 */
+        /* Yasashisa Gothic: self-hosting - フォントを /public/fonts/yasashisa-gothic.woff2 に配置してください */
         @font-face {
             font-family: 'YasashisaGothic';
             src: url('/fonts/yasashisa-gothic.woff2') format('woff2');
@@ -204,7 +205,7 @@ export default function HeroSection({ isMenuOpen, setIsMenuOpen, onLoaded, onHer
                     alt="メイン写真"
                     className={`absolute inset-0 w-full h-full object-cover object-center fade-in-image transition-opacity duration-500 ${hasMainPhoto ? 'opacity-100' : 'opacity-0'}`}
                     loading="eager"
-                    fetchpriority="high"
+                    fetchPriority="high"
                 />
                 <div className="absolute inset-0 bg-gray-300/30"></div>
             </div>
