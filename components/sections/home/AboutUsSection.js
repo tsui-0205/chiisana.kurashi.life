@@ -178,28 +178,10 @@ export default function AboutUsSection() {
                 .font-hand { font-family: 'Yomogi', 'Noto Sans JP', sans-serif; letter-spacing: .02em; }
                 .text-shadow-soft { text-shadow: 0 6px 30px rgba(0,0,0,.06); }
 
-                /* タイトル用の背景 - スクロール対策 */
-                .section-header-bg {
-                    position: relative;
-                    background: rgba(255, 255, 255, 0.98);
-                    backdrop-filter: blur(10px);
-                    -webkit-backdrop-filter: blur(10px);
-                    padding: 1rem 0;
-                    border-radius: 12px;
-                    z-index: 10;
-                    will-change: transform;
-                    backface-visibility: hidden;
-                    -webkit-backface-visibility: hidden;
-                    transform: translateZ(0);
-                }
-
                 .fade-in-up {
                     opacity: 0;
                     transform: translateY(30px);
                     transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-                    will-change: opacity, transform;
-                    backface-visibility: hidden;
-                    -webkit-backface-visibility: hidden;
                 }
                 
                 .fade-in-up.visible {
@@ -211,9 +193,6 @@ export default function AboutUsSection() {
                     opacity: 0;
                     transform: translateX(-30px);
                     transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-                    will-change: opacity, transform;
-                    backface-visibility: hidden;
-                    -webkit-backface-visibility: hidden;
                 }
                 
                 .fade-in-left.visible {
@@ -225,44 +204,34 @@ export default function AboutUsSection() {
                     opacity: 0;
                     transform: translateX(30px);
                     transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-                    will-change: opacity, transform;
-                    backface-visibility: hidden;
-                    -webkit-backface-visibility: hidden;
                 }
                 
                 .fade-in-right.visible {
                     opacity: 1;
                     transform: translateX(0);
                 }
-
-                /* ナビゲーションボタン - スクロール対策 */
-                .nav-button {
-                    will-change: transform;
-                    backface-visibility: hidden;
-                    -webkit-backface-visibility: hidden;
-                    transform: translateZ(0);
-                }
             `}</style>
-
-            {/* Soft color blobs */}
             <div className="pointer-events-none absolute -right-16 bottom-8 h-72 w-72 rounded-full bg-blue-300/30 blur-3xl" />
             <div className="pointer-events-none absolute right-14 bottom-20 h-64 w-64 rounded-full bg-amber-200/40 blur-3xl" />
 
-            {/* Section Header - Independent positioning with background */}
-            <div className="font-body mx-auto mt-10 md:mt-16 mb-6 md:mb-8 max-w-[1200px] relative px-6">
-                <div className="section-header-bg">
-                    <div
-                        className="flex items-center gap-3 px-4"
-                        data-animate="true"
-                        data-index="header"
-                    >
+            {/* Section Header - シンプルなスタイルで常に表示 */}
+            <div className="font-body mx-auto mt-10 md:mt-16 mb-6 md:mb-8 max-w-[1200px] relative px-6" style={{ zIndex: 100 }}>
+                <div style={{
+                    background: 'rgba(255, 255, 255, 0.95)',
+                    backdropFilter: 'blur(8px)',
+                    WebkitBackdropFilter: 'blur(8px)',
+                    padding: '1rem 0',
+                    borderRadius: '12px'
+                }}>
+                    <div className="flex items-center gap-3 px-4">
                         <div className="h-0.5 w-24 bg-black rounded-full"></div>
-                        <h2 className="text-[22px] sm:text-[28px] md:text-[38px] font-bold text-zinc-700 tracking-[0.18em] md:pl-[80px] whitespace-nowrap">わたしたちのこと</h2>
+                        <h2 className="text-[22px] sm:text-[28px] md:text-[38px] font-bold text-zinc-700 tracking-[0.18em] md:pl-[80px] whitespace-nowrap">
+                            わたしたちのこと
+                        </h2>
                     </div>
                 </div>
             </div>
 
-            {/* Profile selector + slider: body content that should fade up (title remains static) */}
             <motion.div
                 ref={bodyRef}
                 initial={{ opacity: 0, y: 30 }}
@@ -450,7 +419,7 @@ export default function AboutUsSection() {
                         {/* Navigation Arrows */}
                         <button
                             onClick={prevSlide}
-                            className={`nav-button absolute left-0 top-1/2 -translate-y-1/2 -translate-x-16 w-12 h-12 bg-white hover:bg-zinc-50 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 z-10 border border-zinc-200 fade-in-left ${visibleItems.has('nav') ? 'visible' : ''}`}
+                            className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-16 w-12 h-12 bg-white hover:bg-zinc-50 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 z-10 border border-zinc-200 fade-in-left ${visibleItems.has('nav') ? 'visible' : ''}`}
                             aria-label="前のスライド"
                             data-animate="true"
                             data-index="nav"
@@ -463,7 +432,7 @@ export default function AboutUsSection() {
 
                         <button
                             onClick={nextSlide}
-                            className={`nav-button absolute right-0 top-1/2 -translate-y-1/2 translate-x-16 w-12 h-12 bg-white hover:bg-zinc-50 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 z-10 border border-zinc-200 fade-in-right ${visibleItems.has('nav') ? 'visible' : ''}`}
+                            className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-16 w-12 h-12 bg-white hover:bg-zinc-50 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 z-10 border border-zinc-200 fade-in-right ${visibleItems.has('nav') ? 'visible' : ''}`}
                             aria-label="次のスライド"
                             style={{ transitionDelay: '0.4s' }}
                         >
