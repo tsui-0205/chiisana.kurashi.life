@@ -204,6 +204,25 @@ export async function DELETE(request) {
         // 投稿を配列から削除
         const deletedPost = currentPosts.splice(postIndex, 1)[0];
 
+        // Cloudinary の画像を削除（投稿内の全画像を検出）
+        const cloudinaryDeleteResults = [];
+        
+        // カバー画像を削除
+        if (deletedPost.cover && deletedPost.cover.includes('cloudinary.com')) {
+            const deleteResult = await deleteCloudinaryImage(deletedPost.cover);
+            cloudinaryDeleteResults.push({ url: deletedPost.cover, result: deleteResult });
+        }
+
+        // セクション内の画像を削除
+        if (deletedPost.sections && Array.isArray(deletedPost.sections)) {
+            for (const section of deletedPost.sections) {
+                if (section.image && section.image.includes('cloudinary.com')) {
+                    const deleteResult = await deleteCloudinaryImage(section.image);
+                    cloudinaryDeleteResults.push({ url: section.image, result: deleteResult });
+                }
+            }
+        }
+
         // 新しい posts.js ファイルの内容を生成
         const newPostsContent = `// ブログ投稿データ
 export const posts = ${JSON.stringify(currentPosts, null, 4).replace(/"([^"]+)":/g, '$1:')};
@@ -213,10 +232,68 @@ export const posts = ${JSON.stringify(currentPosts, null, 4).replace(/"([^"]+)":
 
         return NextResponse.json({
             message: 'Post deleted successfully',
-            deletedPost: deletedPost
+            deletedPost: deletedPost,
+            cloudinaryDeleted: cloudinaryDeleteResults
         });
 
     } catch (error) {
-        return NextResponse.json({ error: 'Failed to delete post' }, { status: 500 });
+        console.error('Delete post error', error);
+        return NextResponse.json({ error: 'Failed to delete post', details: String(error) }, { status: 500 });
+    }
+}
+
+// Cloudinary から画像を削除するヘルパー関数
+async function deleteCloudinaryImage(imageUrl) {
+    try {
+        const CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME;
+        const API_KEY = process.env.CLOUDINARY_API_KEY;
+        const API_SECRET = process.env.CLOUDINARY_API_SECRET;
+
+        if (!CLOUD_NAME || !API_KEY || !API_SECRET) {
+            console.error('Cloudinary not configured for deletion');
+            return { success: false, error: 'Cloudinary not configured' };
+        }
+
+        // URL から public_id を抽出
+        // 例: https://res.cloudinary.com/xxx/image/upload/v1234567890/blog/filename.jpg
+        // → public_id は "blog/filename"
+        const match = imageUrl.match(/\/upload\/(?:v\d+\/)?(.+)\.(jpg|jpeg|png|gif|webp)$/i);
+        if (!match) {
+            console.error('Could not extract public_id from URL:', imageUrl);
+            return { success: false, error: 'Could not extract public_id from URL' };
+        }
+
+        const publicId = match[1]; // 例: "blog/filename"
+        console.log('Deleting Cloudinary image:', publicId);
+
+        // Cloudinary Admin API で削除（署名付き）
+        const timestamp = Math.round(Date.now() / 1000);
+        const crypto = await import('crypto');
+        const stringToSign = `public_id=${publicId}&timestamp=${timestamp}`;
+        const signature = crypto.createHash('sha1').update(stringToSign + API_SECRET).digest('hex');
+
+        const deleteForm = new FormData();
+        deleteForm.append('public_id', publicId);
+        deleteForm.append('api_key', API_KEY);
+        deleteForm.append('timestamp', String(timestamp));
+        deleteForm.append('signature', signature);
+
+        const cloudRes = await fetch(
+            `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/destroy`,
+            { method: 'POST', body: deleteForm }
+        );
+
+        const json = await cloudRes.json();
+        console.log('Cloudinary delete response:', json);
+        
+        if (!cloudRes.ok) {
+            console.error('Cloudinary delete failed:', { status: cloudRes.status, body: json });
+            return { success: false, error: json, status: cloudRes.status };
+        }
+
+        return { success: true, result: json };
+    } catch (error) {
+        console.error('Error deleting Cloudinary image:', error);
+        return { success: false, error: String(error) };
     }
 }

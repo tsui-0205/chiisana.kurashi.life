@@ -106,7 +106,6 @@ export default function NewPost() {
 
       if (response.ok) {
         const result = await response.json();
-
         if (sectionIndex !== null) {
           // セクション画像の更新
           setFormData(prev => ({
@@ -126,6 +125,7 @@ export default function NewPost() {
         }
         showToast('画像がアップロードされました！', 'success');
       } else {
+        const error = await response.json();
         showToast('画像のアップロードに失敗しました。', 'error');
       }
     } catch (error) {
@@ -193,22 +193,24 @@ export default function NewPost() {
     setShowConfirmModal(false);
     setIsSubmitting(true);
     try {
+      const postData = {
+        id: formData.slug,
+        title: formData.title,
+        content: formData.content,
+        cover: formData.cover || "/images/sample/default.jpg",
+        excerpt: formData.excerpt,
+        category: formData.category,
+        tags: formData.tags.join(', '), // 配列を文字列に変換
+        sections: formData.sections, // 複数セクションを追加
+        date: formData.publishDate,
+      };
+
       const response = await fetch('/api/posts', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          id: formData.slug,
-          title: formData.title,
-          content: formData.content,
-          cover: formData.cover || "/images/sample/default.jpg",
-          excerpt: formData.excerpt,
-          category: formData.category,
-          tags: formData.tags.join(', '), // 配列を文字列に変換
-          sections: formData.sections, // 複数セクションを追加
-          date: formData.publishDate,
-        }),
+        body: JSON.stringify(postData),
       });
 
       if (response.ok) {

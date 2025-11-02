@@ -20,7 +20,7 @@ async function checkAuthentication() {
             return now - tokenTime < weekInMs;
         }
     } catch (e) {
-        console.error('auth check failed', e);
+
     }
     return false;
 }
@@ -47,7 +47,9 @@ export async function POST(request) {
     try {
         const formData = await request.formData();
         const file = formData.get('file');
-        if (!file) return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
+        if (!file) {
+            return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
+        }
 
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
@@ -57,8 +59,8 @@ export async function POST(request) {
         const timestamp = Math.round(Date.now() / 1000);
         const folder = 'blog'; // Cloudinary のフォルダ名（任意で変更可）
         const crypto = await import('crypto');
-        const stringToSign = `folder=${folder}&timestamp=${timestamp}${API_SECRET}`;
-        const signature = crypto.createHash('sha1').update(stringToSign).digest('hex');
+        const stringToSign = `folder=${folder}&timestamp=${timestamp}`;
+        const signature = crypto.createHash('sha1').update(stringToSign + API_SECRET).digest('hex');
 
         const uploadForm = new FormData();
         uploadForm.append('file', base64File);
@@ -76,20 +78,31 @@ export async function POST(request) {
         try {
             json = await cloudRes.json();
         } catch (e) {
-            console.error('failed to parse cloudinary response', e);
-            const text = await cloudRes.text().catch(() => 'no-body');
-            console.error('cloudinary raw response', text);
-            return NextResponse.json({ error: 'Upload failed', details: 'Invalid response from Cloudinary', status: cloudRes.status }, { status: 502 });
+
+            return NextResponse.json({
+                error: 'Upload failed',
+                details: 'Invalid response from Cloudinary',
+                status: cloudRes.status
+            }, { status: 502 });
         }
 
         if (!cloudRes.ok) {
-            console.error('cloudinary error', { status: cloudRes.status, body: json });
-            return NextResponse.json({ error: 'Upload failed', details: json, status: cloudRes.status }, { status: 502 });
+            return NextResponse.json({
+                error: 'Upload failed',
+                details: json,
+                status: cloudRes.status
+            }, { status: 502 });
         }
 
-        return NextResponse.json({ message: 'File uploaded successfully', url: json.secure_url, raw: json });
+        return NextResponse.json({
+            message: 'File uploaded successfully',
+            url: json.secure_url,
+            raw: json
+        });
     } catch (error) {
-        console.error('upload error', error);
-        return NextResponse.json({ error: 'Failed to upload file', details: String(error) }, { status: 500 });
+        return NextResponse.json({
+            error: 'Failed to upload file',
+            details: String(error)
+        }, { status: 500 });
     }
 }

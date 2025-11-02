@@ -19,11 +19,6 @@ export const metadata = {
   description: "石川県で暮らす夫婦の日常を綴るブログ。小さな幸せを写真と文章で記録しています。",
   keywords: "夫婦,日常,暮らし,石川県,ブログ,日記,ライフスタイル,北陸,写真,小さな幸せ,つい,わたしと夫の小さな暮らし",
   authors: [{ name: "つい|夫" }],
-  icons: {
-    icon: "/favicon.ico",
-    shortcut: "/favicon.ico",
-    apple: "/favicon.ico",
-  },
   robots: {
     index: true,
     follow: true,

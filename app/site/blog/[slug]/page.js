@@ -135,6 +135,9 @@ export default function BlogPostSimple() {
                   aspectRatio: "4/3",
                   objectFit: "cover",
                 }}
+                onError={(e) => {
+                  e.target.src = "/images/blog/default.jpg";
+                }}
               />
             </div>
           </div>
@@ -177,6 +180,9 @@ export default function BlogPostSimple() {
                           style={{
                             aspectRatio: "4/3",
                             objectFit: "cover",
+                          }}
+                          onError={(e) => {
+                            e.target.src = "/images/blog/default.jpg";
                           }}
                         />
                       </div>
