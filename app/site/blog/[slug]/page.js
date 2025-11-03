@@ -47,12 +47,12 @@ const HomeIcon = () => (
 // 記事画像コンポーネント（白フチ＆影）
 const ArticleImage = ({ src, alt, className = "" }) => (
   <div className={`flex justify-center ${className}`}>
-    <div className="bg-white p-1 shadow-lg max-w-full overflow-hidden">
+    <div className="bg-white p-1 shadow-lg max-w-full">
       <img
         src={src || "/images/blog/default.jpg"}
         alt={alt}
-        className="w-full h-auto max-w-3xl mx-auto block"
-        style={{ aspectRatio: "4/3", objectFit: "cover" }}
+        className="w-full h-auto max-w-3xl mx-auto block object-contain"
+        style={{ aspectRatio: "auto" }}
         onError={(e) => { e.target.src = "/images/blog/default.jpg"; }}
       />
     </div>

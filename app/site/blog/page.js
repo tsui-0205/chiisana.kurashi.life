@@ -207,7 +207,7 @@ export default function BlogPage() {
   }, []);
 
   const [q, setQ] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("すべて");
+  const [selectedCategory, setSelectedCategory] = useState("Category");
   const [showAll, setShowAll] = useState(false);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -241,29 +241,29 @@ export default function BlogPage() {
     const usedCategories = new Set(posts.map(post => post.category).filter(Boolean));
     // 共通リストと統合（重複排除）
     const allCategories = new Set([...categoryList, ...Array.from(usedCategories)]);
-    return ["すべて", ...Array.from(allCategories)];
+    return ["Category", ...Array.from(allCategories)];
   }, [posts]);
 
   const sortedPosts = useMemo(() => {
     return [...posts].sort((a, b) => {
       const da = a.date ? new Date(a.date) : new Date(0);
       const db = b.date ? new Date(b.date) : new Date(0);
-      return db - da; // newest first
+      return db - da; 
     });
   }, [posts]);
 
   const filtered = useMemo(() => {
     const base = sortedPosts.filter((p) => {
       // 検索クエリのフィルタリング（タイトル、概要、タグで検索）
-      const matchesSearch = q 
+      const matchesSearch = q
         ? (
-            p.title?.toLowerCase().includes(q.toLowerCase()) ||
-            p.excerpt?.toLowerCase().includes(q.toLowerCase()) ||
-            p.tags?.toLowerCase().includes(q.toLowerCase())
-          )
+          p.title?.toLowerCase().includes(q.toLowerCase()) ||
+          p.excerpt?.toLowerCase().includes(q.toLowerCase()) ||
+          p.tags?.toLowerCase().includes(q.toLowerCase())
+        )
         : true;
       // カテゴリのフィルタリング
-      const matchesCategory = selectedCategory === "すべて" || p.category === selectedCategory;
+      const matchesCategory = selectedCategory === "Category" || p.category === selectedCategory;
       return matchesSearch && matchesCategory;
     });
     return showAll ? base : base.slice(0, 9);
@@ -356,8 +356,6 @@ export default function BlogPage() {
               </nav>
             </div>
           </div>
-
-          {/* Desktop: Compact panel */}
           <div className="hidden md:block">
             {isMenuOpen && (
               <div className="fixed top-0 right-0 z-50 w-72 max-w-[90%] bg-white/95 backdrop-blur-sm shadow-lg p-4 transition-transform duration-300 ease-out rounded-bl-3xl rounded-tl-3xl rounded-b-2xl menu-container">
@@ -420,57 +418,54 @@ export default function BlogPage() {
         </>
       )}
 
-      {/* Hero */}
       <HeroTriptych images={heroImages} />
-
-      {/* New Articles */}
       <section id="articles" className="py-16 px-4 md:px-6 max-w-6xl mx-auto mb-4 md:mb-6 lg:mb-8">
-        {/* <div className="text-center mb-4">
-          <h2 className="text-4xl md:text-5xl font-semibold tracking-[0.18em] text-zinc-900">
-            ARTICLES
-          </h2>
-          <p className="text-zinc-500 mt-2 font-light">記事一覧</p>
-        </div> */}
+        {/* Search and Category Filter */}
+        <div className="mt-12 mb-8">
+          <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center">
+            {/* Search Box */}
+            <div className="relative flex-1">
+              <svg className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21 21l-4.35-4.35" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                <circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" strokeWidth="1.6" />
+              </svg>
+              <Input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="タイトル、タグ、キーワードで検索..."
+                className="pl-9 rounded-2xl w-full"
+              />
+            </div>
 
-        {/* Filter / Search */}
-        <div className="mt-12 mb-8 flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
-          <div className="relative w-full md:w-2/3">
-            <svg className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M21 21l-4.35-4.35" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-              <circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" strokeWidth="1.6" />
-            </svg>
-            <Input
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="タイトル、タグ、キーワードで検索..."
-              className="pl-9 rounded-2xl"
-            />
+            {/* Category Dropdown */}
+            <div className="relative w-full md:w-64">
+              <select
+                value={selectedCategory}
+                onChange={(e) => handleCategorySelect(e.target.value)}
+                className="w-full px-6 py-3 text-sm font-light tracking-wider appearance-none bg-white/80 backdrop-blur-sm text-zinc-700 border border-zinc-200/60 rounded-2xl shadow-sm cursor-pointer transition-all duration-200 hover:border-zinc-300/80 focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-400"
+                style={{ letterSpacing: '0.1em' }}
+              >
+                {categories.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
+              {/* Custom dropdown arrow */}
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-zinc-400">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
           </div>
-          {(q || selectedCategory !== "すべて") && (
-            <div className="text-sm text-gray-600 md:text-right">
+
+          {/* Results count */}
+          {(q || selectedCategory !== "Category") && (
+            <div className="text-sm text-gray-600 mt-3 text-right">
               {filtered.length}件の記事
             </div>
           )}
-        </div>
-
-        {/* Category Filter */}
-        <div className="mb-8">
-          <div className="flex flex-wrap gap-3 justify-center">
-            {categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => handleCategorySelect(category)}
-                className={`px-6 py-2.5 text-sm font-light tracking-wider transition-all duration-300 border ${selectedCategory === category
-                  ? 'bg-zinc-900 text-white border-zinc-900 shadow-lg'
-                  : 'bg-white/90 text-zinc-700 border-zinc-200 hover:bg-zinc-50 hover:border-zinc-300 hover:text-zinc-900'
-                  }`}
-                style={{ letterSpacing: '0.1em' }}
-                aria-pressed={selectedCategory === category}
-              >
-                {category}
-              </button>
-            ))}
-          </div>
         </div>
         <div className="relative pb-6 md:pb-6 lg:pb-20">
           {loading ? (
@@ -484,7 +479,7 @@ export default function BlogPage() {
                 <button
                   onClick={() => {
                     setQ("");
-                    setSelectedCategory("すべて");
+                    setSelectedCategory("Category");
                   }}
                   className="mt-4 px-6 py-2 bg-zinc-900 text-white rounded-md hover:bg-zinc-800 transition-colors"
                 >
