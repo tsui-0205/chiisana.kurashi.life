@@ -7,6 +7,9 @@ export default function robots() {
         disallow: ['/site/admin/', '/api/'],
       },
     ],
-    sitemap: 'https://chiisana.kurashi.life/sitemap.xml',
+    sitemap: [
+      'https://tsui-chiisanakurashi.com/sitemap.xml',
+      'https://tsui-chiisanakurashi.com/site/sitemap.xml',
+    ],
   };
 }

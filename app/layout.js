@@ -40,11 +40,11 @@ export const metadata = {
   openGraph: {
     title: "つい|わたしと夫の小さな暮らし - 石川県で暮らす夫婦の日常ブログ",
     description: "石川県で暮らす夫婦の日常を綴るブログ。2025年2月5日に入籍した内気なふたりが、能登・金沢・白山・加賀の小さな幸せを写真と文章で記録しています。",
-    url: "https://chiisana.kurashi.life/",
+    url: "https://tsui-chiisanakurashi.com/",
     siteName: "つい|わたしと夫の小さな暮らし",
     images: [
       {
-        url: "https://chiisana.kurashi.life/images/main.jpg",
+        url: "https://tsui-chiisanakurashi.com/images/main.jpg",
         width: 1200,
         height: 630,
         alt: "石川県で暮らす夫婦の日常 - わたしと夫の小さな暮らし",
@@ -57,11 +57,11 @@ export const metadata = {
     card: 'summary_large_image',
     title: "つい|わたしと夫の小さな暮らし - 石川県で暮らす夫婦の日常ブログ",
     description: "石川県で暮らす夫婦の日常を綴るブログ。能登・金沢・白山・加賀の小さな幸せを写真と文章で記録しています。",
-    images: ['https://chiisana.kurashi.life/images/main.jpg'],
+    images: ['https://tsui-chiisanakurashi.com/images/main.jpg'],
   },
   // canonical
   alternates: {
-    canonical: 'https://chiisana.kurashi.life/'
+    canonical: 'https://tsui-chiisanakurashi.com/'
   },
 };
 
@@ -71,7 +71,7 @@ export default function RootLayout({ children }) {
     "@type": "Blog",
     "name": "つい|わたしと夫の小さな暮らし",
     "alternateName": "わたしと夫の小さな暮らし",
-    "url": "https://chiisana.kurashi.life/",
+    "url": "https://tsui-chiisanakurashi.com/",
     "description": "石川県で暮らす夫婦の日常を綴るブログ。2025年2月5日に入籍した内気なふたりが、能登・金沢・白山・加賀の小さな幸せを写真と文章で記録しています。",
     "inLanguage": "ja",
     "author": {
@@ -84,7 +84,7 @@ export default function RootLayout({ children }) {
       "name": "つい|わたしと夫の小さな暮らし",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://chiisana.kurashi.life/images/main.jpg"
+        "url": "https://tsui-chiisanakurashi.com/images/main.jpg"
       }
     },
     "keywords": "わたしと夫の小さな暮らし,つい,石川県,夫婦ブログ,日常,暮らし,能登,金沢,白山,加賀",
@@ -97,7 +97,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="ja">
       <head>
-        <link rel="canonical" href="https://chiisana.kurashi.life/" />
+        <link rel="canonical" href="https://tsui-chiisanakurashi.com/" />
         <meta name="geo.region" content="JP-17" />
         <meta name="geo.placename" content="石川県" />
       </head>
