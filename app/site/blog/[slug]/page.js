@@ -1,9 +1,8 @@
 "use client";
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import ContactFooter from "@/components/sections/home/ContactFooter";
-import { posts } from "@/data/posts";
 
 // 日付フォーマット: YYYY.MM.DD
 const formatDate = (dateStr) => {
@@ -77,12 +76,49 @@ export default function BlogPostSimple() {
   const router = useRouter();
   const slug = params?.slug;
 
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // APIから投稿を取得
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/posts');
+        if (response.ok) {
+          const data = await response.json();
+          setPosts(data.posts || []);
+        } else {
+          console.error('Failed to fetch posts:', response.status);
+          setPosts([]);
+        }
+      } catch (error) {
+        console.error('Error fetching posts:', error);
+        setPosts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPosts();
+  }, []);
+
   // URLデコードして記事を検索
   const post = useMemo(() => {
-    if (!slug) return null;
+    if (!slug || !posts.length) return null;
     const decodedSlug = decodeURIComponent(slug);
     return posts.find(p => p.id === decodedSlug);
-  }, [slug]);
+  }, [slug, posts]);
+
+  // ローディング中
+  if (loading) {
+    return (
+      <main className="min-h-screen bg-neutral-100 text-neutral-900 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-xl text-neutral-600">読み込み中...</p>
+        </div>
+      </main>
+    );
+  }
 
   // 記事が見つからない場合
   if (!post) {

@@ -4,13 +4,11 @@ import React, { useEffect, useMemo, useState, useCallback } from "react";
 import Link from "next/link";
 import { Card, CardContent, CardImage } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { posts } from "@/data/posts";
 import { categories as categoryList } from "@/data/categories";
 import ContactFooter from "@/components/sections/home/ContactFooter";
 import { motion } from 'framer-motion';
 import useInView from '@/hooks/useInView';
 
-const heroTitle = posts[0]?.title ?? "おすすめ記事";
 const heroImages = [
   "/images/blog/blog-main.jpg",
 ];
@@ -23,7 +21,7 @@ function formatDateYMD(dateStr) {
   return `${y}年${Number(m)}月${Number(d)}日`;
 }
 
-function HeroTriptych({ title, images }) {
+function HeroTriptych({ images }) {
   const src = images && images.length ? images[0] : '';
   return (
     <section className="relative h-[60vh] md:h-screen w-full overflow-hidden">
@@ -211,6 +209,31 @@ export default function BlogPage() {
   const [q, setQ] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("すべて");
   const [showAll, setShowAll] = useState(false);
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // APIから投稿を取得
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/posts');
+        if (response.ok) {
+          const data = await response.json();
+          setPosts(data.posts || []);
+        } else {
+          console.error('Failed to fetch posts:', response.status);
+          setPosts([]);
+        }
+      } catch (error) {
+        console.error('Error fetching posts:', error);
+        setPosts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPosts();
+  }, []);
 
   // カテゴリの一覧を取得（共通カテゴリリスト + 実際に使われているカテゴリの統合）
   const categories = useMemo(() => {
@@ -219,7 +242,7 @@ export default function BlogPage() {
     // 共通リストと統合（重複排除）
     const allCategories = new Set([...categoryList, ...Array.from(usedCategories)]);
     return ["すべて", ...Array.from(allCategories)];
-  }, []);
+  }, [posts]);
 
   const sortedPosts = useMemo(() => {
     return [...posts].sort((a, b) => {
@@ -227,7 +250,7 @@ export default function BlogPage() {
       const db = b.date ? new Date(b.date) : new Date(0);
       return db - da; // newest first
     });
-  }, []);
+  }, [posts]);
 
   const filtered = useMemo(() => {
     const base = sortedPosts.filter((p) => {
@@ -398,7 +421,7 @@ export default function BlogPage() {
       )}
 
       {/* Hero */}
-      <HeroTriptych title={heroTitle} images={heroImages} />
+      <HeroTriptych images={heroImages} />
 
       {/* New Articles */}
       <section id="articles" className="py-16 px-4 md:px-6 max-w-6xl mx-auto mb-4 md:mb-6 lg:mb-8">
@@ -450,7 +473,11 @@ export default function BlogPage() {
           </div>
         </div>
         <div className="relative pb-6 md:pb-6 lg:pb-20">
-          {filtered.length === 0 ? (
+          {loading ? (
+            <div className="text-center py-16">
+              <p className="text-gray-500 text-lg">読み込み中...</p>
+            </div>
+          ) : filtered.length === 0 ? (
             <div className="text-center py-16">
               <p className="text-gray-500 text-lg">該当する記事が見つかりませんでした</p>
               {(q || selectedCategory !== "すべて") && (

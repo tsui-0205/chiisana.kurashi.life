@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import fs from 'fs';
-import path from 'path';
+import { kv } from '@vercel/kv';
 
 const SESSION_SECRET = process.env.SESSION_SECRET || 'your-secret-key';
+const POSTS_KEY = 'blog:posts'; // KVストレージのキー
 
-// 認証チェック関数 (非同期化: cookies() が Promise を返すため)
+// 認証チェック関数
 async function checkAuthentication() {
     try {
         const cookieStore = await cookies();
@@ -26,7 +26,7 @@ async function checkAuthentication() {
             return now - tokenTime < weekInMs;
         }
     } catch (error) {
-       
+        console.error('Authentication error:', error);
     }
 
     return false;
@@ -35,21 +35,13 @@ async function checkAuthentication() {
 // GETリクエスト: 現在の投稿一覧を取得
 export async function GET() {
     try {
-        const postsPath = path.join(process.cwd(), 'data', 'posts.js');
-        const postsContent = fs.readFileSync(postsPath, 'utf8');
-
-        // posts.js から posts 配列を抽出
-        const postsMatch = postsContent.match(/export const posts = (\[[\s\S]*?\]);/);
-        if (!postsMatch) {
-            return NextResponse.json({ error: 'Posts data not found' }, { status: 500 });
-        }
-
-        // 安全にevalするため、Function constructorを使用
-        const postsData = new Function('return ' + postsMatch[1])();
-
-        return NextResponse.json({ posts: postsData });
+        // KVから投稿を取得
+        const posts = await kv.get(POSTS_KEY) || [];
+        
+        return NextResponse.json({ posts });
     } catch (error) {
-        return NextResponse.json({ error: 'Failed to read posts' }, { status: 500 });
+        console.error('Error fetching posts:', error);
+        return NextResponse.json({ error: 'Failed to read posts', details: error.message }, { status: 500 });
     }
 }
 
@@ -63,30 +55,22 @@ export async function POST(request) {
     try {
         const newPost = await request.json();
 
-        console.log('Received new post:', newPost); // デバッグログ
+        console.log('新しい投稿を受け取りました:', newPost);
 
         // バリデーション
         if (!newPost.id || !newPost.title || !newPost.content) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
 
-        const postsPath = path.join(process.cwd(), 'data', 'posts.js');
-        const postsContent = fs.readFileSync(postsPath, 'utf8');
-
-        // 現在の posts 配列を取得
-        const postsMatch = postsContent.match(/export const posts = (\[[\s\S]*?\]);/);
-        if (!postsMatch) {
-            return NextResponse.json({ error: 'Posts data not found' }, { status: 500 });
-        }
-
-        const currentPosts = new Function('return ' + postsMatch[1])();
+        // KVから現在の投稿を取得
+        const currentPosts = await kv.get(POSTS_KEY) || [];
 
         // 重複チェック
         if (currentPosts.some(post => post.id === newPost.id)) {
             return NextResponse.json({ error: 'Post with this ID already exists' }, { status: 400 });
         }
 
-        // 新しい投稿を配列の先頭に追加（最新順）
+        // 新しい投稿を作成
         const postToAdd = {
             id: newPost.id,
             title: newPost.title,
@@ -97,28 +81,24 @@ export async function POST(request) {
             excerpt: newPost.excerpt || "",
             category: newPost.category || "日常",
             tags: newPost.tags || "",
-            sections: newPost.sections || [], // 複数セクションを保存
+            sections: newPost.sections || [],
         };
 
+        // 配列の先頭に追加（最新順）
         currentPosts.unshift(postToAdd);
 
-        console.log('Posts to save:', currentPosts.length); // デバッグログ
+        console.log('保存する投稿:', currentPosts.length);
 
-        // 新しい posts.js ファイルの内容を生成
-        const newPostsContent = `// ブログ投稿データ
-export const posts = ${JSON.stringify(currentPosts, null, 2)};
-`;
-
-        // ファイルに書き込み
-        fs.writeFileSync(postsPath, newPostsContent, 'utf8');
+        // KVに保存
+        await kv.set(POSTS_KEY, currentPosts);
 
         return NextResponse.json({
             message: 'Post created successfully',
-            post: currentPosts[0]
+            post: postToAdd
         });
 
     } catch (error) {
-        console.error('Error creating post:', error); // エラーログ
+        console.error('投稿作成エラー:', error);
         return NextResponse.json({ 
             error: 'Failed to create post', 
             details: error.message 
@@ -140,15 +120,8 @@ export async function PUT(request) {
             return NextResponse.json({ error: 'Post ID is required' }, { status: 400 });
         }
 
-        const postsPath = path.join(process.cwd(), 'data', 'posts.js');
-        const postsContent = fs.readFileSync(postsPath, 'utf8');
-
-        const postsMatch = postsContent.match(/export const posts = (\[[\s\S]*?\]);/);
-        if (!postsMatch) {
-            return NextResponse.json({ error: 'Posts data not found' }, { status: 500 });
-        }
-
-        const currentPosts = new Function('return ' + postsMatch[1])();
+        // KVから現在の投稿を取得
+        const currentPosts = await kv.get(POSTS_KEY) || [];
 
         // 投稿を見つけて更新
         const postIndex = currentPosts.findIndex(post => post.id === updatedPost.id);
@@ -159,15 +132,11 @@ export async function PUT(request) {
         currentPosts[postIndex] = {
             ...currentPosts[postIndex],
             ...updatedPost,
-            href: `/site/blog/${updatedPost.id}`, // hrefは常に正しく設定
+            href: `/site/blog/${updatedPost.id}`,
         };
 
-        // 新しい posts.js ファイルの内容を生成
-        const newPostsContent = `// ブログ投稿データ
-export const posts = ${JSON.stringify(currentPosts, null, 2)};
-`;
-
-        fs.writeFileSync(postsPath, newPostsContent, 'utf8');
+        // KVに保存
+        await kv.set(POSTS_KEY, currentPosts);
 
         return NextResponse.json({
             message: 'Post updated successfully',
@@ -198,16 +167,8 @@ export async function DELETE(request) {
             return NextResponse.json({ error: 'Post ID is required' }, { status: 400 });
         }
 
-        const postsPath = path.join(process.cwd(), 'data', 'posts.js');
-        const postsContent = fs.readFileSync(postsPath, 'utf8');
-
-        // 現在の posts 配列を取得
-        const postsMatch = postsContent.match(/export const posts = (\[[\s\S]*?\]);/);
-        if (!postsMatch) {
-            return NextResponse.json({ error: 'Posts data not found' }, { status: 500 });
-        }
-
-        const currentPosts = new Function('return ' + postsMatch[1])();
+        // KVから現在の投稿を取得
+        const currentPosts = await kv.get(POSTS_KEY) || [];
 
         // 投稿を見つけて削除
         const postIndex = currentPosts.findIndex(post => post.id === postId);
@@ -237,12 +198,8 @@ export async function DELETE(request) {
             }
         }
 
-        // 新しい posts.js ファイルの内容を生成
-        const newPostsContent = `// ブログ投稿データ
-export const posts = ${JSON.stringify(currentPosts, null, 2)};
-`;
-
-        fs.writeFileSync(postsPath, newPostsContent, 'utf8');
+        // KVに保存
+        await kv.set(POSTS_KEY, currentPosts);
 
         return NextResponse.json({
             message: 'Post deleted successfully',
