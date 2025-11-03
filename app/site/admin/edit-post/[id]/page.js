@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
+import { categories } from "@/data/categories";
 
 export default function EditPost() {
     const router = useRouter();
@@ -417,6 +418,39 @@ export default function EditPost() {
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent"
                                     placeholder="記事の短い要約を入力してください"
                                 />
+                            </div>
+
+                            <div className="mt-6 grid gap-6 md:grid-cols-3">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        カテゴリ
+                                    </label>
+                                    <select
+                                        name="category"
+                                        value={formData.category}
+                                        onChange={handleChange}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+                                    >
+                                        {categories.map((cat) => (
+                                            <option key={cat} value={cat}>
+                                                {cat}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        公開日
+                                    </label>
+                                    <input
+                                        type="date"
+                                        name="publishDate"
+                                        value={formData.publishDate}
+                                        onChange={handleChange}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+                                    />
+                                </div>
                             </div>
 
                             <div className="mt-6">

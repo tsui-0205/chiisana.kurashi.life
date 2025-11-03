@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
 import Link from "next/link";
 import { Card, CardContent, CardImage } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { posts } from "@/data/posts";
+import { categories as categoryList } from "@/data/categories";
 import ContactFooter from "@/components/sections/home/ContactFooter";
 import { motion } from 'framer-motion';
 import useInView from '@/hooks/useInView';
@@ -209,14 +210,15 @@ export default function BlogPage() {
 
   const [q, setQ] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("すべて");
-
-  // show only latest 9 by default, toggle to show all via `old` button
   const [showAll, setShowAll] = useState(false);
 
-  // カテゴリの一覧を取得
+  // カテゴリの一覧を取得（共通カテゴリリスト + 実際に使われているカテゴリの統合）
   const categories = useMemo(() => {
-    const cats = new Set(posts.map(post => post.category).filter(Boolean));
-    return ["すべて", ...Array.from(cats)];
+    // 実際の投稿で使われているカテゴリを取得
+    const usedCategories = new Set(posts.map(post => post.category).filter(Boolean));
+    // 共通リストと統合（重複排除）
+    const allCategories = new Set([...categoryList, ...Array.from(usedCategories)]);
+    return ["すべて", ...Array.from(allCategories)];
   }, []);
 
   const sortedPosts = useMemo(() => {
@@ -229,14 +231,26 @@ export default function BlogPage() {
 
   const filtered = useMemo(() => {
     const base = sortedPosts.filter((p) => {
-      // 検索クエリのフィルタリング
-      const matchesSearch = q ? p.title.toLowerCase().includes(q.toLowerCase()) : true;
+      // 検索クエリのフィルタリング（タイトル、概要、タグで検索）
+      const matchesSearch = q 
+        ? (
+            p.title?.toLowerCase().includes(q.toLowerCase()) ||
+            p.excerpt?.toLowerCase().includes(q.toLowerCase()) ||
+            p.tags?.toLowerCase().includes(q.toLowerCase())
+          )
+        : true;
       // カテゴリのフィルタリング
       const matchesCategory = selectedCategory === "すべて" || p.category === selectedCategory;
       return matchesSearch && matchesCategory;
     });
     return showAll ? base : base.slice(0, 9);
   }, [q, selectedCategory, showAll, sortedPosts]);
+
+  // カテゴリ選択ハンドラー
+  const handleCategorySelect = useCallback((category) => {
+    setSelectedCategory(category);
+    setShowAll(false); // カテゴリ変更時は最新9件のみ表示
+  }, []);
 
   return (
     <div className="min-h-screen bg-zinc-50 text-gray-800">
@@ -396,7 +410,7 @@ export default function BlogPage() {
         </div> */}
 
         {/* Filter / Search */}
-        <div className="mt-12 mb-8 flex flex-col md:flex-row gap-3 items-stretch md:items-center">
+        <div className="mt-12 mb-8 flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
           <div className="relative w-full md:w-2/3">
             <svg className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M21 21l-4.35-4.35" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
@@ -405,10 +419,15 @@ export default function BlogPage() {
             <Input
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="キーワードで探す"
+              placeholder="タイトル、タグ、キーワードで検索..."
               className="pl-9 rounded-2xl"
             />
           </div>
+          {(q || selectedCategory !== "すべて") && (
+            <div className="text-sm text-gray-600 md:text-right">
+              {filtered.length}件の記事
+            </div>
+          )}
         </div>
 
         {/* Category Filter */}
@@ -417,12 +436,13 @@ export default function BlogPage() {
             {categories.map((category) => (
               <button
                 key={category}
-                onClick={() => setSelectedCategory(category)}
+                onClick={() => handleCategorySelect(category)}
                 className={`px-6 py-2.5 text-sm font-light tracking-wider transition-all duration-300 border ${selectedCategory === category
                   ? 'bg-zinc-900 text-white border-zinc-900 shadow-lg'
                   : 'bg-white/90 text-zinc-700 border-zinc-200 hover:bg-zinc-50 hover:border-zinc-300 hover:text-zinc-900'
                   }`}
                 style={{ letterSpacing: '0.1em' }}
+                aria-pressed={selectedCategory === category}
               >
                 {category}
               </button>
@@ -430,11 +450,28 @@ export default function BlogPage() {
           </div>
         </div>
         <div className="relative pb-6 md:pb-6 lg:pb-20">
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {filtered.map((p, i) => (
-              <PostCard key={p.id} post={p} index={i} />
-            ))}
-          </div>
+          {filtered.length === 0 ? (
+            <div className="text-center py-16">
+              <p className="text-gray-500 text-lg">該当する記事が見つかりませんでした</p>
+              {(q || selectedCategory !== "すべて") && (
+                <button
+                  onClick={() => {
+                    setQ("");
+                    setSelectedCategory("すべて");
+                  }}
+                  className="mt-4 px-6 py-2 bg-zinc-900 text-white rounded-md hover:bg-zinc-800 transition-colors"
+                >
+                  すべての記事を表示
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {filtered.map((p, i) => (
+                <PostCard key={p.id} post={p} index={i} />
+              ))}
+            </div>
+          )}
 
           {/* 右下にoldボタンを絶対配置。画像群の右下の下に見えるように translateY を使う */}
           {!showAll && sortedPosts.length > 9 && (

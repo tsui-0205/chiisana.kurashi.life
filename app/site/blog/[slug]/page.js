@@ -1,23 +1,75 @@
 "use client";
-import React from "react";
+import React, { useMemo } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import ContactFooter from "@/components/sections/home/ContactFooter";
 import { posts } from "@/data/posts";
 
-// ===== Simple Post (odekake-camera 個別記事 風) =====
-// 画面中央に「タイトル→日付→大きな画像（白フチ＆影）」のみを配置。
-// 余白たっぷり・モノトーン・可読性重視。必要最小限のスタイルに絞っています。
+// 日付フォーマット: YYYY.MM.DD
+const formatDate = (dateStr) => {
+  if (!dateStr) return '';
+  const isIso = /\d{4}-\d{2}-\d{2}/.test(dateStr);
+  if (!isIso) return dateStr;
+  const date = new Date(dateStr);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}.${month}.${day}`;
+};
 
-const fmtDateDot = (d) => {
-  // 受け取りが ISO の場合は YYYY.MM.DD に整形
-  const isIso = /\d{4}-\d{2}-\d{2}/.test(d);
-  if (!isIso) return d; // 既に "2025.08.28" のような書式ならそのまま
-  const dt = new Date(d);
-  const y = dt.getFullYear();
-  const m = String(dt.getMonth() + 1).padStart(2, "0");
-  const day = String(dt.getDate()).padStart(2, "0");
-  return `${y}.${m}.${day}`;
+// ナビゲーションボタンコンポーネント
+const NavigationButton = ({ href, children, icon }) => (
+  <Link href={href} className="group flex items-center gap-3 transition-all duration-200">
+    <span className="grid place-items-center w-12 h-12 rounded-full border border-zinc-700 bg-zinc-100/60 text-zinc-700 shadow-sm transition-all
+                    group-hover:border-zinc-900 group-hover:bg-zinc-200/80 group-focus-visible:ring-1 group-focus-visible:ring-zinc-700/50">
+      {icon}
+    </span>
+    <span className="text-zinc-700 text-base tracking-wider font-bold py-2
+                    group-hover:underline underline-offset-4 decoration-zinc-700 transition-colors"
+      style={{ letterSpacing: '0.12em' }}>
+      {children}
+    </span>
+  </Link>
+);
+
+// 戻る矢印アイコン
+const BackIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="transition-transform duration-200 group-hover:-translate-x-1">
+    <path d="M18 12H6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    <path d="M6 15l-4-3 4-3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+// ホームアイコン
+const HomeIcon = () => (
+  <img src="/images/blog/homeicon.png" alt="ホーム" className="w-6 h-6 object-contain" />
+);
+
+// 記事画像コンポーネント（白フチ＆影）
+const ArticleImage = ({ src, alt, className = "" }) => (
+  <div className={`flex justify-center ${className}`}>
+    <div className="bg-white p-1 shadow-lg max-w-full overflow-hidden">
+      <img
+        src={src || "/images/blog/default.jpg"}
+        alt={alt}
+        className="w-full h-auto max-w-3xl mx-auto block"
+        style={{ aspectRatio: "4/3", objectFit: "cover" }}
+        onError={(e) => { e.target.src = "/images/blog/default.jpg"; }}
+      />
+    </div>
+  </div>
+);
+
+// テキストコンテンツコンポーネント
+const TextContent = ({ content }) => {
+  if (!content) return null;
+  return (
+    <div className="prose prose-lg max-w-none text-neutral-800 leading-relaxed">
+      {content.split('\n').map((paragraph, index) => (
+        paragraph.trim() && <p key={index} className="mb-4">{paragraph}</p>
+      ))}
+    </div>
+  );
 };
 
 export default function BlogPostSimple() {
@@ -25,66 +77,37 @@ export default function BlogPostSimple() {
   const router = useRouter();
   const slug = params?.slug;
 
-  // URLデコードして日本語に戻す
-  const decodedSlug = slug ? decodeURIComponent(slug) : null;
+  // URLデコードして記事を検索
+  const post = useMemo(() => {
+    if (!slug) return null;
+    const decodedSlug = decodeURIComponent(slug);
+    return posts.find(p => p.id === decodedSlug);
+  }, [slug]);
 
-  // URLのslugから該当する投稿を検索（デコード済みで比較）
-  const post = posts.find(p => p.id === decodedSlug);
-  const cat = post?.category || null;
-
-  const handleBackClick = () => {
-    router.push('/site/blog');
-  };
+  // 記事が見つからない場合
   if (!post) {
     return (
       <main className="min-h-screen bg-neutral-100 text-neutral-900 flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-semibold mb-8">記事が見つかりません</h1>
           <div className="flex flex-row flex-wrap gap-6 justify-center items-center">
-            <Link href="/site/blog" className="group flex items-center gap-3 transition-all duration-200">
-              {/* 円ボタン */}
-              <span className="grid place-items-center w-12 h-12 rounded-full border border-zinc-700 bg-zinc-100/60 text-zinc-700 shadow-sm transition-all
-                              group-hover:border-zinc-900 group-hover:bg-zinc-200/80 group-focus-visible:ring-1 group-focus-visible:ring-zinc-700/50">
-                <svg
-                  width="20" height="20" viewBox="0 0 24 24" fill="none"
-                  className="transition-transform duration-200 group-hover:-translate-x-1"
-                >
-                  <path d="M18 12H6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-                  <path d="M6 15l-4-3 4-3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </span>
-
-              {/* テキスト */}
-              <span className="text-zinc-700 text-base tracking-wider font-bold py-2
-                              group-hover:underline underline-offset-4 decoration-zinc-700 transition-colors" style={{ letterSpacing: '0.12em' }}>
-                ブログ一覧
-              </span>
-            </Link>
-
-            <Link href="/" className="group flex items-center gap-3 transition-all duration-200">
-              {/* 円ボタン */}
-              <span className="grid place-items-center w-12 h-12 rounded-full border border-zinc-700 bg-zinc-100/60 text-zinc-700 shadow-sm transition-all
-                              group-hover:border-zinc-900 group-hover:bg-zinc-200/80 group-focus-visible:ring-1 group-focus-visible:ring-zinc-700/50">
-                <img src="/images/blog/homeicon.png" alt="home" className="w-6 h-6 object-contain" />
-              </span>
-
-              {/* テキスト */}
-              <div className="flex items-center gap-2">
-                <span className="text-zinc-700 text-base tracking-wider font-bold py-2
-                                group-hover:underline underline-offset-4 decoration-zinc-700 transition-colors" style={{ letterSpacing: '0.12em' }}>
-                  ホーム
-                </span>
-              </div>
-            </Link>
+            <NavigationButton href="/site/blog" icon={<BackIcon />}>
+              ブログ一覧
+            </NavigationButton>
+            <NavigationButton href="/" icon={<HomeIcon />}>
+              ホーム
+            </NavigationButton>
           </div>
         </div>
       </main>
     );
   }
 
+  const category = post.category || null;
+
   return (
     <main className="min-h-screen bg-neutral-100 text-neutral-900">
-      {/* 記事コンテンツ: ページ上部中央に配置 */}
+      {/* 記事コンテンツ */}
       <div className="px-6 py-16">
         <article className="max-w-4xl mx-auto">
           {/* タイトル */}
@@ -94,14 +117,15 @@ export default function BlogPostSimple() {
 
           {/* カテゴリと日付 */}
           <div className="flex items-center justify-center gap-3 mb-4">
-            {cat && (
-              <span className={`px-3 py-1 rounded-full text-sm font-medium ${cat === '思い出' ? 'bg-[#e5e1dc] text-[#333]' : 'bg-zinc-100 text-zinc-600'}`}>
-                {cat}
+            {category && (
+              <span className={`px-3 py-1 rounded-full text-sm font-medium ${category === '思い出' ? 'bg-[#e5e1dc] text-[#333]' : 'bg-zinc-100 text-zinc-600'
+                }`}>
+                {category}
               </span>
             )}
-            <p className="text-base text-neutral-600">
-              {fmtDateDot(post.date)}
-            </p>
+            <time dateTime={post.date} className="text-base text-neutral-600">
+              {formatDate(post.date)}
+            </time>
           </div>
 
           {/* 記事の概要 */}
@@ -124,34 +148,13 @@ export default function BlogPostSimple() {
             </div>
           )}
 
-          {/* 大きな画像（白フチ＆影） */}
-          <div className="mb-10 flex justify-center">
-            <div className="bg-white p-1 shadow-lg max-w-full overflow-hidden">
-              <img
-                src={post.cover || "/images/blog/default.jpg"}
-                alt={post.title}
-                className="w-full h-auto max-w-3xl mx-auto block"
-                style={{
-                  aspectRatio: "4/3",
-                  objectFit: "cover",
-                }}
-                onError={(e) => {
-                  e.target.src = "/images/blog/default.jpg";
-                }}
-              />
-            </div>
-          </div>
+          {/* メイン画像 */}
+          <ArticleImage src={post.cover} alt={post.title} className="mb-10" />
 
-          {/* 記事本文（写真より内側に配置） */}
+          {/* 記事本文 */}
           {post.content && (
             <div className="max-w-2xl mx-auto px-4 md:px-8">
-              <div className="prose prose-lg max-w-none text-neutral-800 leading-relaxed">
-                {post.content.split('\n').map((paragraph, index) => (
-                  <p key={index} className="mb-4">
-                    {paragraph}
-                  </p>
-                ))}
-              </div>
+              <TextContent content={post.content} />
             </div>
           )}
 
@@ -160,7 +163,7 @@ export default function BlogPostSimple() {
             <div className="mt-12 space-y-10">
               {post.sections.map((section, index) => (
                 <div key={index} className="max-w-4xl mx-auto">
-                  {/* セクション小見出し */}
+                  {/* セクション見出し */}
                   {section.title && (
                     <div className="max-w-2xl mx-auto px-4 md:px-8 mb-6">
                       <h2 className="text-2xl md:text-3xl font-semibold text-center leading-relaxed tracking-wide text-neutral-800">
@@ -171,34 +174,17 @@ export default function BlogPostSimple() {
 
                   {/* セクション画像 */}
                   {section.image && (
-                    <div className="mb-6 flex justify-center">
-                      <div className="bg-white p-1 shadow-lg max-w-full overflow-hidden">
-                        <img
-                          src={section.image}
-                          alt={section.title || `セクション ${index + 1}`}
-                          className="w-full h-auto max-w-3xl mx-auto block"
-                          style={{
-                            aspectRatio: "4/3",
-                            objectFit: "cover",
-                          }}
-                          onError={(e) => {
-                            e.target.src = "/images/blog/default.jpg";
-                          }}
-                        />
-                      </div>
-                    </div>
+                    <ArticleImage
+                      src={section.image}
+                      alt={section.title || `セクション ${index + 1}`}
+                      className="mb-6"
+                    />
                   )}
 
-                  {/* セクション説明文 */}
+                  {/* セクション本文 */}
                   {section.content && (
                     <div className="max-w-2xl mx-auto px-4 md:px-8">
-                      <div className="prose prose-lg max-w-none text-neutral-800 leading-relaxed">
-                        {section.content.split('\n').map((paragraph, pIndex) => (
-                          <p key={pIndex} className="mb-4">
-                            {paragraph}
-                          </p>
-                        ))}
-                      </div>
+                      <TextContent content={section.content} />
                     </div>
                   )}
                 </div>
@@ -207,55 +193,19 @@ export default function BlogPostSimple() {
           )}
 
           {/* ナビゲーションボタン */}
-          <div className="mt-12 text-center">
+          <nav className="mt-12" aria-label="記事ナビゲーション">
             <div className="flex flex-row flex-wrap gap-6 justify-center items-center">
-              <Link
-                href="/site/blog"
-                className="group flex items-center gap-3 transition-all duration-200"
-              >
-                {/* 円ボタン */}
-                <span className="grid place-items-center w-12 h-12 rounded-full border border-zinc-700 bg-zinc-100/60 text-zinc-700 shadow-sm transition-all
-                                  group-hover:border-zinc-900 group-hover:bg-zinc-200/80 group-focus-visible:ring-1 group-focus-visible:ring-zinc-700/50">
-                  <svg
-                    width="20" height="20" viewBox="0 0 24 24" fill="none"
-                    className="transition-transform duration-200 group-hover:-translate-x-1"
-                  >
-                    <path d="M18 12H6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-                    <path d="M6 15l-4-3 4-3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </span>
-
-                {/* テキスト */}
-                <span className="text-zinc-700 text-base tracking-wider font-bold py-2
-                                  group-hover:underline underline-offset-4 decoration-zinc-700 transition-colors" style={{ letterSpacing: '0.12em' }}>
-                  ブログ一覧
-                </span>
-              </Link>
-
-              <Link
-                href="/"
-                className="group flex items-center gap-3 transition-all duration-200"
-              >
-                {/* 円ボタン */}
-                <span className="grid place-items-center w-12 h-12 rounded-full border border-zinc-700 bg-zinc-100/60 text-zinc-700 shadow-sm transition-all
-                                  group-hover:border-zinc-900 group-hover:bg-zinc-200/80 group-focus-visible:ring-1 group-focus-visible:ring-zinc-700/50">
-                  <img src="/images/blog/homeicon.png" alt="home" className="w-6 h-6 object-contain" />
-                </span>
-
-                {/* テキスト */}
-                <div className="flex items-center gap-2">
-                  <span className="text-zinc-700 text-base tracking-wider font-bold py-2
-                                    group-hover:underline underline-offset-4 decoration-zinc-700 transition-colors" style={{ letterSpacing: '0.12em' }}>
-                    ホーム
-                  </span>
-                </div>
-              </Link>
+              <NavigationButton href="/site/blog" icon={<BackIcon />}>
+                ブログ一覧
+              </NavigationButton>
+              <NavigationButton href="/" icon={<HomeIcon />}>
+                ホーム
+              </NavigationButton>
             </div>
-          </div>
+          </nav>
         </article>
       </div>
 
-      {/* ContactFooter */}
       <ContactFooter />
     </main>
   );

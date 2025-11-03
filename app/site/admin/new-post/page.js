@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { categories } from "@/data/categories";
 
 export default function NewPost() {
   const router = useRouter();
@@ -437,11 +438,11 @@ export default function NewPost() {
                     onChange={handleChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent"
                   >
-                    <option value="日常">日常</option>
-                    <option value="料理">料理</option>
-                    <option value="散歩">散歩</option>
-                    <option value="季節">季節</option>
-                    <option value="思い出">思い出</option>
+                    {categories.map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
