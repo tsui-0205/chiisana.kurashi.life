@@ -63,6 +63,8 @@ export async function POST(request) {
     try {
         const newPost = await request.json();
 
+        console.log('Received new post:', newPost); // デバッグログ
+
         // バリデーション
         if (!newPost.id || !newPost.title || !newPost.content) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -85,7 +87,7 @@ export async function POST(request) {
         }
 
         // 新しい投稿を配列の先頭に追加（最新順）
-        currentPosts.unshift({
+        const postToAdd = {
             id: newPost.id,
             title: newPost.title,
             date: newPost.date || new Date().toISOString().split('T')[0],
@@ -96,11 +98,15 @@ export async function POST(request) {
             category: newPost.category || "日常",
             tags: newPost.tags || "",
             sections: newPost.sections || [], // 複数セクションを保存
-        });
+        };
+
+        currentPosts.unshift(postToAdd);
+
+        console.log('Posts to save:', currentPosts.length); // デバッグログ
 
         // 新しい posts.js ファイルの内容を生成
         const newPostsContent = `// ブログ投稿データ
-export const posts = ${JSON.stringify(currentPosts, null, 4).replace(/"([^"]+)":/g, '$1:')};
+export const posts = ${JSON.stringify(currentPosts, null, 2)};
 `;
 
         // ファイルに書き込み
@@ -112,7 +118,11 @@ export const posts = ${JSON.stringify(currentPosts, null, 4).replace(/"([^"]+)":
         });
 
     } catch (error) {
-        return NextResponse.json({ error: 'Failed to create post' }, { status: 500 });
+        console.error('Error creating post:', error); // エラーログ
+        return NextResponse.json({ 
+            error: 'Failed to create post', 
+            details: error.message 
+        }, { status: 500 });
     }
 }
 
@@ -154,7 +164,7 @@ export async function PUT(request) {
 
         // 新しい posts.js ファイルの内容を生成
         const newPostsContent = `// ブログ投稿データ
-export const posts = ${JSON.stringify(currentPosts, null, 4).replace(/"([^"]+)":/g, '$1:')};
+export const posts = ${JSON.stringify(currentPosts, null, 2)};
 `;
 
         fs.writeFileSync(postsPath, newPostsContent, 'utf8');
@@ -165,7 +175,11 @@ export const posts = ${JSON.stringify(currentPosts, null, 4).replace(/"([^"]+)":
         });
 
     } catch (error) {
-        return NextResponse.json({ error: 'Failed to update post' }, { status: 500 });
+        console.error('Error updating post:', error);
+        return NextResponse.json({ 
+            error: 'Failed to update post',
+            details: error.message 
+        }, { status: 500 });
     }
 }
 
@@ -225,7 +239,7 @@ export async function DELETE(request) {
 
         // 新しい posts.js ファイルの内容を生成
         const newPostsContent = `// ブログ投稿データ
-export const posts = ${JSON.stringify(currentPosts, null, 4).replace(/"([^"]+)":/g, '$1:')};
+export const posts = ${JSON.stringify(currentPosts, null, 2)};
 `;
 
         fs.writeFileSync(postsPath, newPostsContent, 'utf8');
