@@ -239,7 +239,7 @@ export default function InstagramFeed({ showToTop = false, hideWhenHeroVisible =
                                 >
                                     <Image
                                         src={post.imageUrl}
-                                        alt="Instagram投稿"
+                                        alt="つい・わたしと夫の小さな暮らし 石川県の日常"
                                         fill
                                         sizes="(max-width: 640px) 50vw, (max-width: 1024px) 36vw, 28vw"
                                         className="object-cover"

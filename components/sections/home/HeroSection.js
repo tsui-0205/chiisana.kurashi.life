@@ -243,7 +243,7 @@ export default function HeroSection({ isMenuOpen, setIsMenuOpen, onLoaded, onHer
                 <div className={`absolute inset-0 w-full h-full bg-gray-200 animate-pulse transition-opacity duration-500 ${hasMainPhoto ? 'opacity-0 pointer-events-none' : 'opacity-100'}`} />
                 <img
                     src="/images/main.jpg"
-                    alt="メイン写真"
+                    alt="わたしと夫の小さな暮らし - 石川県で暮らす夫婦の日常"
                     className={`absolute inset-0 w-full h-full object-cover object-center fade-in-image transition-opacity duration-500 ${hasMainPhoto ? 'opacity-100' : 'opacity-0'}`}
                     loading="eager"
                     fetchPriority="high"

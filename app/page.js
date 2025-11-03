@@ -19,6 +19,8 @@ export default function Home() {
     
     return (
         <div className="bg-white text-zinc-800 relative">
+            {/* SEO: Main heading - visually hidden but accessible to search engines */}
+            <h1 className="sr-only">わたしと夫の小さな暮らし - つい。石川県で暮らす夫婦の日常ブログ</h1>
             <HeroSection isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} onLoaded={setHasMainPhoto} onHeroVisible={setIsHeroVisible} />
             {/* Content sections that will overlay the fixed image when scrolled */}
             <div className="relative z-40 bg-white">
