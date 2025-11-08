@@ -26,68 +26,81 @@ export default function InstagramFeed({ showToTop = false, hideWhenHeroVisible =
         window.open(url, "_blank", "noopener,noreferrer");
     }, []);
 
-    // アニメーション設定をメモ化
-    const { duration, mobileDuration, doubled, movePercent } = useMemo(() => {
-        const baseSeconds = 40;
-        const dur = Math.max(12, Math.round((instagramPosts.length / 3) * baseSeconds));
-        const mobDur = Math.max(8, Math.round(dur * 0.6));
-        const DUPLICATES = 2;
-        const dbl = Array(DUPLICATES).fill(instagramPosts).flat();
-        const mvPercent = 470 / DUPLICATES;
-        return { duration: dur, mobileDuration: mobDur, doubled: dbl, movePercent: mvPercent };
-    }, []);
+    // アニメーション設定（複製数はランタイムで決定 -> ユーザーが回数を指定する必要なし）
+    const DURATION_DESKTOP = 38; // 秒: デスクトップで1セットが流れる時間の目安
+    const DURATION_MOBILE = 25; // 秒: モバイルで1セットが流れる時間の目安
+    const duration = DURATION_DESKTOP;
+    const mobileDuration = DURATION_MOBILE;
 
-    // ドラッグでスクロール（スマホ/PC両対応）
+    // 複製数は初期2。レンダリング後にラッパー幅とトラック幅を見て必要な分だけ増やす
+    const [copies, setCopies] = useState(2);
+    const doubled = useMemo(() => Array(copies).fill(instagramPosts).flat(), [copies]);
+    const singleWidthRef = useRef(0);
+
+    // ドラッグでスクロール（リファクタリング版）
     useEffect(() => {
         const el = wrapperRef.current;
         if (!el) return;
 
-        let isDown = false;
+        let isDragging = false;
         let startX = 0;
         let scrollLeft = 0;
 
-        const onDown = (e) => {
-            isDown = true;
+        const handlePointerDown = (e) => {
+            isDragging = true;
             setIsUserInteracting(true);
             el.setPointerCapture(e.pointerId);
             startX = e.clientX;
             scrollLeft = el.scrollLeft;
             el.style.cursor = "grabbing";
         };
-        const onMove = (e) => {
-            if (!isDown) return;
-            const walk = (e.clientX - startX) * 1.2; // ドラッグ感度
-            el.scrollLeft = scrollLeft - walk;
+
+        const handlePointerMove = (e) => {
+            if (!isDragging) return;
+            e.preventDefault();
+            const deltaX = (e.clientX - startX) * 1.5; // ドラッグ感度向上
+            el.scrollLeft = scrollLeft - deltaX;
         };
-        const onUp = (e) => {
-            isDown = false;
+
+        const handlePointerEnd = (e) => {
+            if (!isDragging) return;
+            isDragging = false;
             setIsUserInteracting(false);
-            try { el.releasePointerCapture(e.pointerId); } catch { }
+            try { 
+                el.releasePointerCapture(e.pointerId); 
+            } catch (err) {
+                console.warn('Failed to release pointer capture:', err);
+            }
             el.style.cursor = "grab";
         };
 
-        el.addEventListener("pointerdown", onDown);
-        el.addEventListener("pointermove", onMove);
-        el.addEventListener("pointerup", onUp);
-        el.addEventListener("pointercancel", onUp);
+        el.addEventListener("pointerdown", handlePointerDown);
+        el.addEventListener("pointermove", handlePointerMove);
+        el.addEventListener("pointerup", handlePointerEnd);
+        el.addEventListener("pointercancel", handlePointerEnd);
 
         return () => {
-            el.removeEventListener("pointerdown", onDown);
-            el.removeEventListener("pointermove", onMove);
-            el.removeEventListener("pointerup", onUp);
-            el.removeEventListener("pointercancel", onUp);
+            el.removeEventListener("pointerdown", handlePointerDown);
+            el.removeEventListener("pointermove", handlePointerMove);
+            el.removeEventListener("pointerup", handlePointerEnd);
+            el.removeEventListener("pointercancel", handlePointerEnd);
         };
     }, []);
 
-    // IntersectionObserver を統合してパフォーマンス改善
+    // IntersectionObserver でパフォーマンス最適化（リファクタリング版）
     useEffect(() => {
-        observerRef.current = new IntersectionObserver(
+        const observer = new IntersectionObserver(
             (entries) => {
+                const newVisible = new Set(visibleItems);
                 entries.forEach((entry) => {
                     if (entry.isIntersecting) {
-                        setVisibleItems(prev => new Set([...prev, entry.target.dataset.index]));
+                        const index = entry.target.dataset.index;
+                        if (index) newVisible.add(index);
                     }
                 });
+                if (newVisible.size !== visibleItems.size) {
+                    setVisibleItems(newVisible);
+                }
             },
             {
                 threshold: 0.1,
@@ -95,91 +108,213 @@ export default function InstagramFeed({ showToTop = false, hideWhenHeroVisible =
             }
         );
 
-        // 要素を即座に監視開始
+        observerRef.current = observer;
+
+        // 監視対象要素を取得して監視開始
         const elements = document.querySelectorAll('[data-animate="true"]');
-        elements.forEach((el) => {
-            try {
-                if (observerRef.current) {
-                    observerRef.current.observe(el);
-                }
-            } catch (e) {
-                // noop
-            }
-        });
+        elements.forEach((el) => observer.observe(el));
 
         return () => {
+            observer.disconnect();
+        };
+    }, [visibleItems]);
+
+    // ランタイムで必要な複製数を確保する (画像読み込み後に呼び出すことで幅のズレを抑える)
+    useEffect(() => {
+        let cancelled = false;
+        let attempts = 0;
+
+        const ensureCopies = () => {
+            attempts += 1;
+            const wrapper = wrapperRef.current;
+            const track = trackRef.current;
+            if (!wrapper || !track || cancelled) return;
+
+            const wrapperW = wrapper.clientWidth || window.innerWidth;
+            // track.scrollWidth が wrapper の 2 倍以上になるように複製数を増やす
+            if (track.scrollWidth < wrapperW * 2 && attempts < 12) {
+                setCopies((c) => Math.min(12, c + 1));
+                // 次レンダリング後に再確認
+                setTimeout(ensureCopies, 120);
+            }
+            // 単一セットの幅を計測（最初の N 要素の合計幅 + gap を含む）
             try {
-                if (observerRef.current) {
-                    observerRef.current.disconnect();
+                const children = Array.from(track.children || []);
+                const n = instagramPosts.length;
+                if (children.length >= n) {
+                    const firstN = children.slice(0, n);
+                    const widths = firstN.reduce((sum, el) => sum + (el.offsetWidth || 0), 0);
+                    const style = window.getComputedStyle(track);
+                    const gap = parseFloat(style.gap || style.columnGap || 0) || 0;
+                    const paddingLeft = parseFloat(style.paddingLeft || 0) || 0;
+                    const paddingRight = parseFloat(style.paddingRight || 0) || 0;
+                    const setWidth = widths + gap * Math.max(0, n - 1) + paddingLeft + paddingRight;
+                    if (setWidth > 0) singleWidthRef.current = setWidth;
                 }
             } catch (e) {
                 // noop
             }
         };
-    }, []);
+
+        // 少し遅らせて最初の計測（画像のレイアウトが安定してから）
+        const t = setTimeout(ensureCopies, 200);
+        window.addEventListener('resize', ensureCopies);
+
+        return () => {
+            cancelled = true;
+            clearTimeout(t);
+            window.removeEventListener('resize', ensureCopies);
+        };
+    }, [doubled]);
+
+    // requestAnimationFrame でシームレスにスクロールさせる（CSSキーフレームのリセット位置問題を回避）
+    useEffect(() => {
+        const track = trackRef.current;
+        if (!track) return;
+
+        let rafId = 0;
+        let last = performance.now();
+        let offset = 0; // px
+
+        const prefersReduced = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (prefersReduced) return;
+
+        const step = (now) => {
+            const elapsed = (now - last) / 1000; // 秒
+            last = now;
+
+            if (!isUserInteracting) {
+                const vw = window.innerWidth;
+                const isMobile = vw <= 768;
+                const usedDuration = isMobile ? mobileDuration : duration;
+
+                // 1セット分の幅（px） — 事前計測があればそれを優先
+                const measured = singleWidthRef.current || 0;
+                const singleWidthPx = measured > 0 ? measured : (track.scrollWidth / copies || 0);
+                // px/秒
+                const speed = singleWidthPx / Math.max(0.001, usedDuration);
+
+                offset += speed * elapsed;
+                // 繰り返し時にジャンプしないように余剰分だけ差し引く
+                if (offset >= singleWidthPx) offset -= singleWidthPx;
+
+                track.style.transform = `translateX(-${offset}px)`;
+            }
+
+            rafId = requestAnimationFrame(step);
+        };
+
+        rafId = requestAnimationFrame(step);
+
+        return () => cancelAnimationFrame(rafId);
+    }, [copies, duration, mobileDuration, isUserInteracting]);
 
     const [ref, inView] = useInView({ threshold: 0.12 });
 
     return (
         <section id="instagram" className="instagram-section relative overflow-hidden text-zinc-800">
             <style>{`
-        .font-body { font-family: 'Noto Sans JP', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; }
-        .font-hand { font-family: 'Yomogi', 'Noto Sans JP', sans-serif; letter-spacing: .02em; }
-
-        /* フルブリード・オートスクロール */
-        .marquee-wrapper { 
-          overflow: hidden;
-          position: relative; 
-          touch-action: pan-x; 
-          cursor: grab; 
-          -webkit-overflow-scrolling: touch;
-          scroll-behavior: auto; /* ユーザー操作優先 */
-        }
-        .marquee-track {
-          display: flex;
-          gap: 24px;
-          will-change: transform;
-          align-items: stretch;
-        }
-                        .marquee-track.animate {
-                            animation: scrollX linear infinite;
-                            animation-duration: ${duration}s;
-                            animation-play-state: running;
-                        }
-                /* モバイル向け: より短い duration を使って体感速度を速める */
-                @media (max-width: 768px) {
-                    .marquee-track.animate { animation-duration: ${mobileDuration}s; }
+                /* フォント設定 */
+                .font-body { 
+                    font-family: 'Noto Sans JP', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; 
                 }
+                .font-hand { 
+                    font-family: 'Yomogi', 'Noto Sans JP', sans-serif; 
+                    letter-spacing: 0.02em; 
+                }
+
+                /* マーキーラッパー */
+                .marquee-wrapper { 
+                    overflow: hidden;
+                    position: relative; 
+                    touch-action: pan-x; 
+                    cursor: grab; 
+                    -webkit-overflow-scrolling: touch;
+                    scroll-behavior: auto;
+                }
+
+                /* マーキートラック - 高速スムーズアニメーション */
+                .marquee-track {
+                    display: flex;
+                    gap: 24px;
+                    will-change: transform;
+                    align-items: stretch;
+                }
+
+                /* アニメーションは JavaScript(rAF) 側で制御する。
+                   CSS キーフレームは残すが、ここではアニメーションを無効化して
+                   inline style(transform) による連続スクロールを優先させる */
+                .marquee-track.animate {
+                    /* animation intentionally disabled when using rAF scroll */
+                    animation: none !important;
+                }
+
+                /* 無限ループ: 1セット分を移動して戻る（デスクトップ用） */
                 @keyframes scrollX {
-                    from { transform: translateX(0); }
-                    to   { transform: translateX(-${movePercent}%); }
+                    0% { transform: translateX(0); }
+                    100% { transform: translateX(-50%); }
                 }
-        @media (prefers-reduced-motion: reduce) {
-          .marquee-track.animate { animation: none; }
-        }
 
-        /* 端のフェード（モダンな抜け感） */
-        .edge-fade::before,
-        .edge-fade::after {
-          content: ""; position: absolute; top: 0; bottom: 0; width: 12vw; pointer-events: none;
-        }
-        .edge-fade::before { left: 0; background: linear-gradient(90deg, rgba(255,255,255,1), rgba(255,255,255,0)); }
-        .edge-fade::after  { right: 0; background: linear-gradient(270deg, rgba(255,255,255,1), rgba(255,255,255,0)); }
+                /* モバイル用: ビューポート幅で1セット分を移動（確実に4枚分を通過） */
+                @keyframes scrollXMobile {
+                    0% { transform: translateX(0); }
+                    100% { transform: translateX(-100vw); }
+                }
 
-        /* 画像カードの質感 */
-        .ig-card {
-          position: relative; overflow: hidden; border-radius: 1rem; background: white;
-          box-shadow: 0 10px 40px rgba(0,0,0,.08);
-          transition: transform .4s cubic-bezier(.2,.6,.2,1), box-shadow .4s;
-        }
-        .ig-card:hover { transform: translateY(-4px); box-shadow: 0 20px 60px rgba(0,0,0,.12); }
-        .ig-card::after { content: ""; position: absolute; inset: 0; box-shadow: inset 0 0 80px rgba(0,0,0,.06); border-radius: 1rem; }
-        
-        /* セクション背景 */
-        .instagram-section {
-          padding: 2rem 1rem;
-        }
-      `}</style>
+                /* アクセシビリティ: モーション削減 */
+                @media (prefers-reduced-motion: reduce) {
+                    .marquee-track.animate { 
+                        animation: none; 
+                    }
+                }
+
+                /* エッジフェード効果 */
+                .edge-fade::before,
+                .edge-fade::after {
+                    content: "";
+                    position: absolute;
+                    top: 0;
+                    bottom: 0;
+                    width: 12vw;
+                    pointer-events: none;
+                    z-index: 10;
+                }
+                .edge-fade::before { 
+                    left: 0; 
+                    background: linear-gradient(90deg, rgba(255,255,255,1), rgba(255,255,255,0)); 
+                }
+                .edge-fade::after { 
+                    right: 0; 
+                    background: linear-gradient(270deg, rgba(255,255,255,1), rgba(255,255,255,0)); 
+                }
+
+                /* カードデザイン */
+                .ig-card {
+                    position: relative;
+                    overflow: hidden;
+                    border-radius: 1rem;
+                    background: white;
+                    box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+                    transition: transform 0.4s cubic-bezier(0.2, 0.6, 0.2, 1), 
+                                box-shadow 0.4s ease;
+                }
+                .ig-card:hover { 
+                    transform: translateY(-4px); 
+                    box-shadow: 0 20px 60px rgba(0,0,0,0.12); 
+                }
+                .ig-card::after { 
+                    content: "";
+                    position: absolute;
+                    inset: 0;
+                    box-shadow: inset 0 0 80px rgba(0,0,0,0.06);
+                    border-radius: 1rem;
+                }
+
+                /* セクション背景 */
+                .instagram-section {
+                    padding: 2rem 1rem;
+                }
+            `}</style>
 
             <div className="font-body mx-auto mt-6 md:mt-8 mb-6 md:mb-12 max-w-[1200px] relative px-6">
                 <div
@@ -232,7 +367,7 @@ export default function InstagramFeed({ showToTop = false, hideWhenHeroVisible =
                             {doubled.map((post, idx) => (
                                 <figure
                                     key={`${post.id}-${idx}`}
-                                    className="ig-card group relative h-[45vh] md:h-[60vh] aspect-[4/3] min-w-[50vw] sm:min-w-[36vw] md:min-w-[36vw] lg:min-w-[36vw] xl:min-w-[28vw]"
+                                    className="ig-card group relative h-[40vh] md:h-[50vh] aspect-[4/3] min-w-[50vw] sm:min-w-[40vw] md:min-w-[36vw] lg:min-w-[36vw] xl:min-w-[28vw]"
                                     onClick={() => openPost(post.postUrl)}
                                     role="button"
                                     aria-label="Open Instagram post"

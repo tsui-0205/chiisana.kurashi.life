@@ -16,11 +16,24 @@ const geistMono = Geist_Mono({
 
 export const metadata = {
   title: "つい|わたしと夫の小さな暮らし - 石川県で暮らす夫婦の日常ブログ",
-  description: "石川県で暮らす夫婦の日常を綴るブログ。2025年2月5日に入籍した内気なふたりが、能登・金沢・白山・加賀の小さな幸せを写真と文章で記録しています。カフェ巡り、読書、フットサル、日々の暮らしを発信中。",
+  description: "石川県で暮らす夫婦が、日常と石川の魅力を写真と文章で発信しています。カフェ巡り、読書、フットサル、日々の暮らしを発信中。",
   keywords: "わたしと夫の小さな暮らし,つい,石川県,夫婦ブログ,日常,暮らし,能登,金沢,白山,加賀,北陸,ライフスタイル,カフェ巡り,写真,日記,小さな幸せ,夫婦の日常,石川暮らし,ishikawa,kanazawa",
   authors: [{ name: "つい|夫" }],
   creator: "つい|わたしと夫の小さな暮らし",
   publisher: "つい|わたしと夫の小さな暮らし",
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/favicon.ico', sizes: '16x16', type: 'image/x-icon' },
+      { url: '/favicon.ico', sizes: '32x32', type: 'image/x-icon' },
+    ],
+    apple: [
+      { url: '/favicon.ico' },
+    ],
+    other: [
+      { rel: 'icon', url: '/favicon.ico' },
+    ],
+  },
   robots: {
     index: true,
     follow: true,
@@ -39,7 +52,7 @@ export const metadata = {
   // Open Graph / Social metadata
   openGraph: {
     title: "つい|わたしと夫の小さな暮らし - 石川県で暮らす夫婦の日常ブログ",
-    description: "石川県で暮らす夫婦の日常を綴るブログ。2025年2月5日に入籍した内気なふたりが、能登・金沢・白山・加賀の小さな幸せを写真と文章で記録しています。",
+    description: "石川県で暮らす夫婦が、日常と石川の魅力を写真と文章で発信しています。",
     url: "https://tsui-chiisanakurashi.com/",
     siteName: "つい|わたしと夫の小さな暮らし",
     images: [
@@ -72,7 +85,7 @@ export default function RootLayout({ children }) {
     "name": "つい|わたしと夫の小さな暮らし",
     "alternateName": "わたしと夫の小さな暮らし",
     "url": "https://tsui-chiisanakurashi.com/",
-    "description": "石川県で暮らす夫婦の日常を綴るブログ。2025年2月5日に入籍した内気なふたりが、能登・金沢・白山・加賀の小さな幸せを写真と文章で記録しています。",
+    "description": "石川県で暮らす夫婦が、日常と石川の魅力を写真と文章で発信しています。",
     "inLanguage": "ja",
     "author": {
       "@type": "Person",
