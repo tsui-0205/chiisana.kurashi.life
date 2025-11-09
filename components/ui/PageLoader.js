@@ -27,7 +27,6 @@ export default function PageLoader() {
                 <img className="loader-image" src="/images/loadishikawa.png" alt="loader2" />
                 <img className="loader-image" src="/images/loadishikawa.png" alt="loader3" />
             </div>
-            <div className="loading-text">ロード中...</div>
 
             <style jsx>{`
                 .page-loader-root {
@@ -53,38 +52,30 @@ export default function PageLoader() {
                     width: 100px;
                     height: auto;
                     opacity: 0;
-                    transform: translateY(20px);
-                    animation: fadeUp 0.6s ease forwards;
+                    animation: fadeInOut 1.5s ease-in-out infinite;
                 }
 
                 .loader-image:nth-child(1) {
-                    animation-delay: 0.2s;
+                    animation-delay: 0s;
                 }
 
                 .loader-image:nth-child(2) {
-                    animation-delay: 0.6s;
+                    animation-delay: 0.5s;
                 }
 
                 .loader-image:nth-child(3) {
                     animation-delay: 1s;
                 }
 
-                @keyframes fadeUp {
-                    to {
-                        opacity: 1;
-                        transform: translateY(0);
+                @keyframes fadeInOut {
+                    0%, 100% {
+                        opacity: 0;
+                        transform: scale(0.8) translateY(10px);
                     }
-                }
-
-                /* make loading text animate with the images (use same fadeUp) */
-                .loading-text {
-                    margin-top: 1.6rem;
-                    font-size: 1.2rem;
-                    color: #666;
-                    opacity: 0;
-                    transform: translateY(20px);
-                    animation: fadeUp 0.6s ease forwards;
-                    animation-delay: 1s; /* sync with 3rd image */
+                    50% {
+                        opacity: 1;
+                        transform: scale(1) translateY(0);
+                    }
                 }
             `}</style>
         </div>

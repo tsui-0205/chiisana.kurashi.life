@@ -469,9 +469,7 @@ export default function BlogPage() {
         </div>
         <div className="relative pb-6 md:pb-6 lg:pb-20">
           {loading ? (
-            <div className="text-center py-16">
-              <p className="text-gray-500 text-lg">読み込み中...</p>
-            </div>
+            null
           ) : filtered.length === 0 ? (
             <div className="text-center py-16">
               <p className="text-gray-500 text-lg">該当する記事が見つかりませんでした</p>

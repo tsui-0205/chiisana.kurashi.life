@@ -111,13 +111,7 @@ export default function BlogPostSimple() {
 
   // ローディング中
   if (loading) {
-    return (
-      <main className="min-h-screen bg-neutral-100 text-neutral-900 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-xl text-neutral-600">読み込み中...</p>
-        </div>
-      </main>
-    );
+    return null;
   }
 
   // 記事が見つからない場合

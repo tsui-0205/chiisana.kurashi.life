@@ -167,7 +167,7 @@ export default function PostsManagement() {
                                     <p className="text-sm text-gray-600">この操作は元に戻せません</p>
                                 </div>
                             </div>
-                            
+
                             <div className="mb-6">
                                 <p className="text-gray-700">
                                     以下の記事を削除しますか？
@@ -252,10 +252,7 @@ export default function PostsManagement() {
 
                     <div className="overflow-x-auto">
                         {loadingPosts ? (
-                            <div className="text-center py-12">
-                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-rose-600 mx-auto"></div>
-                                <p className="mt-2 text-gray-600">記事を読み込み中...</p>
-                            </div>
+                            null
                         ) : posts.length > 0 ? (
                             <table className="w-full">
                                 <thead className="bg-gray-50">

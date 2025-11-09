@@ -308,10 +308,7 @@ export default function AdminDashboard() {
                     </div>
                     <div className="p-6">
                         {loadingPosts ? (
-                            <div className="text-center py-8">
-                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-rose-600 mx-auto"></div>
-                                <p className="mt-2 text-gray-600">記事を読み込み中...</p>
-                            </div>
+                            null
                         ) : recentPosts.length > 0 ? (
                             <div className="space-y-4">
                                 {recentPosts.map((post, index) => (
