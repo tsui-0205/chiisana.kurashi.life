@@ -3,6 +3,55 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+// モバイル用投稿カード
+const PostCardMobile = ({ post, formatDate, confirmDeletePost }) => (
+    <div className="p-4 hover:bg-gray-50">
+        <div className="flex gap-3 mb-3">
+            {post.cover && (
+                <img src={post.cover} alt={post.title} className="w-16 h-16 object-cover rounded-lg flex-shrink-0" />
+            )}
+            <div className="flex-1 min-w-0">
+                <h3 className="text-sm font-medium text-gray-900 line-clamp-2 mb-1">{post.title}</h3>
+                <div className="flex items-center gap-2 text-xs text-gray-500">
+                    <span className="px-2 py-0.5 bg-rose-100 text-rose-600 rounded-full">{post.category || "日常"}</span>
+                    <span>{formatDate(post.date)}</span>
+                </div>
+            </div>
+        </div>
+        <div className="flex gap-2 justify-end">
+            <Link href={`/site/blog/${post.id}`} className="px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100" target="_blank">表示</Link>
+            <Link href={`/site/admin/edit-post/${encodeURIComponent(post.id)}`} className="px-3 py-1.5 text-xs font-medium text-green-600 bg-green-50 rounded-md hover:bg-green-100">編集</Link>
+            <button onClick={() => confirmDeletePost(post)} className="px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 rounded-md hover:bg-red-100">削除</button>
+        </div>
+    </div>
+);
+
+// PC用テーブル行
+const PostRowDesktop = ({ post, formatDate, confirmDeletePost }) => (
+    <tr className="hover:bg-gray-50">
+        <td className="px-6 py-4">
+            <div className="flex items-center">
+                {post.cover && <img src={post.cover} alt={post.title} className="w-12 h-12 object-cover rounded-lg mr-4" />}
+                <div>
+                    <h3 className="text-sm font-medium text-gray-900 line-clamp-2">{post.title}</h3>
+                    {post.excerpt && <p className="text-xs text-gray-500 mt-1 line-clamp-1">{post.excerpt}</p>}
+                </div>
+            </div>
+        </td>
+        <td className="px-6 py-4">
+            <span className="px-2 py-1 bg-rose-100 text-rose-600 text-xs rounded-full">{post.category || "日常"}</span>
+        </td>
+        <td className="px-6 py-4 text-sm text-gray-600">{formatDate(post.date)}</td>
+        <td className="px-6 py-4">
+            <div className="flex gap-2">
+                <Link href={`/site/blog/${post.id}`} className="text-blue-600 hover:text-blue-800 text-sm font-medium" target="_blank">表示</Link>
+                <Link href={`/site/admin/edit-post/${encodeURIComponent(post.id)}`} className="text-green-600 hover:text-green-800 text-sm font-medium">編集</Link>
+                <button onClick={() => confirmDeletePost(post)} className="text-red-600 hover:text-red-800 text-sm font-medium">削除</button>
+            </div>
+        </td>
+    </tr>
+);
+
 export default function PostsManagement() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
@@ -13,63 +62,52 @@ export default function PostsManagement() {
     const router = useRouter();
 
     useEffect(() => {
-        checkAuthStatus();
-        loadPosts();
-    }, []);
+        const init = async () => {
+            try {
+                const response = await fetch('/api/auth/me');
+                const data = await response.json();
 
-    const checkAuthStatus = async () => {
-        try {
-            const response = await fetch('/api/auth/me');
-            const data = await response.json();
-
-            if (data.authenticated) {
-                setIsAuthenticated(true);
-            } else {
+                if (data.authenticated) {
+                    setIsAuthenticated(true);
+                    loadPosts();
+                } else {
+                    router.push('/site/admin/login');
+                }
+            } catch (error) {
                 router.push('/site/admin/login');
+            } finally {
+                setIsLoading(false);
             }
-        } catch (error) {
-            router.push('/site/admin/login');
-        } finally {
-            setIsLoading(false);
-        }
-    };
+        };
+        init();
+    }, [router]);
 
     const loadPosts = async () => {
         setLoadingPosts(true);
         try {
             const response = await fetch('/api/posts');
             const data = await response.json();
-            if (data.posts) {
-                setPosts(data.posts);
-            }
+            setPosts(data.posts || []);
         } catch (error) {
+            console.error('Failed to load posts:', error);
         } finally {
             setLoadingPosts(false);
         }
     };
 
-    // トースト表示関数
     const showToast = (message, type = "info") => {
         setToast({ show: true, message, type });
-        setTimeout(() => {
-            setToast({ show: false, message: "", type: "" });
-        }, 4000);
+        setTimeout(() => setToast({ show: false, message: "", type: "" }), 4000);
     };
 
-    // 削除確認モーダルを表示
-    const confirmDeletePost = (post) => {
-        setDeleteModal({ show: true, post });
-    };
+    const confirmDeletePost = (post) => setDeleteModal({ show: true, post });
 
-    // 記事削除実行
     const handleDeletePost = async () => {
-        const post = deleteModal.post;
+        const { post } = deleteModal;
         if (!post) return;
 
         try {
-            const response = await fetch(`/api/posts?id=${encodeURIComponent(post.id)}`, {
-                method: 'DELETE',
-            });
+            const response = await fetch(`/api/posts?id=${encodeURIComponent(post.id)}`, { method: 'DELETE' });
 
             if (response.ok) {
                 loadPosts();
@@ -85,19 +123,11 @@ export default function PostsManagement() {
         }
     };
 
-    // 削除キャンセル
-    const cancelDelete = () => {
-        setDeleteModal({ show: false, post: null });
-    };
+    const cancelDelete = () => setDeleteModal({ show: false, post: null });
 
     const formatDate = (dateStr) => {
         if (!dateStr) return '';
-        const date = new Date(dateStr);
-        return date.toLocaleDateString('ja-JP', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
+        return new Date(dateStr).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });
     };
 
     if (isLoading) {
@@ -153,43 +183,43 @@ export default function PostsManagement() {
 
             {/* 削除確認モーダル */}
             {deleteModal.show && deleteModal.post && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
-                        <div className="p-6">
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+                        <div className="p-4 sm:p-6">
                             <div className="flex items-center gap-3 mb-4">
-                                <div className="flex-shrink-0 w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
-                                    <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 bg-red-100 rounded-full flex items-center justify-center">
+                                    <svg className="w-5 h-5 sm:w-6 sm:h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                     </svg>
                                 </div>
                                 <div>
-                                    <h3 className="text-lg font-semibold text-gray-900">記事を削除</h3>
-                                    <p className="text-sm text-gray-600">この操作は元に戻せません</p>
+                                    <h3 className="text-base sm:text-lg font-semibold text-gray-900">記事を削除</h3>
+                                    <p className="text-xs sm:text-sm text-gray-600">この操作は元に戻せません</p>
                                 </div>
                             </div>
 
-                            <div className="mb-6">
-                                <p className="text-gray-700">
+                            <div className="mb-4 sm:mb-6">
+                                <p className="text-sm sm:text-base text-gray-700">
                                     以下の記事を削除しますか？
                                 </p>
                                 <div className="mt-3 p-3 bg-gray-50 rounded-lg">
-                                    <h4 className="font-medium text-gray-900">{deleteModal.post.title}</h4>
-                                    <p className="text-sm text-gray-600 mt-1">
+                                    <h4 className="text-sm sm:text-base font-medium text-gray-900 break-words">{deleteModal.post.title}</h4>
+                                    <p className="text-xs sm:text-sm text-gray-600 mt-1">
                                         {deleteModal.post.category || "日常"} • {formatDate(deleteModal.post.date)}
                                     </p>
                                 </div>
                             </div>
 
-                            <div className="flex gap-3">
+                            <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3">
                                 <button
                                     onClick={cancelDelete}
-                                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
+                                    className="w-full sm:flex-1 px-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg text-sm sm:text-base text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
                                 >
                                     キャンセル
                                 </button>
                                 <button
                                     onClick={handleDeletePost}
-                                    className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors"
+                                    className="w-full sm:flex-1 px-4 py-2.5 sm:py-2 bg-red-600 text-white text-sm sm:text-base rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors"
                                 >
                                     削除する
                                 </button>
@@ -254,82 +284,31 @@ export default function PostsManagement() {
                         {loadingPosts ? (
                             null
                         ) : posts.length > 0 ? (
-                            <table className="w-full">
-                                <thead className="bg-gray-50">
-                                    <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            記事情報
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            カテゴリ
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            公開日
-                                        </th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            操作
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody className="bg-white divide-y divide-gray-200">
+                            <>
+                                {/* スマホ: カードレイアウト */}
+                                <div className="block md:hidden divide-y divide-gray-200">
                                     {posts.map((post, index) => (
-                                        <tr key={post.id || index} className="hover:bg-gray-50">
-                                            <td className="px-6 py-4">
-                                                <div className="flex items-center">
-                                                    {post.cover && (
-                                                        <img
-                                                            src={post.cover}
-                                                            alt={post.title}
-                                                            className="w-12 h-12 object-cover rounded-lg mr-4"
-                                                        />
-                                                    )}
-                                                    <div>
-                                                        <h3 className="text-sm font-medium text-gray-900 line-clamp-2">
-                                                            {post.title}
-                                                        </h3>
-                                                        {post.excerpt && (
-                                                            <p className="text-xs text-gray-500 mt-1 line-clamp-1">
-                                                                {post.excerpt}
-                                                            </p>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <span className="px-2 py-1 bg-rose-100 text-rose-600 text-xs rounded-full">
-                                                    {post.category || "日常"}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4 text-sm text-gray-600">
-                                                {formatDate(post.date)}
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="flex gap-2">
-                                                    <Link
-                                                        href={`/site/blog/${post.id}`}
-                                                        className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                                                        target="_blank"
-                                                    >
-                                                        表示
-                                                    </Link>
-                                                    <Link
-                                                        href={`/site/admin/edit-post/${encodeURIComponent(post.id)}`}
-                                                        className="text-green-600 hover:text-green-800 text-sm font-medium"
-                                                    >
-                                                        編集
-                                                    </Link>
-                                                    <button
-                                                        onClick={() => confirmDeletePost(post)}
-                                                        className="text-red-600 hover:text-red-800 text-sm font-medium"
-                                                    >
-                                                        削除
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
+                                        <PostCardMobile key={post.id || index} post={post} formatDate={formatDate} confirmDeletePost={confirmDeletePost} />
                                     ))}
-                                </tbody>
-                            </table>
+                                </div>
+
+                                {/* PC: テーブルレイアウト */}
+                                <table className="hidden md:table w-full">
+                                    <thead className="bg-gray-50">
+                                        <tr>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">記事情報</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">カテゴリ</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">公開日</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="bg-white divide-y divide-gray-200">
+                                        {posts.map((post, index) => (
+                                            <PostRowDesktop key={post.id || index} post={post} formatDate={formatDate} confirmDeletePost={confirmDeletePost} />
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </>
                         ) : (
                             <div className="text-center py-12">
                                 <svg className="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

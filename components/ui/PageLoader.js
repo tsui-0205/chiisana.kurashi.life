@@ -2,10 +2,15 @@
 
 import { useEffect, useState } from "react";
 
+
 export default function PageLoader() {
-    const [visible, setVisible] = useState(false);
+    // 初回アクセス時はtrue、マウント後すぐfalseにする
+    const [visible, setVisible] = useState(true);
 
     useEffect(() => {
+        // 初回マウント後、1フレームで自動的に非表示
+        const timeout = setTimeout(() => setVisible(false), 400);
+
         const show = () => setVisible(true);
         const hide = () => setVisible(false);
 
@@ -13,6 +18,7 @@ export default function PageLoader() {
         window.addEventListener("__page-loader:hide", hide);
 
         return () => {
+            clearTimeout(timeout);
             window.removeEventListener("__page-loader:show", show);
             window.removeEventListener("__page-loader:hide", hide);
         };

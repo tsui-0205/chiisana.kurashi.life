@@ -16,6 +16,7 @@ export default function EditPost() {
         slug: "",
         content: "",
         cover: "",
+        images: [],
         excerpt: "",
         category: "日常",
         tags: [],
@@ -77,6 +78,7 @@ export default function EditPost() {
                         slug: post.id || "",
                         content: post.content || "",
                         cover: post.cover || "",
+                        images: post.images || [],
                         excerpt: post.excerpt || "",
                         category: post.category || "日常",
                         tags: post.tags ? post.tags.split(',').map(tag => tag.trim()) : [],
@@ -114,7 +116,7 @@ export default function EditPost() {
         }
     };
 
-    const handleImageUpload = async (e, sectionIndex = null) => {
+    const handleImageUpload = async (e, sectionIndex = null, isMultiple = false) => {
         const file = e.target.files[0];
         if (!file) return;
 
@@ -140,6 +142,8 @@ export default function EditPost() {
                                 : section
                         )
                     }));
+                } else if (isMultiple) {
+                    setFormData(prev => ({ ...prev, images: [...prev.images, result.url] }));
                 } else {
                     setFormData(prev => ({
                         ...prev,
@@ -198,6 +202,10 @@ export default function EditPost() {
         }));
     };
 
+    const removeImage = (index) => {
+        setFormData(prev => ({ ...prev, images: prev.images.filter((_, i) => i !== index) }));
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -223,6 +231,7 @@ export default function EditPost() {
                     title: formData.title,
                     content: formData.content,
                     cover: formData.cover || "/images/sample/default.jpg",
+                    images: formData.images,
                     excerpt: formData.excerpt,
                     category: formData.category,
                     tags: formData.tags.join(', '),
@@ -296,32 +305,35 @@ export default function EditPost() {
 
             {/* 更新確認モーダル */}
             {showConfirmModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-20 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-lg shadow-lg max-w-md w-full mx-4">
-                        <div className="p-6">
-                            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+                        <div className="p-4 sm:p-6">
+                            <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4">
                                 記事を更新しますか？
                             </h3>
-                            <div className="space-y-2 text-sm text-gray-600 mb-6">
-                                <p><strong>タイトル:</strong> {formData.title}</p>
+                            <div className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6">
+                                <p className="break-words"><strong>タイトル:</strong> {formData.title}</p>
                                 <p><strong>カテゴリ:</strong> {formData.category}</p>
                                 {formData.tags.length > 0 && (
-                                    <p><strong>タグ:</strong> {formData.tags.join(', ')}</p>
+                                    <p className="break-words"><strong>タグ:</strong> {formData.tags.join(', ')}</p>
                                 )}
                                 <p><strong>公開日:</strong> {formData.publishDate}</p>
                                 <p><strong>画像セクション:</strong> {formData.sections.length}個</p>
+                                {formData.images && formData.images.length > 0 && (
+                                    <p><strong>追加画像:</strong> {formData.images.length}枚</p>
+                                )}
                             </div>
-                            <div className="flex space-x-4">
+                            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                                 <button
                                     onClick={cancelSubmit}
-                                    className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                                    className="w-full sm:flex-1 px-4 py-2.5 sm:py-2 border border-gray-300 rounded-md text-sm sm:text-base text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
                                 >
                                     キャンセル
                                 </button>
                                 <button
                                     onClick={confirmSubmit}
                                     disabled={isSubmitting}
-                                    className="flex-1 px-4 py-2 bg-rose-600 text-white rounded-md hover:bg-rose-700 disabled:bg-gray-400"
+                                    className="w-full sm:flex-1 px-4 py-2.5 sm:py-2 bg-rose-600 text-white text-sm sm:text-base rounded-md hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
                                 >
                                     {isSubmitting ? '更新中...' : '更新する'}
                                 </button>
@@ -479,6 +491,52 @@ export default function EditPost() {
                                         <p className="text-xs text-gray-500 mt-1">
                                             画像URL: {formData.cover}
                                         </p>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="mt-6">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    追加画像（複数アップロード可能）
+                                </label>
+                                <div className="flex items-center space-x-4">
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e) => handleImageUpload(e, null, true)}
+                                        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                                        disabled={uploadingImage}
+                                    />
+                                    {uploadingImage && (
+                                        <span className="text-sm text-gray-500">アップロード中...</span>
+                                    )}
+                                </div>
+                                <p className="text-xs text-gray-500 mt-1">
+                                    記事内で使用する画像を複数アップロードできます
+                                </p>
+                                {formData.images && formData.images.length > 0 && (
+                                    <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                                        {formData.images.map((imageUrl, index) => (
+                                            <div key={index} className="relative group">
+                                                <img
+                                                    src={imageUrl}
+                                                    alt={`画像 ${index + 1}`}
+                                                    className="w-full h-32 object-cover rounded-md border border-gray-300"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeImage(index)}
+                                                    className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700"
+                                                >
+                                                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                                    </svg>
+                                                </button>
+                                                <p className="text-xs text-gray-500 mt-1 truncate" title={imageUrl}>
+                                                    {imageUrl}
+                                                </p>
+                                            </div>
+                                        ))}
                                     </div>
                                 )}
                             </div>

@@ -8,62 +8,52 @@ import RegionInfo from "./RegionInfo";
 // 画像は /public/images/ishikawa 
 // noto.jpg, kanazawa.jpg, hakusan.jpg, kaga.jpg を使用
 
+const SLIDES = [
+    { id: "noto", src: "/images/ishikawa/noto.jpg" },
+    { id: "kanazawa", src: "/images/ishikawa/kanazawa.jpg" },
+    { id: "hakusan", src: "/images/ishikawa/hakusan.jpg" },
+    { id: "kaga", src: "/images/ishikawa/kaga.jpg" },
+];
+
+const REGION_NAMES = {
+    noto: { ja: "能登", en: "Noto" },
+    kanazawa: { ja: "金沢", en: "Kanazawa" },
+    hakusan: { ja: "白山", en: "Hakusan" },
+    kaga: { ja: "加賀", en: "Kaga" },
+};
+
 // ====== アイドル（未ホバー時）演出レイヤ ============================
 function IdleBackdrop({ active, onChangeIndex, setImagesLoaded: setParentImagesLoaded }) {
     const prefersReduced = useReducedMotion();
-
-    // Ken Burns 的にスライド&ズームする画像セット
-    const slides = useMemo(
-        () => [
-            { id: "noto", src: "/images/ishikawa/noto.jpg" },
-            { id: "kanazawa", src: "/images/ishikawa/kanazawa.jpg" },
-            { id: "hakusan", src: "/images/ishikawa/hakusan.jpg" },
-            { id: "kaga", src: "/images/ishikawa/kaga.jpg" },
-        ],
-        []
-    );
 
     const [index, setIndex] = useState(0);
     const [imagesLoaded, setImagesLoaded] = useState(false);
 
     // 画像をプリロード
     useEffect(() => {
-        const imagePromises = slides.map((slide) => {
-            return new Promise((resolve, reject) => {
-                const img = new Image();
-                img.onload = resolve;
-                img.onerror = reject;
-                img.src = slide.src;
-            });
+        Promise.all(
+            SLIDES.map((slide) =>
+                new Promise((resolve) => {
+                    const img = new Image();
+                    img.onload = img.onerror = resolve;
+                    img.src = slide.src;
+                })
+            )
+        ).then(() => {
+            setImagesLoaded(true);
+            setParentImagesLoaded?.(true);
         });
-
-        Promise.all(imagePromises)
-            .then(() => {
-                setImagesLoaded(true);
-                if (setParentImagesLoaded) setParentImagesLoaded(true);
-            })
-            .catch(() => {
-                setImagesLoaded(true);
-                if (setParentImagesLoaded) setParentImagesLoaded(true);
-            }); // エラーでも続行
-    }, [slides, setParentImagesLoaded]);
+    }, [setParentImagesLoaded]);
 
     useEffect(() => {
-        if (!active || !imagesLoaded) return;
-        if (prefersReduced) return;
-        const t = setInterval(() => setIndex((i) => (i + 1) % slides.length), 4000);
-        return () => {
-            try {
-                clearInterval(t);
-            } catch (e) {
-                // Ignore errors during cleanup
-            }
-        };
-    }, [active, prefersReduced, slides.length, imagesLoaded]);
+        if (!active || !imagesLoaded || prefersReduced) return;
+        const t = setInterval(() => setIndex((i) => (i + 1) % SLIDES.length), 4000);
+        return () => clearInterval(t);
+    }, [active, prefersReduced, imagesLoaded]);
 
     // 親コンポーネントへ index 変化を通知
     useEffect(() => {
-        if (typeof onChangeIndex === "function") onChangeIndex(index);
+        onChangeIndex?.(index);
     }, [index, onChangeIndex]);
 
     // 浮遊するグラデーションブロブ
@@ -90,7 +80,7 @@ function IdleBackdrop({ active, onChangeIndex, setImagesLoaded: setParentImagesL
     return (
         <div className="pointer-events-none absolute inset-0 z-[5] overflow-hidden">
             {/* Ken Burns スライド（背景）*/}
-            {slides.map((s, i) => {
+            {SLIDES.map((s, i) => {
                 const isActive = i === index;
                 return (
                     <motion.img
@@ -116,7 +106,6 @@ function IdleBackdrop({ active, onChangeIndex, setImagesLoaded: setParentImagesL
                 aria-hidden={true}
                 className="absolute inset-0 opacity-[0.08] mix-blend-overlay"
                 style={{
-                    // Use a simple radial gradient here to avoid embedding complex data URIs
                     backgroundImage: "radial-gradient(transparent 60%, rgba(0,0,0,0.35))",
                     backgroundSize: "cover",
                     backgroundPosition: "center",
@@ -131,6 +120,18 @@ function IdleBackdrop({ active, onChangeIndex, setImagesLoaded: setParentImagesL
         </div>
     );
 }
+
+// 地域名ラベル（モバイル用）
+const RegionLabel = ({ region }) => {
+    const info = REGION_NAMES[region];
+    if (!info) return null;
+    return (
+        <div className="absolute top-3 left-3 z-40 flex items-center gap-2 lg:hidden">
+            <span className="text-2xl md:text-3xl font-extrabold text-white tracking-[0.2em] drop-shadow-lg">{info.ja}</span>
+            <span className="text-xs md:text-lg font-medium text-white/90 tracking-wider drop-shadow-lg">{info.en}</span>
+        </div>
+    );
+};
 
 // ====== MAIN ======================================================
 export default function IshikawaMapApp() {
@@ -160,35 +161,14 @@ export default function IshikawaMapApp() {
     }, []);
 
     useEffect(() => {
-        if (typeof window !== 'undefined') {
-            window.addEventListener("keydown", handleKeyDown);
-        }
+        if (typeof window === 'undefined') return;
+        window.addEventListener("keydown", handleKeyDown);
+        window.addEventListener('regioninfo:close', handleRegionInfoClose);
         return () => {
-            if (typeof window !== 'undefined') {
-                try {
-                    window.removeEventListener("keydown", handleKeyDown);
-                } catch (e) {
-                    // Ignore errors during cleanup
-                }
-            }
+            window.removeEventListener("keydown", handleKeyDown);
+            window.removeEventListener('regioninfo:close', handleRegionInfoClose);
         };
-    }, [handleKeyDown]);
-
-    // Fallback: listen for RegionInfo fallback close events
-    useEffect(() => {
-        if (typeof window !== 'undefined') {
-            window.addEventListener('regioninfo:close', handleRegionInfoClose);
-        }
-        return () => {
-            if (typeof window !== 'undefined') {
-                try {
-                    window.removeEventListener('regioninfo:close', handleRegionInfoClose);
-                } catch (e) {
-                    // Ignore errors during cleanup
-                }
-            }
-        };
-    }, [handleRegionInfoClose]);
+    }, [handleKeyDown, handleRegionInfoClose]);
 
     // Hover と選択の同期
     useEffect(() => {
@@ -208,24 +188,18 @@ export default function IshikawaMapApp() {
     // スクロールで説明カードを自動的に閉じる（短いデバウンス付き）
     useEffect(() => {
         if (!selectedRegion || typeof window === 'undefined') return;
-        let t = null;
-        function onScroll() {
-            if (t) clearTimeout(t);
+        let t;
+        const onScroll = () => {
+            clearTimeout(t);
             t = setTimeout(() => {
                 setSelectedRegion(null);
                 setSelectedOrigin('none');
             }, 150);
-        }
+        };
         window.addEventListener('scroll', onScroll, { passive: true });
         return () => {
-            try {
-                if (typeof window !== 'undefined') {
-                    window.removeEventListener('scroll', onScroll);
-                }
-                if (t) clearTimeout(t);
-            } catch (e) {
-
-            }
+            window.removeEventListener('scroll', onScroll);
+            clearTimeout(t);
         };
     }, [selectedRegion]);
 
@@ -300,95 +274,35 @@ export default function IshikawaMapApp() {
                                 />
 
                                 {/* モバイル用：横書きオーバーレイ（ホバー/タッチ時） */}
-                                {hoveredRegion && (
-                                    // 左上横書き（モバイル/タブレット）: md(iPad)で読みやすくするためサイズを拡大
-                                    <div className="absolute top-3 left-3 z-40 flex items-center gap-2 lg:hidden bg-black/40 backdrop-blur-sm px-4 py-2 rounded-lg">
-                                        <span className="text-2xl md:text-3xl font-extrabold text-white tracking-[0.2em]">
-                                            {hoveredRegion === "noto" && "能登"}
-                                            {hoveredRegion === "kanazawa" && "金沢"}
-                                            {hoveredRegion === "hakusan" && "白山"}
-                                            {hoveredRegion === "kaga" && "加賀"}
-                                        </span>
-                                        <span className="text-xs md:text-lg font-medium text-white/90 tracking-wider">
-                                            {hoveredRegion === "noto" && "Noto"}
-                                            {hoveredRegion === "kanazawa" && "Kanazawa"}
-                                            {hoveredRegion === "hakusan" && "Hakusan"}
-                                            {hoveredRegion === "kaga" && "Kaga"}
-                                        </span>
-                                    </div>
-                                )}
+                                {hoveredRegion && <RegionLabel region={hoveredRegion} />}
 
                                 {/* モバイル用：未ホバー（Idle）時にも表示する */}
-                                {!hoveredRegion && idleActive && (
-                                    <div className="absolute top-3 left-3 z-40 flex items-center gap-2 lg:hidden">
-                                        <span className="text-2xl md:text-3xl font-extrabold text-white tracking-[0.2em] drop-shadow-lg">
-                                            {idleIndex === 0 && "能登"}
-                                            {idleIndex === 1 && "金沢"}
-                                            {idleIndex === 2 && "白山"}
-                                            {idleIndex === 3 && "加賀"}
-                                        </span>
-                                        <span className="text-xs md:text-lg font-medium text-white/90 tracking-wider drop-shadow-lg">
-                                            {idleIndex === 0 && "Noto"}
-                                            {idleIndex === 1 && "Kanazawa"}
-                                            {idleIndex === 2 && "Hakusan"}
-                                            {idleIndex === 3 && "Kaga"}
-                                        </span>
-                                    </div>
-                                )}
+                                {!hoveredRegion && idleActive && <RegionLabel region={SLIDES[idleIndex]?.id} />}
 
                                 {/* buttons moved below background slideshow */}
 
                                 {/* 縦書きタイトル（ホバー時または Idle スライド時に表示） */}
                                 {(() => {
-                                    // hoveredRegion があれば優先。なければ idleIndex に対応する領域を表示。
-                                    const regions = ["noto", "kanazawa", "hakusan", "kaga"];
-                                    const displayRegion = hoveredRegion || (idleActive ? regions[idleIndex % regions.length] : null);
+                                    const displayRegion = hoveredRegion || (idleActive ? SLIDES[idleIndex]?.id : null);
                                     if (!displayRegion) return null;
 
-                                    const enName = displayRegion === "noto" ? "Noto" : displayRegion === "kanazawa" ? "Kanazawa" : displayRegion === "hakusan" ? "Hakusan" : displayRegion === "kaga" ? "Kaga" : "";
+                                    const regionInfo = REGION_NAMES[displayRegion];
+                                    if (!regionInfo) return null;
 
-                                    // motion を使い、表示はゆっくりフェード&スライドインさせる
                                     return (
                                         <motion.div
                                             key={displayRegion}
-                                            aria-hidden={!!hoveredRegion ? false : true}
+                                            aria-hidden={!hoveredRegion}
                                             initial={prefersReduced ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
-                                            animate={prefersReduced ? { opacity: 1, y: 0 } : { opacity: 1, y: 0 }}
+                                            animate={{ opacity: 1, y: 0 }}
                                             transition={prefersReduced ? {} : { duration: 1.8, ease: "easeOut" }}
                                             className="absolute left-[-240px] top-8 z-40 hidden lg:flex flex-col items-center lg:left-[-320px]"
                                         >
                                             <div className="flex flex-col items-center text-[2.8rem] lg:text-[3.6rem] font-extrabold leading-[1] tracking-[0.28em] text-white drop-shadow-md">
-                                                {displayRegion === "noto" && (
-                                                    <>
-                                                        <span className="block">能</span>
-                                                        <span className="block">登</span>
-                                                    </>
-                                                )}
-                                                {displayRegion === "kanazawa" && (
-                                                    <>
-                                                        <span className="block">金</span>
-                                                        <span className="block">沢</span>
-                                                    </>
-                                                )}
-                                                {displayRegion === "hakusan" && (
-                                                    <>
-                                                        <span className="block">白</span>
-                                                        <span className="block">山</span>
-                                                    </>
-                                                )}
-                                                {displayRegion === "kaga" && (
-                                                    <>
-                                                        <span className="block">加</span>
-                                                        <span className="block">賀</span>
-                                                    </>
-                                                )}
+                                                {regionInfo.ja.split('').map((char, i) => <span key={i} className="block">{char}</span>)}
                                             </div>
                                             <div className="mt-4 flex flex-col items-center text-lg lg:text-xl font-medium text-white drop-shadow-sm tracking-[0.3em]">
-                                                {enName.split("").map((ch, i) => (
-                                                    <span key={i} className="block leading-none">
-                                                        {ch}
-                                                    </span>
-                                                ))}
+                                                {regionInfo.en.split("").map((ch, i) => <span key={i} className="block leading-none">{ch}</span>)}
                                             </div>
                                         </motion.div>
                                     );
@@ -397,36 +311,16 @@ export default function IshikawaMapApp() {
                         </div>
                     </div>
 
-                    {/* === 追加: 背景スライド下の地域ボタン群 === */}
                     {/* === 地域ナビゲーション（シンプルスタイル） === */}
                     <div className="button-grid" style={{ marginTop: 32 }}>
-                        <div className="button-13">
-                            <a href="#" onClick={(e) => {
-                                e.preventDefault();
-                                handleRegionSelect('noto');
-                            }}>能登</a>
-                        </div>
-
-                        <div className="button-13">
-                            <a href="#" onClick={(e) => {
-                                e.preventDefault();
-                                handleRegionSelect('kanazawa');
-                            }}>金沢</a>
-                        </div>
-
-                        <div className="button-13">
-                            <a href="#" onClick={(e) => {
-                                e.preventDefault();
-                                handleRegionSelect('hakusan');
-                            }}>白山</a>
-                        </div>
-
-                        <div className="button-13">
-                            <a href="#" onClick={(e) => {
-                                e.preventDefault();
-                                handleRegionSelect('kaga');
-                            }}>加賀</a>
-                        </div>
+                        {SLIDES.map(({ id }) => (
+                            <div key={id} className="button-13">
+                                <a href="#" onClick={(e) => {
+                                    e.preventDefault();
+                                    handleRegionSelect(id);
+                                }}>{REGION_NAMES[id].ja}</a>
+                            </div>
+                        ))}
                     </div>
 
                     {/* 説明カード - モバイル:下部、デスクトップ:右側 */}

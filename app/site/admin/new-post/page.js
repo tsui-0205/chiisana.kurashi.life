@@ -13,25 +13,27 @@ export default function NewPost() {
     slug: "",
     content: "",
     cover: "",
+    images: [], // 複数画像用
     excerpt: "",
     category: "日常",
-    tags: [],  
-    sections: [], 
+    tags: [],
+    sections: [],
     publishDate: new Date().toISOString().split('T')[0]
   });
 
   const [preview, setPreview] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
-  const [toast, setToast] = useState({ show: false, message: "", type: "" }); // トースト通知
-  const [showConfirmModal, setShowConfirmModal] = useState(false); // 投稿確認モーダル
+  const [toast, setToast] = useState({ show: false, message: "", type: "" });
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
-  // トースト表示関数
+  const TOAST_DURATION = 3000;
+
   const showToast = (message, type = "info") => {
     setToast({ show: true, message, type });
     setTimeout(() => {
       setToast({ show: false, message: "", type: "" });
-    }, 3000); // 3秒後に自動消滅
+    }, TOAST_DURATION);
   };
 
   useEffect(() => {
@@ -91,7 +93,7 @@ export default function NewPost() {
     }
   };
 
-  const handleImageUpload = async (e, sectionIndex = null) => {
+  const handleImageUpload = async (e, sectionIndex = null, isMultiple = false) => {
     const file = e.target.files[0];
     if (!file) return;
 
@@ -105,30 +107,26 @@ export default function NewPost() {
         body: formDataImage,
       });
 
-      if (response.ok) {
-        const result = await response.json();
-        if (sectionIndex !== null) {
-          // セクション画像の更新
-          setFormData(prev => ({
-            ...prev,
-            sections: prev.sections.map((section, index) =>
-              index === sectionIndex
-                ? { ...section, image: result.url }
-                : section
-            )
-          }));
-        } else {
-          // カバー画像の更新
-          setFormData(prev => ({
-            ...prev,
-            cover: result.url
-          }));
-        }
-        showToast('画像がアップロードされました！', 'success');
-      } else {
-        const error = await response.json();
-        showToast('画像のアップロードに失敗しました。', 'error');
+      if (!response.ok) {
+        throw new Error('Upload failed');
       }
+
+      const result = await response.json();
+
+      if (sectionIndex !== null) {
+        setFormData(prev => ({
+          ...prev,
+          sections: prev.sections.map((section, index) =>
+            index === sectionIndex ? { ...section, image: result.url } : section
+          )
+        }));
+      } else if (isMultiple) {
+        setFormData(prev => ({ ...prev, images: [...prev.images, result.url] }));
+      } else {
+        setFormData(prev => ({ ...prev, cover: result.url }));
+      }
+
+      showToast('画像がアップロードされました！', 'success');
     } catch (error) {
       showToast('画像のアップロードエラーが発生しました。', 'error');
     } finally {
@@ -160,78 +158,67 @@ export default function NewPost() {
     }));
   };
 
-  // タグ管理関数
   const addTag = (tag) => {
-    if (tag && !formData.tags.includes(tag)) {
-      setFormData(prev => ({
-        ...prev,
-        tags: [...prev.tags, tag]
-      }));
+    const trimmedTag = tag.trim();
+    if (trimmedTag && !formData.tags.includes(trimmedTag)) {
+      setFormData(prev => ({ ...prev, tags: [...prev.tags, trimmedTag] }));
     }
   };
 
   const removeTag = (index) => {
-    setFormData(prev => ({
-      ...prev,
-      tags: prev.tags.filter((_, i) => i !== index)
-    }));
+    setFormData(prev => ({ ...prev, tags: prev.tags.filter((_, i) => i !== index) }));
+  };
+
+  const removeImage = (index) => {
+    setFormData(prev => ({ ...prev, images: prev.images.filter((_, i) => i !== index) }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.title || !formData.content || !formData.slug) {
+    if (!formData.title?.trim() || !formData.content?.trim() || !formData.slug?.trim()) {
       showToast('タイトル、スラッグ、本文は必須項目です。', 'error');
       return;
     }
 
-    // 確認モーダルを表示
     setShowConfirmModal(true);
   };
 
-  // 実際の投稿処理
   const confirmSubmit = async () => {
     setShowConfirmModal(false);
     setIsSubmitting(true);
+
     try {
       const postData = {
         id: formData.slug,
         title: formData.title,
         content: formData.content,
         cover: formData.cover || "/images/sample/default.jpg",
+        images: formData.images,
         excerpt: formData.excerpt,
         category: formData.category,
-        tags: formData.tags.join(', '), // 配列を文字列に変換
-        sections: formData.sections, // 複数セクションを追加
+        tags: formData.tags.join(', '),
+        sections: formData.sections,
         date: formData.publishDate,
       };
 
       const response = await fetch('/api/posts', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(postData),
       });
 
-      if (response.ok) {
-        const result = await response.json();
-        showToast('記事が正常に投稿されました！', 'success');
-        router.push(`/site/blog/${formData.slug}`);
-      } else {
+      if (!response.ok) {
         const error = await response.json();
-        showToast(`エラー: ${error.error}`, 'error');
+        throw new Error(error.error || '投稿に失敗しました');
       }
+
+      showToast('記事が正常に投稿されました！', 'success');
+      setTimeout(() => router.push(`/site/blog/${formData.slug}`), 1000);
     } catch (error) {
-      showToast('投稿中にエラーが発生しました。', 'error');
-    } finally {
+      showToast(error.message || '投稿中にエラーが発生しました。', 'error');
       setIsSubmitting(false);
     }
-  };
-
-  // 投稿キャンセル
-  const cancelSubmit = () => {
-    setShowConfirmModal(false);
   };
 
   return (
@@ -254,7 +241,7 @@ export default function NewPost() {
             )}
             {toast.type === 'error' && (
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
               </svg>
             )}
             <span>{toast.message}</span>
@@ -293,7 +280,7 @@ export default function NewPost() {
               </div>
               <div className="flex space-x-4">
                 <button
-                  onClick={cancelSubmit}
+                  onClick={() => setShowConfirmModal(false)}
                   className="flex-1 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500"
                 >
                   キャンセル
@@ -427,6 +414,52 @@ export default function NewPost() {
                 )}
               </div>
 
+              <div className="mt-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  追加画像（複数アップロード可能）
+                </label>
+                <div className="flex items-center space-x-4">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleImageUpload(e, null, true)}
+                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                    disabled={uploadingImage}
+                  />
+                  {uploadingImage && (
+                    <span className="text-sm text-gray-500">アップロード中...</span>
+                  )}
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  記事内で使用する画像を複数アップロードできます
+                </p>
+                {formData.images && formData.images.length > 0 && (
+                  <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    {formData.images.map((imageUrl, index) => (
+                      <div key={index} className="relative group">
+                        <img
+                          src={imageUrl}
+                          alt={`画像 ${index + 1}`}
+                          className="w-full h-32 object-cover rounded-md border border-gray-300"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeImage(index)}
+                          className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700"
+                        >
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                          </svg>
+                        </button>
+                        <p className="text-xs text-gray-500 mt-1 truncate" title={imageUrl}>
+                          {imageUrl}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <div className="mt-6 grid gap-6 md:grid-cols-3">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -473,7 +506,7 @@ export default function NewPost() {
                         ))}
                       </div>
                     )}
-                    
+
                     {/* 新しいタグ入力 */}
                     <div className="flex gap-2">
                       <input
@@ -658,94 +691,169 @@ export default function NewPost() {
             </div>
           </form>
         ) : (
-          // プレビュー
-          <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
-            <article>
-              <header className="mb-8">
-                <div className="flex items-center gap-3 mb-4">
-                  <span className="text-sm text-gray-500">{formData.publishDate}</span>
-                  <span className="px-3 py-1 bg-rose-100 text-rose-600 rounded-full text-sm font-medium">
-                    {formData.category}
-                  </span>
-                </div>
-                <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-6">
+          // プレビュー - 実際の記事デザインと同じスタイル
+          <div className="min-h-screen bg-neutral-100 -mx-4 sm:-mx-6 lg:-mx-8 -my-8">
+            <div className="px-6 py-16">
+              <article className="max-w-4xl mx-auto">
+                {/* タイトル */}
+                <h1 className="text-3xl md:text-4xl font-semibold mb-3 text-center leading-relaxed tracking-wide text-neutral-900">
                   {formData.title || "記事タイトルがここに表示されます"}
                 </h1>
+
+                {/* カテゴリと日付 */}
+                <div className="flex items-center justify-center gap-3 mb-4">
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${formData.category === '思い出'
+                      ? 'bg-[#e5e1dc] text-[#333]'
+                      : 'bg-zinc-100 text-zinc-600'
+                    }`}>
+                    {formData.category}
+                  </span>
+                  <time className="text-base text-neutral-600">
+                    {formData.publishDate.replace(/-/g, '.')}
+                  </time>
+                </div>
+
+                {/* 記事の概要 */}
                 {formData.excerpt && (
-                  <p className="text-lg text-gray-600 leading-relaxed">
-                    {formData.excerpt}
-                  </p>
+                  <div className="max-w-2xl mx-auto text-center mb-6">
+                    <p className="text-lg text-neutral-700 leading-relaxed">
+                      {formData.excerpt}
+                    </p>
+                  </div>
                 )}
+
+                {/* タグ */}
                 {formData.tags && formData.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-4">
+                  <div className="flex flex-wrap gap-2 justify-center mb-8">
                     {formData.tags.map((tag, index) => (
-                      <span key={index} className="px-2 py-1 bg-gray-100 text-gray-600 rounded-md text-sm">
+                      <span key={index} className="px-3 py-1 bg-gray-200 text-gray-700 rounded-md text-sm font-medium">
                         #{tag}
                       </span>
                     ))}
                   </div>
                 )}
-              </header>
 
-              <div className="prose prose-lg max-w-none prose-gray">
-                {formData.content ? (
-                  <div dangerouslySetInnerHTML={{ __html: formData.content.replace(/\n/g, '</p><p>').replace(/^/, '<p>').replace(/$/, '</p>') }} />
-                ) : (
-                  <p className="text-gray-500 italic">記事の内容がここに表示されます...</p>
+                {/* メイン画像（アイキャッチ） */}
+                {formData.cover && (
+                  <div className="flex justify-center mb-10">
+                    <div className="bg-white p-1 shadow-lg max-w-full">
+                      <img
+                        src={formData.cover}
+                        alt={formData.title}
+                        className="w-full h-auto max-w-3xl mx-auto block object-contain"
+                        style={{ aspectRatio: "auto" }}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* 追加画像表示 */}
+                {formData.images && formData.images.length > 0 && (
+                  <div className="space-y-6 mb-10">
+                    {formData.images.map((imageUrl, index) => (
+                      <div key={index} className="flex justify-center">
+                        <div className="bg-white p-1 shadow-lg max-w-full">
+                          <img
+                            src={imageUrl}
+                            alt={`画像 ${index + 1}`}
+                            className="w-full h-auto max-w-3xl mx-auto block object-contain"
+                            style={{ aspectRatio: "auto" }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* 記事本文 */}
+                {formData.content && (
+                  <div className="max-w-2xl mx-auto px-4 md:px-8 mb-10">
+                    <div className="text-neutral-800 leading-relaxed">
+                      {formData.content.split('\n').map((paragraph, index) => (
+                        paragraph.trim() && (
+                          <p key={index} className="mb-4 text-lg">
+                            {paragraph}
+                          </p>
+                        )
+                      ))}
+                    </div>
+                  </div>
                 )}
 
                 {/* セクション表示 */}
-                {formData.sections.map((section, index) => (
-                  <div key={index} className="mt-8 border-t border-gray-200 pt-6">
-                    {section.title && (
-                      <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-                        {section.title}
-                      </h2>
-                    )}
-                    {section.image && (
-                      <div className="mb-4">
-                        <img
-                          src={section.image}
-                          alt={section.title || `セクション ${index + 1}`}
-                          className="w-full max-w-2xl mx-auto rounded-lg shadow-md"
-                        />
+                {formData.sections && formData.sections.length > 0 && (
+                  <div className="mt-12 space-y-10">
+                    {formData.sections.map((section, index) => (
+                      <div key={index} className="max-w-4xl mx-auto">
+                        {/* セクション見出し */}
+                        {section.title && (
+                          <div className="max-w-2xl mx-auto px-4 md:px-8 mb-6">
+                            <h2 className="text-2xl md:text-3xl font-semibold text-center leading-relaxed tracking-wide text-neutral-800">
+                              {section.title}
+                            </h2>
+                          </div>
+                        )}
+
+                        {/* セクション画像 */}
+                        {section.image && (
+                          <div className="flex justify-center mb-6">
+                            <div className="bg-white p-1 shadow-lg max-w-full">
+                              <img
+                                src={section.image}
+                                alt={section.title || `セクション ${index + 1}`}
+                                className="w-full h-auto max-w-3xl mx-auto block object-contain"
+                                style={{ aspectRatio: "auto" }}
+                              />
+                            </div>
+                          </div>
+                        )}
+
+                        {/* セクション本文 */}
+                        {section.content && (
+                          <div className="max-w-2xl mx-auto px-4 md:px-8">
+                            <div className="text-neutral-800 leading-relaxed">
+                              {section.content.split('\n').map((paragraph, idx) => (
+                                paragraph.trim() && (
+                                  <p key={idx} className="mb-4 text-lg">
+                                    {paragraph}
+                                  </p>
+                                )
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    )}
-                    {section.content && (
-                      <div className="text-gray-700 leading-relaxed">
-                        <div dangerouslySetInnerHTML={{
-                          __html: section.content.replace(/\n/g, '</p><p>').replace(/^/, '<p>').replace(/$/, '</p>')
-                        }} />
-                      </div>
-                    )}
+                    ))}
                   </div>
-                ))}
-              </div>
-            </article>
-            
-            {/* プレビュー画面のボタン */}
-            <div className="mt-8 pt-6 border-t border-gray-200">
-              <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4">
-                <Link
-                  href="/site/admin"
-                  className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 text-center"
-                >
-                  キャンセル
-                </Link>
-                <button
-                  type="button"
-                  onClick={() => setPreview(!preview)}
-                  className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-                >
-                  編集に戻る
-                </button>
-                <button
-                  onClick={handleSubmit}
-                  disabled={isSubmitting || !formData.title || !formData.content}
-                  className="px-6 py-2 bg-rose-600 text-white rounded-md hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                >
-                  {isSubmitting ? '投稿中...' : '記事を投稿'}
-                </button>
+                )}
+              </article>
+
+              {/* プレビュー画面のボタン */}
+              <div className="max-w-4xl mx-auto mt-8 px-6">
+                <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+                  <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4">
+                    <Link
+                      href="/site/admin"
+                      className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 text-center"
+                    >
+                      キャンセル
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => setPreview(!preview)}
+                      className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                    >
+                      編集に戻る
+                    </button>
+                    <button
+                      onClick={handleSubmit}
+                      disabled={isSubmitting || !formData.title || !formData.content}
+                      className="px-6 py-2 bg-rose-600 text-white rounded-md hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    >
+                      {isSubmitting ? '投稿中...' : '記事を投稿'}
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import Link from "next/link";
 import { Card, CardContent, CardImage } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,19 +13,16 @@ const heroImages = [
   "/images/blog/blog-main.jpg",
 ];
 
-function formatDateYMD(dateStr) {
-  if (!dateStr) return '';
-  const parts = String(dateStr).split('-');
-  if (parts.length < 3) return dateStr;
-  const [y, m, d] = parts;
+const formatDateYMD = (dateStr) => {
+  if (!dateStr || !/\d{4}-\d{2}-\d{2}/.test(dateStr)) return dateStr;
+  const [y, m, d] = dateStr.split('-');
   return `${y}年${Number(m)}月${Number(d)}日`;
-}
+};
 
-function HeroTriptych({ images }) {
-  const src = images && images.length ? images[0] : '';
+const HeroTriptych = ({ images }) => {
+  const src = images?.[0] || '/images/blog/blog-main.jpg';
   return (
     <section className="relative h-[60vh] md:h-screen w-full overflow-hidden">
-      {/* Full-screen hero image like main page */}
       <div className="absolute inset-0 w-full h-full z-0">
         <div className="w-full h-full image-figure">
           <img
@@ -41,12 +38,9 @@ function HeroTriptych({ images }) {
             }}
           />
         </div>
-        {/* Optional overlay for better text readability */}
         <div className="absolute inset-0 bg-black/20"></div>
       </div>
-
-      {/* Animated Scroll Indicator positioned to avoid mobile overlap */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 flex flex-col items-center">
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center">
         <div className="text-white text-sm mb-2 font-light tracking-wider drop-shadow-md animate-bounce scroll-bounce">SCROLL</div>
         <svg className="w-6 h-6 text-white animate-bounce scroll-bounce drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
@@ -54,10 +48,12 @@ function HeroTriptych({ images }) {
       </div>
     </section>
   );
-}
+};
 
-function PostCard({ post, index }) {
+const PostCard = ({ post, index }) => {
   const [ref, inView] = useInView({ threshold: 0.15 });
+  const category = post.category || "日常";
+  const categoryClass = category === '思い出' ? 'bg-[#e5e1dc] text-[#333]' : 'bg-zinc-100 text-zinc-600';
 
   return (
     <motion.article
@@ -74,16 +70,10 @@ function PostCard({ post, index }) {
             alt={post.title}
           />
           <CardContent>
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-2 text-nowrap">
-              {(() => {
-                const cat = post.category || "日常";
-                const catClass = cat === '思い出' ? 'bg-[#e5e1dc] text-[#333]' : 'bg-zinc-100 text-zinc-600';
-                return (
-                  <span className={`text-[10px] px-2 py-1 rounded-full font-medium whitespace-nowrap ${catClass}`}>
-                    {cat}
-                  </span>
-                );
-              })()}
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-2">
+              <span className={`text-[10px] px-2 py-1 rounded-full font-medium whitespace-nowrap ${categoryClass}`}>
+                {category}
+              </span>
               <p className="text-[10px] text-neutral-500 tracking-[0.08em] whitespace-nowrap">
                 {formatDateYMD(post.date)}
               </p>
@@ -110,7 +100,7 @@ function PostCard({ post, index }) {
       </Link>
     </motion.article>
   );
-}
+};
 
 export default function BlogPage() {
   // page-level styles for image entrance animation
@@ -171,10 +161,6 @@ export default function BlogPage() {
       document.head.removeChild(style);
     };
   }, []);
-
-  // client-only year to avoid hydration mismatch with server-side rendering
-  const [buildYear, setBuildYear] = useState('');
-  useEffect(() => { setBuildYear(new Date().getFullYear()); }, []);
 
   // Menu state
   const [isMenuOpen, setIsMenuOpen] = useState(false);
